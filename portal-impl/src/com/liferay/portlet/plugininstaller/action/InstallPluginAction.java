@@ -34,6 +34,7 @@ import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.ServerDetector;
+import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -54,6 +55,7 @@ import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.WebKeys;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -276,11 +278,9 @@ public class InstallPluginAction extends PortletAction {
 			}
 		}
 
-		File file = uploadPortletRequest.getFile("file");
+		InputStream inputStream = uploadPortletRequest.getFileAsStream("file");
 
-		byte[] bytes = FileUtil.getBytes(file);
-
-		if ((bytes == null) || (bytes.length == 0)) {
+		if (inputStream == null) {
 			SessionErrors.add(actionRequest, UploadException.class.getName());
 
 			return;
@@ -290,20 +290,19 @@ public class InstallPluginAction extends PortletAction {
 			PluginPackageUtil.registerPluginPackageInstallation(
 				deploymentContext);
 
-			String source = file.toString();
-
 			String deployDir = PrefsPropsUtil.getString(
 				PropsKeys.AUTO_DEPLOY_DEPLOY_DIR,
 				PropsValues.AUTO_DEPLOY_DEPLOY_DIR);
 
 			String destination = deployDir + StringPool.SLASH + fileName;
 
-			FileUtil.copyFile(source, destination);
+			FileUtil.write(destination, inputStream);
 
 			SessionMessages.add(actionRequest, "pluginUploaded");
 		}
 		finally {
 			PluginPackageUtil.endPluginPackageInstallation(deploymentContext);
+			StreamUtil.cleanUp(inputStream);
 		}
 	}
 
