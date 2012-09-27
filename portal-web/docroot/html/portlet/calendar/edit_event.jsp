@@ -327,12 +327,17 @@ int secondReminder = BeanParamUtil.getInteger(event, request, "secondReminder", 
 				if (!this.get('checked') && durationHour && (durationHour.val() == '24')) {
 					durationHour.val('1');
 				}
+
 				if (this.get('checked')) {
 					timeZoneSensitiveCheckbox.attr('checked', false);
 					timeZoneSensitiveCheckbox.attr('disabled', true);
 				}
 				else {
 					timeZoneSensitiveCheckbox.attr('disabled', false);
+
+					if (timeZoneSensitiveCheckbox.previous().val() == 'true') {
+						timeZoneSensitiveCheckbox.attr('checked', true);
+					}
 				}
 			}
 		);
