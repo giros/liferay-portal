@@ -537,6 +537,7 @@ public class Recurrence implements Serializable {
 			dtStart.clear(Calendar.ZONE_OFFSET);
 			dtStart.clear(Calendar.DST_OFFSET);
 			dtStart.setTimeZone(TimeZoneUtil.getTimeZone(StringPool.UTC));
+			dtStart.setTime(start.getTime());
 		}
 
 		dtStart.setMinimalDaysInFirstWeek(4);
