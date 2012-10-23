@@ -525,18 +525,13 @@ public class Recurrence implements Serializable {
 			oldStart = Calendar.MONDAY;
 		}
 
-		if (start == null) {
-			dtStart = CalendarFactoryUtil.getCalendar(
-				TimeZoneUtil.getTimeZone(StringPool.UTC));
+		dtStart = CalendarFactoryUtil.getCalendar(
+			TimeZoneUtil.getTimeZone(StringPool.UTC));
 
+		if (start == null) {
 			dtStart.setTime(new Date(0L));
 		}
 		else {
-			dtStart = (Calendar)start.clone();
-
-			dtStart.clear(Calendar.ZONE_OFFSET);
-			dtStart.clear(Calendar.DST_OFFSET);
-			dtStart.setTimeZone(TimeZoneUtil.getTimeZone(StringPool.UTC));
 			dtStart.setTime(start.getTime());
 		}
 
