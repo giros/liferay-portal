@@ -478,6 +478,51 @@ public class CalEventLocalServiceImpl extends CalEventLocalServiceBaseImpl {
 		return exportICal4j(toICalCalendar(userId, events), fileName);
 	}
 
+	public List<CalEvent> getAllEvents(long groupId, Calendar cal, String type)
+		throws SystemException {
+
+		return getAllEvents(groupId, cal, new String[] {type});
+	}
+
+	public List<CalEvent> getAllEvents(
+			long groupId, Calendar cal, String[] types)
+		throws SystemException {
+
+		List<CalEvent> allEvents = new ArrayList<CalEvent>();
+
+		// Events starting on this day
+
+		allEvents.addAll(getEvents(groupId, cal, types));
+
+		// Events overlapping to this day
+
+		Calendar prevCal = (Calendar)cal.clone();
+
+		prevCal.add(Calendar.DAY_OF_MONTH, -1);
+
+		prevCal.set(Calendar.HOUR_OF_DAY, 0);
+		prevCal.set(Calendar.MINUTE, 0);
+		prevCal.set(Calendar.SECOND, 0);
+		prevCal.set(Calendar.MILLISECOND, 0);
+
+		List<CalEvent> prevResults = getEvents(groupId, prevCal, types);
+
+		for (CalEvent event : prevResults) {
+			Date startDate = event.getStartDate();
+
+			long overlap =
+				startDate.getTime() + (event.getDurationHour() * Time.HOUR) +
+				(event.getDurationMinute() * Time.MINUTE) -
+				(prevCal.getTimeInMillis() + Time.DAY);
+
+			if (!event.isAllDay() && (overlap > 0)) {
+				allEvents.add(event);
+			}
+		}
+
+		return allEvents;
+	}
+
 	public List<CalEvent> getCompanyEvents(long companyId, int start, int end)
 		throws SystemException {
 
