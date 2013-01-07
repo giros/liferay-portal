@@ -136,6 +136,38 @@ public class CalEventServiceSoap {
 		}
 	}
 
+	public static com.liferay.portlet.calendar.model.CalEventSoap[] getAllEvents(
+		long groupId, java.util.Calendar cal, java.lang.String type)
+		throws RemoteException {
+		try {
+			java.util.List<com.liferay.portlet.calendar.model.CalEvent> returnValue =
+				CalEventServiceUtil.getAllEvents(groupId, cal, type);
+
+			return com.liferay.portlet.calendar.model.CalEventSoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.portlet.calendar.model.CalEventSoap[] getAllEvents(
+		long groupId, java.util.Calendar cal, java.lang.String[] types)
+		throws RemoteException {
+		try {
+			java.util.List<com.liferay.portlet.calendar.model.CalEvent> returnValue =
+				CalEventServiceUtil.getAllEvents(groupId, cal, types);
+
+			return com.liferay.portlet.calendar.model.CalEventSoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	public static com.liferay.portlet.calendar.model.CalEventSoap getEvent(
 		long eventId) throws RemoteException {
 		try {

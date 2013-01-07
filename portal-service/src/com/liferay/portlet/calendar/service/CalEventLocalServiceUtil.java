@@ -393,6 +393,18 @@ public class CalEventLocalServiceUtil {
 		return getService().exportGroupEvents(userId, groupId, fileName);
 	}
 
+	public static java.util.List<com.liferay.portlet.calendar.model.CalEvent> getAllEvents(
+		long groupId, java.util.Calendar cal, java.lang.String type)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getAllEvents(groupId, cal, type);
+	}
+
+	public static java.util.List<com.liferay.portlet.calendar.model.CalEvent> getAllEvents(
+		long groupId, java.util.Calendar cal, java.lang.String[] types)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getAllEvents(groupId, cal, types);
+	}
+
 	public static java.util.List<com.liferay.portlet.calendar.model.CalEvent> getCompanyEvents(
 		long companyId, int start, int end)
 		throws com.liferay.portal.kernel.exception.SystemException {
