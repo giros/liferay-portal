@@ -129,6 +129,36 @@ public class CalEventServiceImpl extends CalEventServiceBaseImpl {
 			getGuestOrUserId(), groupId, fileName);
 	}
 
+	public List<CalEvent> getAllEvents(long groupId, Calendar cal, String type)
+		throws PortalException, SystemException {
+
+		return getAllEvents(groupId, cal, new String[] {type});
+	}
+
+	public List<CalEvent> getAllEvents(
+			long groupId, Calendar cal, String[] types)
+		throws PortalException, SystemException {
+
+		List<CalEvent> events = calEventLocalService.getAllEvents(
+			groupId, cal, types);
+
+		events = ListUtil.copy(events);
+
+		Iterator<CalEvent> itr = events.iterator();
+
+		while (itr.hasNext()) {
+			CalEvent event = itr.next();
+
+			if (!CalEventPermission.contains(
+					getPermissionChecker(), event, ActionKeys.VIEW)) {
+
+				itr.remove();
+			}
+		}
+
+		return events;
+	}
+
 	public CalEvent getEvent(long eventId)
 		throws PortalException, SystemException {
 

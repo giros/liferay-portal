@@ -385,6 +385,18 @@ public class CalEventLocalServiceWrapper implements CalEventLocalService,
 		return _calEventLocalService.exportGroupEvents(userId, groupId, fileName);
 	}
 
+	public java.util.List<com.liferay.portlet.calendar.model.CalEvent> getAllEvents(
+		long groupId, java.util.Calendar cal, java.lang.String type)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _calEventLocalService.getAllEvents(groupId, cal, type);
+	}
+
+	public java.util.List<com.liferay.portlet.calendar.model.CalEvent> getAllEvents(
+		long groupId, java.util.Calendar cal, java.lang.String[] types)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _calEventLocalService.getAllEvents(groupId, cal, types);
+	}
+
 	public java.util.List<com.liferay.portlet.calendar.model.CalEvent> getCompanyEvents(
 		long companyId, int start, int end)
 		throws com.liferay.portal.kernel.exception.SystemException {
