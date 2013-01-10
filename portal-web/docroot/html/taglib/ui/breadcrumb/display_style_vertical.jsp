@@ -40,18 +40,13 @@ String breadcrumbString = sb.toString();
 if (Validator.isNotNull(breadcrumbString)) {
 	int pos_first = breadcrumbString.indexOf("<li");
 
-	breadcrumbString = StringUtil.insert(breadcrumbString, " class=\"first", pos_first + 3);
-
 	int pos_last = breadcrumbString.lastIndexOf("<li");
 
-	if (pos_first == pos_last) {
-		breadcrumbString = StringUtil.insert(breadcrumbString, " last\"", pos_first + 16);
+	if (pos_last > pos_first) {
+		breadcrumbString = StringUtil.insert(breadcrumbString, " class=\"first\"", pos_first + 3);
 	}
-	else {
-		breadcrumbString = StringUtil.insert(breadcrumbString, "\"", pos_first + 16);
 
-		breadcrumbString = StringUtil.insert(breadcrumbString, " class=\"last\"", pos_last + 4);
-	}
+	breadcrumbString = StringUtil.insert(breadcrumbString, " class=\"last\"", pos_last + 3);
 }
 %>
 
