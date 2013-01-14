@@ -26,7 +26,6 @@ import com.thoughtworks.selenium.Selenium;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
@@ -574,7 +573,11 @@ public class WebDriverToSeleniumBridge
 	}
 
 	public boolean isElementPresent(String locator) {
+		WebDriverHelper.setTimeoutImplicit(this, "1");
+
 		List<WebElement> webElements = getWebElements(locator);
+
+		WebDriverHelper.setDefaultTimeoutImplicit(this);
 
 		return !webElements.isEmpty();
 	}
@@ -1104,12 +1107,6 @@ public class WebDriverToSeleniumBridge
 	}
 
 	public void setTimeout(String timeout) {
-		WebDriver.Options options = manage();
-
-		Timeouts timeouts = options.timeouts();
-
-		timeouts.implicitlyWait(
-			TestPropsValues.TIMEOUT_IMPLICIT_WAIT, TimeUnit.SECONDS);
 	}
 
 	public void shiftKeyDown() {
@@ -1266,92 +1263,52 @@ public class WebDriverToSeleniumBridge
 	}
 
 	protected WebElement getWebElement(String locator) {
-		WebDriverWait webDriverWait = new WebDriverWait(
-			this, TestPropsValues.TIMEOUT_IMPLICIT_WAIT);
+		List<WebElement> webElements = getWebElements(locator);
 
-		if (locator.startsWith("//")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfElementLocated(By.xpath(locator)));
-		}
-		else if (locator.startsWith("class=")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfElementLocated(
-					By.className(locator.substring(6))));
-		}
-		else if (locator.startsWith("css=")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfElementLocated(
-					By.cssSelector(locator.substring(4))));
-		}
-		else if (locator.startsWith("link=")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfElementLocated(
-					By.linkText(locator.substring(5))));
-		}
-		else if (locator.startsWith("name=")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfElementLocated(
-					By.name(locator.substring(5))));
-		}
-		else if (locator.startsWith("tag=")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfElementLocated(
-					By.tagName(locator.substring(4))));
-		}
-		else if (locator.startsWith("xpath=") || locator.startsWith("xPath=")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfElementLocated(
-					By.xpath(locator.substring(6))));
+		if (!webElements.isEmpty()) {
+			return webElements.get(0);
 		}
 		else {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfElementLocated(By.id(locator)));
+			return null;
 		}
 	}
 
 	protected List<WebElement> getWebElements(String locator) {
-		WebDriverWait webDriverWait = new WebDriverWait(
-			this, TestPropsValues.TIMEOUT_IMPLICIT_WAIT);
-
 		if (locator.startsWith("//")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfAllElementsLocatedBy(
-					By.xpath(locator)));
+			return findElements(By.xpath(locator));
 		}
 		else if (locator.startsWith("class=")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfAllElementsLocatedBy(
-					By.className(locator.substring(6))));
+			locator = locator.substring(6);
+
+			return findElements(By.className(locator));
 		}
 		else if (locator.startsWith("css=")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfAllElementsLocatedBy(
-					By.cssSelector(locator.substring(4))));
+			locator = locator.substring(4);
+
+			return findElements(By.cssSelector(locator));
 		}
 		else if (locator.startsWith("link=")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfAllElementsLocatedBy(
-					By.linkText(locator.substring(5))));
+			locator = locator.substring(5);
+
+			return findElements(By.linkText(locator));
 		}
 		else if (locator.startsWith("name=")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfAllElementsLocatedBy(
-					By.name(locator.substring(5))));
+			locator = locator.substring(5);
+
+			return findElements(By.name(locator));
 		}
 		else if (locator.startsWith("tag=")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfAllElementsLocatedBy(
-					By.tagName(locator.substring(4))));
+			locator = locator.substring(4);
+
+			return findElements(By.tagName(locator));
 		}
 		else if (locator.startsWith("xpath=") || locator.startsWith("xPath=")) {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfAllElementsLocatedBy(
-					By.xpath(locator.substring(6))));
+			locator = locator.substring(6);
+
+			return findElements(By.xpath(locator));
 		}
 		else {
-			return webDriverWait.until(
-				ExpectedConditions.presenceOfAllElementsLocatedBy(
-					By.id(locator)));
+			return findElements(By.id(locator));
 		}
 	}
 

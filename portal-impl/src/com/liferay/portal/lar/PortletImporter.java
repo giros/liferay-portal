@@ -1197,7 +1197,7 @@ public class PortletImporter {
 				if (rootPotletId.equals(PortletKeys.ASSET_PUBLISHER)) {
 					xml = updateAssetPublisherPortletPreferences(
 						portletDataContext, companyId, ownerId, ownerType, plid,
-						portletId, xml);
+						portletId, xml, layout);
 				}
 				else if (rootPotletId.equals(
 							PortletKeys.TAGS_CATEGORIES_NAVIGATION)) {
@@ -1784,7 +1784,8 @@ public class PortletImporter {
 
 	protected String updateAssetPublisherPortletPreferences(
 			PortletDataContext portletDataContext, long companyId, long ownerId,
-			int ownerType, long plid, String portletId, String xml)
+			int ownerType, long plid, String portletId, String xml,
+			Layout layout)
 		throws Exception {
 
 		Company company = CompanyLocalServiceUtil.getCompanyById(companyId);
@@ -1820,7 +1821,8 @@ public class PortletImporter {
 			}
 			else if (name.equals("defaultScope") || name.equals("scopeIds")) {
 				updateAssetPublisherScopeIds(
-					jxPreferences, name, companyGroup.getGroupId(), plid);
+					jxPreferences, name, companyGroup.getGroupId(),
+					layout.getPlid());
 			}
 			else if (name.startsWith("queryName") &&
 					 value.equalsIgnoreCase("assetCategories")) {

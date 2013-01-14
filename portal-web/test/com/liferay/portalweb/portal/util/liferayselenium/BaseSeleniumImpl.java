@@ -263,11 +263,23 @@ public abstract class BaseSeleniumImpl
 		LiferaySeleniumHelper.setBrowserOption();
 	}
 
+	public void setDefaultTimeout() {
+		int timeout = TestPropsValues.TIMEOUT_EXPLICIT_WAIT * 1000;
+
+		setTimeout(String.valueOf(timeout));
+	}
+
+	public void setDefaultTimeoutImplicit() {
+	}
+
 	@Override
 	public void setTimeout(String timeout) {
 		super.setTimeout(timeout);
 
 		_timeout = timeout;
+	}
+
+	public void setTimeoutImplicit(String timeout) {
 	}
 
 	@Override
@@ -313,22 +325,7 @@ public abstract class BaseSeleniumImpl
 	}
 
 	public void waitForElementPresent(String locator) throws Exception {
-		for (int second = 0;; second++) {
-			if (second >= TestPropsValues.TIMEOUT_EXPLICIT_WAIT) {
-				BaseTestCase.fail(
-					"Timeout: unable to find the locator \"" + locator + "\"");
-			}
-
-			try {
-				if (isElementPresent(locator)) {
-					break;
-				}
-			}
-			catch (Exception e) {
-			}
-
-			Thread.sleep(1000);
-		}
+		LiferaySeleniumHelper.waitForElementPresent(this, locator);
 	}
 
 	public void waitForNotPartialText(String locator, String value)
