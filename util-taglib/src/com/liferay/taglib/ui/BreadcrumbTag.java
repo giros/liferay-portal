@@ -23,9 +23,11 @@ import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.model.Account;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.Layout;
@@ -116,10 +118,12 @@ public class BreadcrumbTag extends IncludeTag {
 					layoutSetFriendlyURL, themeDisplay.getSessionId());
 			}
 
+			Account account = themeDisplay.getAccount();
+
 			sb.append("<li><span><a href=\"");
 			sb.append(layoutSetFriendlyURL);
 			sb.append("\">");
-			sb.append(HtmlUtil.escape(themeDisplay.getAccount().getName()));
+			sb.append(HtmlUtil.escape(account.getName()));
 			sb.append("</a></span></li>");
 		}
 	}
@@ -129,12 +133,21 @@ public class BreadcrumbTag extends IncludeTag {
 			PortletURL portletURL, ThemeDisplay themeDisplay, StringBundler sb)
 		throws Exception {
 
-		String layoutURL = getBreadcrumbLayoutURL(
-			selLayout, selLayoutParam, portletURL, themeDisplay);
+		if (selLayout.getParentLayoutId() !=
+			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID) {
+
+			Layout parentLayout = LayoutLocalServiceUtil.getParentLayout(
+				selLayout);
+
+			buildLayoutBreadcrumb(
+				parentLayout, selLayoutParam, false, portletURL, themeDisplay,
+				sb);
+		}
 
 		String target = PortalUtil.getLayoutTarget(selLayout);
 
-		StringBundler breadcrumbSB = new StringBundler(7);
+		String layoutURL = getBreadcrumbLayoutURL(
+			selLayout, selLayoutParam, portletURL, themeDisplay);
 
 		if (themeDisplay.isAddSessionIdToURL()) {
 			layoutURL = PortalUtil.getURLWithSessionId(
@@ -146,14 +159,14 @@ public class BreadcrumbTag extends IncludeTag {
 				layoutURL, "controlPanelCategory");
 		}
 
-		breadcrumbSB.append("<li><span><a href=\"");
-		breadcrumbSB.append(layoutURL);
-		breadcrumbSB.append("\" ");
+		sb.append("<li><span><a href=\"");
+		sb.append(layoutURL);
+		sb.append("\" ");
 
 		String layoutName = selLayout.getName(themeDisplay.getLocale());
 
 		if (selLayout.isTypeControlPanel()) {
-			breadcrumbSB.append(" target=\"_top\"");
+			sb.append("target=\"_top\"");
 
 			if (layoutName.equals(LayoutConstants.NAME_CONTROL_PANEL_DEFAULT)) {
 				layoutName = LanguageUtil.get(
@@ -161,30 +174,12 @@ public class BreadcrumbTag extends IncludeTag {
 			}
 		}
 		else {
-			breadcrumbSB.append(target);
+			sb.append(target);
 		}
 
-		breadcrumbSB.append(">");
-
-		breadcrumbSB.append(HtmlUtil.escape(layoutName));
-
-		breadcrumbSB.append("</a></span></li>");
-
-		if (selLayout.getParentLayoutId() !=
-			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID) {
-
-			Layout parentLayout = LayoutLocalServiceUtil.getParentLayout(
-				selLayout);
-
-			buildLayoutBreadcrumb(
-				parentLayout, selLayoutParam, false, portletURL, themeDisplay,
-				sb);
-
-			sb.append(breadcrumbSB.toString());
-		}
-		else {
-			sb.append(breadcrumbSB.toString());
-		}
+		sb.append(StringPool.GREATER_THAN);
+		sb.append(HtmlUtil.escape(layoutName));
+		sb.append("</a></span></li>");
 	}
 
 	protected void buildParentGroupsBreadcrumb(
@@ -231,7 +226,7 @@ public class BreadcrumbTag extends IncludeTag {
 			}
 		}
 
-		int layoutsPageCount = 0;
+		int layoutsPageCount;
 
 		if (layoutSet.isPrivateLayout()) {
 			layoutsPageCount = group.getPrivateLayoutsPageCount();
@@ -240,9 +235,7 @@ public class BreadcrumbTag extends IncludeTag {
 			layoutsPageCount = group.getPublicLayoutsPageCount();
 		}
 
-		if ((layoutsPageCount > 0) &&
-			!group.getName().equals(GroupConstants.GUEST)) {
-
+		if ((layoutsPageCount > 0) && !group.isGuest()) {
 			String layoutSetFriendlyURL = PortalUtil.getLayoutSetFriendlyURL(
 				layoutSet, themeDisplay);
 
@@ -311,7 +304,7 @@ public class BreadcrumbTag extends IncludeTag {
 
 			if (Validator.isNotNull(breadcrumbURL)) {
 				sb.append("<a href=\"");
-				sb.append(HtmlUtil.escape(breadcrumbURL));
+				sb.append(HtmlUtil.escapeURL(breadcrumbURL));
 				sb.append("\"");
 				sb.append(AUIUtil.buildData(data));
 				sb.append(">");
@@ -410,9 +403,7 @@ public class BreadcrumbTag extends IncludeTag {
 		catch (Exception e) {
 		}
 
-		String breadcrumbString = insertClassOption(sb.toString());
-
-		return breadcrumbString;
+		return insertClassOption(sb.toString());
 	}
 
 	@Override
