@@ -14,13 +14,18 @@
 
 package com.liferay.portlet.asset.lar;
 
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
+import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
+import com.liferay.portal.kernel.xml.Element;
+import com.liferay.portal.service.ServiceContext;
 import com.liferay.portlet.asset.model.AssetVocabulary;
 import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil;
 
 /**
  * @author Zsolt Berentey
+ * @author Gergely Mathe
  */
 public class AssetVocabularyStagedModelDataHandler
 	extends BaseStagedModelDataHandler<AssetVocabulary> {
@@ -30,7 +35,16 @@ public class AssetVocabularyStagedModelDataHandler
 
 	@Override
 	public void deleteStagedModel(
-		String uuid, long groupId, String className, String extraData) {
+			String uuid, long groupId, String className, String extraData)
+		throws SystemException {
+
+		AssetVocabulary vocabulary =
+			AssetVocabularyLocalServiceUtil.
+				fetchAssetVocabularyByUuidAndGroupId(uuid, groupId);
+
+		if (vocabulary != null) {
+			AssetVocabularyLocalServiceUtil.deleteAssetVocabulary(vocabulary);
+		}
 	}
 
 	@Override
@@ -47,12 +61,61 @@ public class AssetVocabularyStagedModelDataHandler
 	protected void doExportStagedModel(
 			PortletDataContext portletDataContext, AssetVocabulary vocabulary)
 		throws Exception {
+
+		Element vocabularyElement = portletDataContext.getExportDataElement(
+			vocabulary);
+
+		portletDataContext.addClassedModel(
+			vocabularyElement, ExportImportPathUtil.getModelPath(vocabulary),
+			vocabulary);
 	}
 
 	@Override
 	protected void doImportStagedModel(
 			PortletDataContext portletDataContext, AssetVocabulary vocabulary)
 		throws Exception {
+
+		ServiceContext serviceContext = portletDataContext.createServiceContext(
+			vocabulary);
+
+		AssetVocabulary importedVocabulary = null;
+
+		long userId = portletDataContext.getUserId(vocabulary.getUserUuid());
+
+		if (portletDataContext.isDataStrategyMirror()) {
+			AssetVocabulary existingVocabulary =
+				AssetVocabularyLocalServiceUtil.
+					fetchAssetVocabularyByUuidAndGroupId(
+						vocabulary.getUuid(),
+						portletDataContext.getScopeGroupId());
+
+			if (existingVocabulary == null) {
+				serviceContext.setUuid(vocabulary.getUuid());
+
+				importedVocabulary =
+					AssetVocabularyLocalServiceUtil.addVocabulary(
+						userId, vocabulary.getTitle(), vocabulary.getTitleMap(),
+						vocabulary.getDescriptionMap(),
+						vocabulary.getSettings(), serviceContext);
+			}
+			else {
+				importedVocabulary =
+					AssetVocabularyLocalServiceUtil.updateVocabulary(
+						existingVocabulary.getVocabularyId(),
+						vocabulary.getTitle(), vocabulary.getTitleMap(),
+						vocabulary.getDescriptionMap(),
+						vocabulary.getSettings(), serviceContext);
+			}
+		}
+		else {
+			importedVocabulary =
+				AssetVocabularyLocalServiceUtil.addVocabulary(
+					userId, vocabulary.getTitle(), vocabulary.getTitleMap(),
+					vocabulary.getDescriptionMap(), vocabulary.getSettings(),
+					serviceContext);
+		}
+
+		portletDataContext.importClassedModel(vocabulary, importedVocabulary);
 	}
 
 	@Override
