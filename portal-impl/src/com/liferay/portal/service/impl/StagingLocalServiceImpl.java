@@ -646,12 +646,9 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 			throw rae;
 		}
 		catch (SystemException se) {
-			RemoteExportException ree = new RemoteExportException(
-				RemoteExportException.BAD_CONNECTION);
-
-			ree.setURL(remoteURL);
-
-			throw ree;
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to connect to remote live server", se);
+			}
 		}
 	}
 
