@@ -490,6 +490,8 @@ public class LayoutImporter {
 		List<Layout> previousLayouts = LayoutUtil.findByG_P(
 			groupId, privateLayout);
 
+		portletDataContext.setPreviousLayouts(previousLayouts);
+
 		// Remove layouts that were deleted from the layout set prototype
 
 		if (Validator.isNotNull(layoutSetPrototypeUuid) &&
@@ -538,6 +540,8 @@ public class LayoutImporter {
 		for (Element layoutElement : layoutElements) {
 			importLayout(portletDataContext, sourceLayoutsUuids, layoutElement);
 		}
+
+		previousLayouts = portletDataContext.getPreviousLayouts();
 
 		// Delete portlet data
 

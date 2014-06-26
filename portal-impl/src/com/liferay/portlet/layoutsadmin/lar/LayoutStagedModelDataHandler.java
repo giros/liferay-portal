@@ -347,6 +347,8 @@ public class LayoutStagedModelDataHandler
 
 		String friendlyURL = layout.getFriendlyURL();
 
+		List<Layout> previousLayouts = portletDataContext.getPreviousLayouts();
+
 		String layoutsImportMode = MapUtil.getString(
 			portletDataContext.getParameterMap(),
 			PortletDataHandlerKeys.LAYOUTS_IMPORT_MODE,
@@ -366,9 +368,6 @@ public class LayoutStagedModelDataHandler
 			Locale locale = LocaleUtil.getSiteDefault();
 
 			String localizedName = layout.getName(locale);
-
-			List<Layout> previousLayouts = LayoutLocalServiceUtil.getLayouts(
-				groupId, privateLayout);
 
 			for (Layout curLayout : previousLayouts) {
 				if (localizedName.equals(curLayout.getName(locale)) ||
@@ -431,7 +430,16 @@ public class LayoutStagedModelDataHandler
 				layoutId = LayoutLocalServiceUtil.getNextLayoutId(
 					groupId, privateLayout);
 			}
+			else {
+				previousLayouts.remove(existingLayout);
+
+				existingLayout.setUuid(layout.getUuid());
+
+				previousLayouts.add(existingLayout);
+			}
 		}
+
+		portletDataContext.setPreviousLayouts(previousLayouts);
 
 		if (_log.isDebugEnabled()) {
 			StringBundler sb = new StringBundler(7);

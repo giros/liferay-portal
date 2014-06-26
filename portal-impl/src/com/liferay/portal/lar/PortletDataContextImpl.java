@@ -1064,6 +1064,11 @@ public class PortletDataContextImpl implements PortletDataContext {
 	}
 
 	@Override
+	public List<Layout> getPreviousLayouts() {
+		return _previousLayouts;
+	}
+
+	@Override
 	public Set<String> getPrimaryKeys() {
 		return _primaryKeys;
 	}
@@ -1855,6 +1860,16 @@ public class PortletDataContextImpl implements PortletDataContext {
 	}
 
 	@Override
+	public void setPreviousLayouts(List<Layout> previousLayouts) {
+		if (previousLayouts instanceof ArrayList) {
+			_previousLayouts = previousLayouts;
+		}
+		else {
+			_previousLayouts = new ArrayList<Layout>(previousLayouts);
+		}
+	}
+
+	@Override
 	public void setPrivateLayout(boolean privateLayout) {
 		_privateLayout = privateLayout;
 	}
@@ -2449,6 +2464,7 @@ public class PortletDataContextImpl implements PortletDataContext {
 		new HashMap<String, List<KeyValuePair>>();
 	private long _plid;
 	private PortletDataContextListener _portletDataContextListener;
+	private List<Layout> _previousLayouts;
 	private Set<String> _primaryKeys = new HashSet<String>();
 	private boolean _privateLayout;
 	private Set<String> _references = new HashSet<String>();

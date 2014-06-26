@@ -395,6 +395,8 @@ public interface PortletDataContext extends Serializable {
 	@Deprecated
 	public String getPortletPath(String portletId);
 
+	public List<Layout> getPreviousLayouts();
+
 	public Set<String> getPrimaryKeys();
 
 	/**
@@ -661,6 +663,8 @@ public interface PortletDataContext extends Serializable {
 
 	public void setPortetDataContextListener(
 		PortletDataContextListener portletDataContextListener);
+
+	public void setPreviousLayouts(List<Layout> previousLayouts);
 
 	public void setPrivateLayout(boolean privateLayout);
 
