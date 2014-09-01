@@ -16,6 +16,7 @@ package com.liferay.portal.backgroundtask.messaging;
 
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskConstants;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskHelperUtil;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.messaging.BaseMessageListener;
 import com.liferay.portal.kernel.messaging.Message;
@@ -24,6 +25,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.BackgroundTask;
 import com.liferay.portal.service.BackgroundTaskLocalService;
+import com.liferay.portal.service.LockLocalService;
 import com.liferay.portal.util.ClassLoaderUtil;
 
 /**
@@ -55,10 +57,10 @@ public class BackgroundTaskQueuingMessageListener extends BaseMessageListener {
 				_backgroundTaskLocalService.fetchBackgroundTask(
 					backgroundTaskId);
 
-			BackgroundTaskExecutor backgroundTaskExecutor =
-				getBackgroundTaskExecutor(backgroundTask);
-
-			boolean locked = backgroundTaskExecutor.isLocked(backgroundTask);
+			boolean locked = _lockLocalService.isLocked(
+				BackgroundTaskExecutor.class.getName(),
+				BackgroundTaskHelperUtil.getLockKey(
+					getBackgroundTaskExecutor(backgroundTask), backgroundTask));
 
 			if (!locked) {
 				executeQueuedBackgroundTasks(taskExecutorClassName);
@@ -101,5 +103,8 @@ public class BackgroundTaskQueuingMessageListener extends BaseMessageListener {
 
 	@BeanReference(type = BackgroundTaskLocalService.class)
 	private BackgroundTaskLocalService _backgroundTaskLocalService;
+
+	@BeanReference(type = LockLocalService.class)
+	private LockLocalService _lockLocalService;
 
 }
