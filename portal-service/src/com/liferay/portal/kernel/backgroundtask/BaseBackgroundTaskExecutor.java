@@ -23,7 +23,6 @@ import com.liferay.portal.model.BackgroundTask;
 import com.liferay.portal.model.ExportImportConfiguration;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ExportImportConfigurationLocalServiceUtil;
-import com.liferay.portal.service.LockLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 
 import java.io.Serializable;
@@ -56,19 +55,6 @@ public abstract class BaseBackgroundTaskExecutor
 	@Override
 	public String handleException(BackgroundTask backgroundTask, Exception e) {
 		return "Unable to execute background task: " + e.getMessage();
-	}
-
-	@Override
-	public boolean isLocked(BackgroundTask backgroundTask)
-		throws PortalException {
-
-		if (isSerial()) {
-			return LockLocalServiceUtil.isLocked(
-				BackgroundTaskExecutor.class.getName(),
-				BackgroundTaskHelperUtil.getLockKey(this, backgroundTask));
-		}
-
-		return false;
 	}
 
 	@Override
