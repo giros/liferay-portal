@@ -17,11 +17,17 @@
 <%@ include file="/html/portlet/init.jsp" %>
 
 <%@ page import="com.liferay.portal.kernel.search.Document" %><%@
+page import="com.liferay.portal.kernel.workflow.WorkflowConstants" %><%@
+page import="com.liferay.portlet.asset.model.AssetEntry" %><%@
+page import="com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil" %><%@
 page import="com.liferay.portlet.blogs.service.BlogsEntryServiceUtil" %><%@
 page import="com.liferay.portlet.blogs.service.permission.BlogsEntryPermission" %><%@
 page import="com.liferay.portlet.blogs.service.permission.BlogsPermission" %><%@
 page import="com.liferay.portlet.blogsadmin.search.EntrySearch" %><%@
-page import="com.liferay.portlet.blogsadmin.search.EntrySearchTerms" %>
+page import="com.liferay.portlet.blogsadmin.search.EntrySearchTerms" %><%@
+page import="com.liferay.portlet.messageboards.service.MBMessageLocalServiceUtil" %><%@
+page import="com.liferay.portlet.ratings.model.RatingsStats" %><%@
+page import="com.liferay.portlet.ratings.service.RatingsStatsLocalServiceUtil" %>
 
 <%@ include file="/html/portlet/blogs_admin/init-ext.jsp" %>
 

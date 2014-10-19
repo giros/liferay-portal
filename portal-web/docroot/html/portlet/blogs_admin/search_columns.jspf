@@ -39,3 +39,21 @@
 	href="<%= rowURL %>"
 	name="status"
 />
+
+<liferay-ui:search-container-column-text
+	name="num-of-views"
+	orderable="<%= false %>"
+	value="<%= String.valueOf(viewCount) %>"
+/>
+
+<liferay-ui:search-container-column-text
+	name="num-of-comments"
+	orderable="<%= false %>"
+	value="<%= String.valueOf(commentsCount) %>"
+/>
+
+<liferay-ui:search-container-column-text
+	name="average-ratings"
+	orderable="<%= false %>"
+	value="<%= String.valueOf(averageRatings) %>"
+/>

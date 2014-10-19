@@ -67,6 +67,18 @@ portletURL.setParameter("struts_action", "/blogs_admin/view");
 				<portlet:param name="entryId" value="<%= String.valueOf(entry.getEntryId()) %>" />
 			</liferay-portlet:renderURL>
 
+			<%
+			AssetEntry assetEntry = AssetEntryLocalServiceUtil.getEntry(BlogsEntry.class.getName(), entry.getEntryId());
+
+			int viewCount = assetEntry.getViewCount();
+
+			int commentsCount = MBMessageLocalServiceUtil.getDiscussionMessagesCount(BlogsEntry.class.getName(), entry.getEntryId(), WorkflowConstants.STATUS_ANY);
+
+			RatingsStats ratingsStats = RatingsStatsLocalServiceUtil.getStats(BlogsEntry.class.getName(), entry.getEntryId());
+
+			double averageRatings = ratingsStats.getAverageScore();
+			%>
+
 			<%@ include file="/html/portlet/blogs_admin/search_columns.jspf" %>
 
 			<liferay-ui:search-container-column-jsp
