@@ -35,6 +35,14 @@ String toolbarItem = ParamUtil.getString(request, "toolbarItem");
 
 			<aui:nav-item href="<%= addEntryURL %>" iconCssClass="icon-plus" label="add" selected='<%= toolbarItem.equals("add") %>' />
 		</c:if>
+
+		<portlet:renderURL var="statisticsURL">
+			<portlet:param name="struts_action" value="/blogs_admin/statistics" />
+			<portlet:param name="redirect" value="<%= viewEntriesURL %>" />
+			<portlet:param name="backURL" value="<%= viewEntriesURL %>" />
+		</portlet:renderURL>
+
+		<aui:nav-item href="<%= statisticsURL %>" iconCssClass="icon-plus" label="statistics" selected='<%= toolbarItem.equals("statistics") %>' />
 	</aui:nav>
 
 	<c:if test="<%= showBlogEntriesSearch %>">
