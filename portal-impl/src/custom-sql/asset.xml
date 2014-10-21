@@ -317,6 +317,19 @@
 				tagPropertyKey ASC
 		]]>
 	</sql>
+	<sql id="com.liferay.portlet.asset.service.persistence.AssetViewStatsFinder.countByC_C_SD">
+		<![CDATA[
+			SELECT
+				COUNT(*) AS COUNT_VALUE
+			FROM
+				AssetViewStats
+			WHERE
+				(classNameId = ?) AND
+				(classPK = ?) AND
+				(viewDate >= ?) AND
+				(viewDate <= ?) AND
+		]]>
+	</sql>
 	<sql id="com.liferay.portlet.asset.service.persistence.AssetVocabularyFinder.countByG_N">
 		<![CDATA[
 			SELECT
