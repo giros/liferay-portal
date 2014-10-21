@@ -271,6 +271,28 @@ public class AssetViewStatsLocalServiceUtil {
 		getService().setBeanIdentifier(beanIdentifier);
 	}
 
+	public static com.liferay.portlet.asset.model.AssetViewStats addAssetViewStats(
+		long userId, long classNameId, long classPK, java.util.Date viewDate)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .addAssetViewStats(userId, classNameId, classPK, viewDate);
+	}
+
+	public static java.util.Map<java.util.Date, java.lang.Long> countViewsByDay(
+		long classNameId, long classPK) {
+		return getService().countViewsByDay(classNameId, classPK);
+	}
+
+	public static java.util.Map<java.util.Date, java.lang.Long> countViewsByWeek(
+		long classNameId, long classPK) {
+		return getService().countViewsByWeek(classNameId, classPK);
+	}
+
+	public static java.util.Map<java.util.Date, java.lang.Long> countViewsByMonth(
+		long classNameId, long classPK) {
+		return getService().countViewsByMonth(classNameId, classPK);
+	}
+
 	public static AssetViewStatsLocalService getService() {
 		if (_service == null) {
 			_service = (AssetViewStatsLocalService)PortalBeanLocatorUtil.locate(AssetViewStatsLocalService.class.getName());

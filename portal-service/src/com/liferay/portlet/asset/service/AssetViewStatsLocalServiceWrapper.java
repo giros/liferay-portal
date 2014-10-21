@@ -283,6 +283,33 @@ public class AssetViewStatsLocalServiceWrapper
 		_assetViewStatsLocalService.setBeanIdentifier(beanIdentifier);
 	}
 
+	@Override
+	public com.liferay.portlet.asset.model.AssetViewStats addAssetViewStats(
+		long userId, long classNameId, long classPK, java.util.Date viewDate)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _assetViewStatsLocalService.addAssetViewStats(userId,
+			classNameId, classPK, viewDate);
+	}
+
+	@Override
+	public java.util.Map<java.util.Date, java.lang.Long> countViewsByDay(
+		long classNameId, long classPK) {
+		return _assetViewStatsLocalService.countViewsByDay(classNameId, classPK);
+	}
+
+	@Override
+	public java.util.Map<java.util.Date, java.lang.Long> countViewsByWeek(
+		long classNameId, long classPK) {
+		return _assetViewStatsLocalService.countViewsByWeek(classNameId, classPK);
+	}
+
+	@Override
+	public java.util.Map<java.util.Date, java.lang.Long> countViewsByMonth(
+		long classNameId, long classPK) {
+		return _assetViewStatsLocalService.countViewsByMonth(classNameId,
+			classPK);
+	}
+
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */

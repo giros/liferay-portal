@@ -245,4 +245,17 @@ public interface AssetViewStatsLocalService extends BaseLocalService,
 	* @param beanIdentifier the Spring bean ID for this bean
 	*/
 	public void setBeanIdentifier(java.lang.String beanIdentifier);
+
+	public com.liferay.portlet.asset.model.AssetViewStats addAssetViewStats(
+		long userId, long classNameId, long classPK, java.util.Date viewDate)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	public java.util.Map<java.util.Date, java.lang.Long> countViewsByDay(
+		long classNameId, long classPK);
+
+	public java.util.Map<java.util.Date, java.lang.Long> countViewsByWeek(
+		long classNameId, long classPK);
+
+	public java.util.Map<java.util.Date, java.lang.Long> countViewsByMonth(
+		long classNameId, long classPK);
 }
