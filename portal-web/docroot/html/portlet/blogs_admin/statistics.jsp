@@ -39,10 +39,12 @@ for (AssetEntry assetEntry: topViewedAssetEntries) {
 <liferay-ui:search-container>
 
 	<liferay-ui:search-container-results>
+
 		<%
 		searchContainer.setTotal(5);
 		searchContainer.setResults(topViewedBlogEntries);
 		%>
+
 	</liferay-ui:search-container-results>
 
 	<liferay-ui:search-container-row
@@ -94,10 +96,12 @@ for (AssetEntry assetEntry: topCommentedAssetEntries) {
 <liferay-ui:search-container>
 
 	<liferay-ui:search-container-results>
+
 		<%
 		searchContainer.setTotal(5);
 		searchContainer.setResults(topCommentedBlogEntries);
 		%>
+
 	</liferay-ui:search-container-results>
 
 	<liferay-ui:search-container-row

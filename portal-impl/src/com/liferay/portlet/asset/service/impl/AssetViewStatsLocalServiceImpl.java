@@ -38,14 +38,15 @@ import java.util.Map;
  */
 public class AssetViewStatsLocalServiceImpl
 	extends AssetViewStatsLocalServiceBaseImpl {
-	/*
+
+	/**
 	 * NOTE FOR DEVELOPERS:
 	 *
 	 * Never reference this interface directly. Always use {@link com.liferay.portlet.asset.service.AssetViewStatsLocalServiceUtil} to access the asset view stats local service.
 	 */
 
 	public AssetViewStats addAssetViewStats(
-			long userId, long classNameId, long classPK, Date viewDate) 
+			long userId, long classNameId, long classPK, Date viewDate)
 		throws SystemException {
 
 		AssetViewStats assetViewStats = assetViewStatsPersistence.create(

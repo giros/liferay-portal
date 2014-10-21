@@ -25,9 +25,7 @@ page import="com.liferay.portlet.messageboards.model.MBTreeWalker" %><%@
 page import="com.liferay.portlet.messageboards.service.permission.MBDiscussionPermission" %><%@
 page import="com.liferay.portlet.messageboards.util.comparator.MessageCreateDateComparator" %><%@
 page import="com.liferay.portlet.ratings.model.RatingsEntry" %><%@
-page import="com.liferay.portlet.ratings.model.RatingsStats" %><%@
 page import="com.liferay.portlet.ratings.service.RatingsEntryLocalServiceUtil" %><%@
-page import="com.liferay.portlet.ratings.service.RatingsStatsLocalServiceUtil" %><%@
 page import="com.liferay.portlet.ratings.service.persistence.RatingsEntryUtil" %><%@
 page import="com.liferay.portlet.ratings.service.persistence.RatingsStatsUtil" %>
 
