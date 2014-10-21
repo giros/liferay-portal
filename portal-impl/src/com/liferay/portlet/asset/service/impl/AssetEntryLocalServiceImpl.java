@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.asset.service.impl;
 
+import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.increment.BufferedIncrement;
@@ -32,6 +33,7 @@ import com.liferay.portal.kernel.search.facet.Facet;
 import com.liferay.portal.kernel.search.facet.ScopeFacet;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.InstancePool;
+import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -56,7 +58,13 @@ import com.liferay.portlet.blogs.model.BlogsEntry;
 import com.liferay.portlet.bookmarks.model.BookmarksEntry;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.journal.model.JournalArticle;
+import com.liferay.portlet.messageboards.model.MBDiscussion;
 import com.liferay.portlet.messageboards.model.MBMessage;
+import com.liferay.portlet.messageboards.model.MBThread;
+import com.liferay.portlet.messageboards.service.MBDiscussionLocalServiceUtil;
+import com.liferay.portlet.messageboards.service.MBThreadLocalServiceUtil;
+import com.liferay.portlet.messageboards.service.persistence.MBThreadUtil;
+import com.liferay.portlet.messageboards.util.comparator.MessageCountComparator;
 import com.liferay.portlet.social.model.SocialActivityConstants;
 import com.liferay.portlet.wiki.model.WikiPage;
 
@@ -320,6 +328,33 @@ public class AssetEntryLocalServiceImpl extends AssetEntryLocalServiceBaseImpl {
 	}
 
 	@Override
+	public List<AssetEntry> getTopCommentedEntriesByGroup(
+			long groupId, String className, boolean asc, int start, int end)
+		throws PortalException, SystemException {
+
+		List<MBThread> mbThreads = MBThreadUtil.filterFindByGroupId(
+			groupId, start, end, new MessageCountComparator(asc));
+
+		List<AssetEntry> assetEntries = new ArrayList<AssetEntry>();
+
+		for (MBThread mbThread : mbThreads) {
+			MBDiscussion mbDiscussion =
+				mbDiscussionLocalService.getThreadDiscussion(
+					mbThread.getThreadId());
+
+			if (!className.equals(mbDiscussion.getClassName())) {
+				continue;
+			}
+
+			assetEntries.add(
+				assetEntryLocalService.getEntry(
+					mbDiscussion.getClassName(), mbDiscussion.getClassPK()));
+		}
+
+		return assetEntries;
+	}
+
+	@Override
 	public List<AssetEntry> getTopViewedEntries(
 			String className, boolean asc, int start, int end)
 		throws SystemException {
@@ -343,6 +378,40 @@ public class AssetEntryLocalServiceImpl extends AssetEntryLocalServiceBaseImpl {
 		entryQuery.setClassNameIds(classNameIds);
 		entryQuery.setEnd(end);
 		entryQuery.setExcludeZeroViewCount(true);
+		entryQuery.setOrderByCol1("viewCount");
+		entryQuery.setOrderByType1(asc ? "ASC" : "DESC");
+		entryQuery.setStart(start);
+
+		return assetEntryFinder.findEntries(entryQuery);
+	}
+
+	@Override
+	public List<AssetEntry> getTopViewedEntriesByGroup(
+			long groupId, String className, boolean asc, int start, int end)
+		throws SystemException {
+
+		return getTopViewedEntriesByGroup(
+			new long[] {groupId}, new String[] {className}, asc, start, end);
+	}
+
+	@Override
+	public List<AssetEntry> getTopViewedEntriesByGroup(
+			long[] groupIds, String[] className, boolean asc, int start,
+			int end)
+		throws SystemException {
+
+		long[] classNameIds = new long[className.length];
+
+		for (int i = 0; i < className.length; i++) {
+			classNameIds[i] = PortalUtil.getClassNameId(className[i]);
+		}
+
+		AssetEntryQuery entryQuery = new AssetEntryQuery();
+
+		entryQuery.setClassNameIds(classNameIds);
+		entryQuery.setEnd(end);
+		entryQuery.setExcludeZeroViewCount(true);
+		entryQuery.setGroupIds(groupIds);
 		entryQuery.setOrderByCol1("viewCount");
 		entryQuery.setOrderByType1(asc ? "ASC" : "DESC");
 		entryQuery.setStart(start);
