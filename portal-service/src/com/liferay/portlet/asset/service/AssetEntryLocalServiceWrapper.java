@@ -728,6 +728,16 @@ public class AssetEntryLocalServiceWrapper implements AssetEntryLocalService,
 	}
 
 	@Override
+	public java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopCommentedEntriesByGroup(
+		long groupId, java.lang.String className, boolean asc, int start,
+		int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _assetEntryLocalService.getTopCommentedEntriesByGroup(groupId,
+			className, asc, start, end);
+	}
+
+	@Override
 	public java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopViewedEntries(
 		java.lang.String className, boolean asc, int start, int end)
 		throws com.liferay.portal.kernel.exception.SystemException {
@@ -741,6 +751,22 @@ public class AssetEntryLocalServiceWrapper implements AssetEntryLocalService,
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _assetEntryLocalService.getTopViewedEntries(className, asc,
 			start, end);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopViewedEntriesByGroup(
+		long groupId, java.lang.String className, boolean asc, int start,
+		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		return _assetEntryLocalService.getTopViewedEntriesByGroup(groupId,
+			className, asc, start, end);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopViewedEntriesByGroup(
+		long[] groupIds, java.lang.String[] className, boolean asc, int start,
+		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		return _assetEntryLocalService.getTopViewedEntriesByGroup(groupIds,
+			className, asc, start, end);
 	}
 
 	@Override

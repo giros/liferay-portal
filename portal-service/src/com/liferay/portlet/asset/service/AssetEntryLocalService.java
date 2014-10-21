@@ -557,6 +557,13 @@ public interface AssetEntryLocalService extends BaseLocalService,
 			com.liferay.portal.kernel.exception.SystemException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopCommentedEntriesByGroup(
+		long groupId, java.lang.String className, boolean asc, int start,
+		int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopViewedEntries(
 		java.lang.String className, boolean asc, int start, int end)
 		throws com.liferay.portal.kernel.exception.SystemException;
@@ -565,6 +572,16 @@ public interface AssetEntryLocalService extends BaseLocalService,
 	public java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopViewedEntries(
 		java.lang.String[] className, boolean asc, int start, int end)
 		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopViewedEntriesByGroup(
+		long groupId, java.lang.String className, boolean asc, int start,
+		int end) throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopViewedEntriesByGroup(
+		long[] groupIds, java.lang.String[] className, boolean asc, int start,
+		int end) throws com.liferay.portal.kernel.exception.SystemException;
 
 	public com.liferay.portlet.asset.model.AssetEntry incrementViewCounter(
 		long userId, java.lang.String className, long classPK)

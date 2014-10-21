@@ -666,6 +666,16 @@ public class AssetEntryLocalServiceUtil {
 		return getService().getPreviousEntry(entryId);
 	}
 
+	public static java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopCommentedEntriesByGroup(
+		long groupId, java.lang.String className, boolean asc, int start,
+		int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getTopCommentedEntriesByGroup(groupId, className, asc,
+			start, end);
+	}
+
 	public static java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopViewedEntries(
 		java.lang.String className, boolean asc, int start, int end)
 		throws com.liferay.portal.kernel.exception.SystemException {
@@ -676,6 +686,22 @@ public class AssetEntryLocalServiceUtil {
 		java.lang.String[] className, boolean asc, int start, int end)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService().getTopViewedEntries(className, asc, start, end);
+	}
+
+	public static java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopViewedEntriesByGroup(
+		long groupId, java.lang.String className, boolean asc, int start,
+		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getTopViewedEntriesByGroup(groupId, className, asc, start,
+			end);
+	}
+
+	public static java.util.List<com.liferay.portlet.asset.model.AssetEntry> getTopViewedEntriesByGroup(
+		long[] groupIds, java.lang.String[] className, boolean asc, int start,
+		int end) throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getTopViewedEntriesByGroup(groupIds, className, asc, start,
+			end);
 	}
 
 	public static com.liferay.portlet.asset.model.AssetEntry incrementViewCounter(

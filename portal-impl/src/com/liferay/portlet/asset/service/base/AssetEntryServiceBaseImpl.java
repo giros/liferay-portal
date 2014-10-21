@@ -55,6 +55,7 @@ import com.liferay.portlet.documentlibrary.service.persistence.DLFolderPersisten
 import com.liferay.portlet.journal.service.persistence.JournalArticleFinder;
 import com.liferay.portlet.journal.service.persistence.JournalArticlePersistence;
 import com.liferay.portlet.journal.service.persistence.JournalArticleResourcePersistence;
+import com.liferay.portlet.messageboards.service.persistence.MBDiscussionPersistence;
 import com.liferay.portlet.messageboards.service.persistence.MBMessageFinder;
 import com.liferay.portlet.messageboards.service.persistence.MBMessagePersistence;
 import com.liferay.portlet.social.service.persistence.SocialActivityCounterFinder;
@@ -1367,6 +1368,44 @@ public abstract class AssetEntryServiceBaseImpl extends BaseServiceImpl
 	}
 
 	/**
+	 * Returns the message boards discussion local service.
+	 *
+	 * @return the message boards discussion local service
+	 */
+	public com.liferay.portlet.messageboards.service.MBDiscussionLocalService getMBDiscussionLocalService() {
+		return mbDiscussionLocalService;
+	}
+
+	/**
+	 * Sets the message boards discussion local service.
+	 *
+	 * @param mbDiscussionLocalService the message boards discussion local service
+	 */
+	public void setMBDiscussionLocalService(
+		com.liferay.portlet.messageboards.service.MBDiscussionLocalService mbDiscussionLocalService) {
+		this.mbDiscussionLocalService = mbDiscussionLocalService;
+	}
+
+	/**
+	 * Returns the message boards discussion persistence.
+	 *
+	 * @return the message boards discussion persistence
+	 */
+	public MBDiscussionPersistence getMBDiscussionPersistence() {
+		return mbDiscussionPersistence;
+	}
+
+	/**
+	 * Sets the message boards discussion persistence.
+	 *
+	 * @param mbDiscussionPersistence the message boards discussion persistence
+	 */
+	public void setMBDiscussionPersistence(
+		MBDiscussionPersistence mbDiscussionPersistence) {
+		this.mbDiscussionPersistence = mbDiscussionPersistence;
+	}
+
+	/**
 	 * Returns the message-boards message local service.
 	 *
 	 * @return the message-boards message local service
@@ -1875,6 +1914,10 @@ public abstract class AssetEntryServiceBaseImpl extends BaseServiceImpl
 	protected com.liferay.portlet.journal.service.JournalArticleResourceLocalService journalArticleResourceLocalService;
 	@BeanReference(type = JournalArticleResourcePersistence.class)
 	protected JournalArticleResourcePersistence journalArticleResourcePersistence;
+	@BeanReference(type = com.liferay.portlet.messageboards.service.MBDiscussionLocalService.class)
+	protected com.liferay.portlet.messageboards.service.MBDiscussionLocalService mbDiscussionLocalService;
+	@BeanReference(type = MBDiscussionPersistence.class)
+	protected MBDiscussionPersistence mbDiscussionPersistence;
 	@BeanReference(type = com.liferay.portlet.messageboards.service.MBMessageLocalService.class)
 	protected com.liferay.portlet.messageboards.service.MBMessageLocalService mbMessageLocalService;
 	@BeanReference(type = com.liferay.portlet.messageboards.service.MBMessageService.class)
