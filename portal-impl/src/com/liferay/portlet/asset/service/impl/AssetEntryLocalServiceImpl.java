@@ -437,6 +437,9 @@ public class AssetEntryLocalServiceImpl extends AssetEntryLocalServiceBaseImpl {
 				SocialActivityConstants.TYPE_VIEW, StringPool.BLANK, 0);
 		}
 
+		assetViewStatsLocalService.addAssetViewStats(
+			userId, PortalUtil.getClassNameId(className), classPK, new Date());
+
 		return assetEntry;
 	}
 

@@ -14,7 +14,13 @@
 
 package com.liferay.portlet.asset.service.impl;
 
+import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portlet.asset.model.AssetViewStats;
 import com.liferay.portlet.asset.service.base.AssetViewStatsLocalServiceBaseImpl;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The implementation of the asset view stats local service.
@@ -37,4 +43,33 @@ public class AssetViewStatsLocalServiceImpl
 	 *
 	 * Never reference this interface directly. Always use {@link com.liferay.portlet.asset.service.AssetViewStatsLocalServiceUtil} to access the asset view stats local service.
 	 */
+
+	public AssetViewStats addAssetViewStats(
+			long userId, long classNameId, long classPK, Date viewDate) 
+		throws SystemException {
+
+		AssetViewStats assetViewStats = assetViewStatsPersistence.create(
+			counterLocalService.increment());
+
+		assetViewStats.setUserId(userId);
+		assetViewStats.setClassNameId(classNameId);
+		assetViewStats.setClassPK(classPK);
+		assetViewStats.setViewDate(viewDate);
+
+		assetViewStatsPersistence.update(assetViewStats);
+
+		return assetViewStats;
+	}
+
+	public Map<Date, Long> countViewsByDay(long classNameId, long classPK) {
+		return new HashMap<Date, Long>();
+	}
+
+	public Map<Date, Long> countViewsByWeek(long classNameId, long classPK) {
+		return new HashMap<Date, Long>();
+	}
+
+	public Map<Date, Long> countViewsByMonth(long classNameId, long classPK) {
+		return new HashMap<Date, Long>();
+	}
 }
