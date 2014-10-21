@@ -87,6 +87,7 @@
 	<import class="com.liferay.portlet.asset.model.AssetTagProperty" />
 	<import class="com.liferay.portlet.asset.model.AssetTagPropertyKey" />
 	<import class="com.liferay.portlet.asset.model.AssetTagStats" />
+	<import class="com.liferay.portlet.asset.model.AssetViewStats" />
 	<import class="com.liferay.portlet.asset.model.AssetVocabulary" />
 	<import class="com.liferay.portlet.blogs.model.BlogsEntry" />
 	<import class="com.liferay.portlet.blogs.model.BlogsStatsUser" />
@@ -1365,6 +1366,16 @@
 		<property name="tagId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="classNameId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="assetCount" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
+	</class>
+	<class name="com.liferay.portlet.asset.model.impl.AssetViewStatsImpl" table="AssetViewStats">
+		<cache usage="read-write" />
+		<id name="viewStatsId" type="long">
+			<generator class="assigned" />
+		</id>
+		<property name="userId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="viewDate" type="org.hibernate.type.TimestampType" />
+		<property name="classNameId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="classPK" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 	</class>
 	<class name="com.liferay.portlet.asset.model.impl.AssetVocabularyImpl" table="AssetVocabulary">
 		<cache usage="read-write" />

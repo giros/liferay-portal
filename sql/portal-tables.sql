@@ -191,6 +191,14 @@ create table AssetTagStats (
 	assetCount INTEGER
 );
 
+create table AssetViewStats (
+	viewStatsId LONG not null primary key,
+	userId LONG,
+	viewDate DATE null,
+	classNameId LONG,
+	classPK LONG
+);
+
 create table AssetVocabulary (
 	uuid_ VARCHAR(75) null,
 	vocabularyId LONG not null primary key,

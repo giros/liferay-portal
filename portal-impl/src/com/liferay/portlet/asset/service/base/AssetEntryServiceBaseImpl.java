@@ -42,6 +42,8 @@ import com.liferay.portlet.asset.service.persistence.AssetTagPropertyFinder;
 import com.liferay.portlet.asset.service.persistence.AssetTagPropertyKeyFinder;
 import com.liferay.portlet.asset.service.persistence.AssetTagPropertyPersistence;
 import com.liferay.portlet.asset.service.persistence.AssetTagStatsPersistence;
+import com.liferay.portlet.asset.service.persistence.AssetViewStatsFinder;
+import com.liferay.portlet.asset.service.persistence.AssetViewStatsPersistence;
 import com.liferay.portlet.asset.service.persistence.AssetVocabularyFinder;
 import com.liferay.portlet.asset.service.persistence.AssetVocabularyPersistence;
 import com.liferay.portlet.blogs.service.persistence.BlogsEntryFinder;
@@ -557,6 +559,63 @@ public abstract class AssetEntryServiceBaseImpl extends BaseServiceImpl
 	public void setAssetTagStatsPersistence(
 		AssetTagStatsPersistence assetTagStatsPersistence) {
 		this.assetTagStatsPersistence = assetTagStatsPersistence;
+	}
+
+	/**
+	 * Returns the asset view stats local service.
+	 *
+	 * @return the asset view stats local service
+	 */
+	public com.liferay.portlet.asset.service.AssetViewStatsLocalService getAssetViewStatsLocalService() {
+		return assetViewStatsLocalService;
+	}
+
+	/**
+	 * Sets the asset view stats local service.
+	 *
+	 * @param assetViewStatsLocalService the asset view stats local service
+	 */
+	public void setAssetViewStatsLocalService(
+		com.liferay.portlet.asset.service.AssetViewStatsLocalService assetViewStatsLocalService) {
+		this.assetViewStatsLocalService = assetViewStatsLocalService;
+	}
+
+	/**
+	 * Returns the asset view stats persistence.
+	 *
+	 * @return the asset view stats persistence
+	 */
+	public AssetViewStatsPersistence getAssetViewStatsPersistence() {
+		return assetViewStatsPersistence;
+	}
+
+	/**
+	 * Sets the asset view stats persistence.
+	 *
+	 * @param assetViewStatsPersistence the asset view stats persistence
+	 */
+	public void setAssetViewStatsPersistence(
+		AssetViewStatsPersistence assetViewStatsPersistence) {
+		this.assetViewStatsPersistence = assetViewStatsPersistence;
+	}
+
+	/**
+	 * Returns the asset view stats finder.
+	 *
+	 * @return the asset view stats finder
+	 */
+	public AssetViewStatsFinder getAssetViewStatsFinder() {
+		return assetViewStatsFinder;
+	}
+
+	/**
+	 * Sets the asset view stats finder.
+	 *
+	 * @param assetViewStatsFinder the asset view stats finder
+	 */
+	public void setAssetViewStatsFinder(
+		AssetViewStatsFinder assetViewStatsFinder) {
+		this.assetViewStatsFinder = assetViewStatsFinder;
 	}
 
 	/**
@@ -1828,6 +1887,12 @@ public abstract class AssetEntryServiceBaseImpl extends BaseServiceImpl
 	protected com.liferay.portlet.asset.service.AssetTagStatsLocalService assetTagStatsLocalService;
 	@BeanReference(type = AssetTagStatsPersistence.class)
 	protected AssetTagStatsPersistence assetTagStatsPersistence;
+	@BeanReference(type = com.liferay.portlet.asset.service.AssetViewStatsLocalService.class)
+	protected com.liferay.portlet.asset.service.AssetViewStatsLocalService assetViewStatsLocalService;
+	@BeanReference(type = AssetViewStatsPersistence.class)
+	protected AssetViewStatsPersistence assetViewStatsPersistence;
+	@BeanReference(type = AssetViewStatsFinder.class)
+	protected AssetViewStatsFinder assetViewStatsFinder;
 	@BeanReference(type = com.liferay.portlet.asset.service.AssetVocabularyLocalService.class)
 	protected com.liferay.portlet.asset.service.AssetVocabularyLocalService assetVocabularyLocalService;
 	@BeanReference(type = com.liferay.portlet.asset.service.AssetVocabularyService.class)

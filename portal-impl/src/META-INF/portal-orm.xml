@@ -1796,6 +1796,22 @@
 			<transient name="primaryKeyObj" />
 		</attributes>
 	</mapped-superclass>
+	<mapped-superclass class="com.liferay.portlet.asset.model.impl.AssetViewStatsModelImpl">
+		<attributes>
+			<id name="viewStatsId" />
+			<basic name="userId" />
+			<basic name="viewDate">
+				<temporal>TIMESTAMP</temporal>
+			</basic>
+			<basic name="classNameId" />
+			<basic name="classPK" />
+			<transient name="className" />
+			<transient name="modelAttributes" />
+			<transient name="primaryKey" />
+			<transient name="primaryKeyObj" />
+			<transient name="userUuid" />
+		</attributes>
+	</mapped-superclass>
 	<mapped-superclass class="com.liferay.portlet.asset.model.impl.AssetVocabularyModelImpl">
 		<attributes>
 			<id name="vocabularyId" />
@@ -4337,6 +4353,10 @@
 	</entity>
 	<entity class="com.liferay.portlet.asset.model.impl.AssetTagStatsImpl" name="AssetTagStats">
 		<table name="AssetTagStats" />
+		<attributes />
+	</entity>
+	<entity class="com.liferay.portlet.asset.model.impl.AssetViewStatsImpl" name="AssetViewStats">
+		<table name="AssetViewStats" />
 		<attributes />
 	</entity>
 	<entity class="com.liferay.portlet.asset.model.impl.AssetVocabularyImpl" name="AssetVocabulary">

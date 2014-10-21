@@ -1269,6 +1269,13 @@
 		<field name="classNameId" type="long" />
 		<field name="assetCount" type="int" />
 	</model>
+	<model name="com.liferay.portlet.asset.model.AssetViewStats">
+		<field name="viewStatsId" type="long" />
+		<field name="userId" type="long" />
+		<field name="viewDate" type="Date" />
+		<field name="classNameId" type="long" />
+		<field name="classPK" type="long" />
+	</model>
 	<model name="com.liferay.portlet.asset.model.AssetVocabulary">
 		<field name="uuid" type="String" />
 		<field name="vocabularyId" type="long" />

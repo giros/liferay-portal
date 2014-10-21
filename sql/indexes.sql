@@ -73,6 +73,8 @@ create index IX_50702693 on AssetTagStats (classNameId);
 create index IX_9464CA on AssetTagStats (tagId);
 create unique index IX_56682CC4 on AssetTagStats (tagId, classNameId);
 
+create index IX_A1BD87A5 on AssetViewStats (classNameId, classPK);
+
 create index IX_B22D908C on AssetVocabulary (companyId);
 create index IX_B6B8CA0E on AssetVocabulary (groupId);
 create index IX_C0AAD74D on AssetVocabulary (groupId, name);
