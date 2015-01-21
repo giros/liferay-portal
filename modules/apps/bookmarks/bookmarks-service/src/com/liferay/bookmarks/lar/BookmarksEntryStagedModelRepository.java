@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.portal.kernel.lar.StagedModelRepository;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.model.StagedModel;
+import org.osgi.service.component.annotations.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +39,7 @@ import java.util.List;
 /**
  * @author Mate Thurzo
  */
+@Component(property = {"model.name=com.liferay.bookmarks.model.BookmarksEntry"})
 public class BookmarksEntryStagedModelRepository
 	implements StagedModelRepository<BookmarksEntry> {
 
@@ -94,8 +96,14 @@ public class BookmarksEntryStagedModelRepository
 
 	@Override
 	public List<BookmarksEntry> fetchStagedModels(long groupId) {
-		return BookmarksEntryLocalServiceUtil.getGroupEntries(
-			groupId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+		DynamicQuery dynamicQuery =
+			BookmarksEntryLocalServiceUtil.dynamicQuery();
+
+		Property groupIdProperty = PropertyFactoryUtil.forName("groupId");
+
+		dynamicQuery.add(groupIdProperty.eq(groupId));
+
+		return BookmarksEntryLocalServiceUtil.dynamicQuery(dynamicQuery);
 	}
 
 	@Override
@@ -123,10 +131,11 @@ public class BookmarksEntryStagedModelRepository
 
 		Property workflowStatusProperty = PropertyFactoryUtil.forName("status");
 
-		dynamicQuery.add(workflowStatusProperty.in(
-			stagedModelDataHandler.getExportableStatuses()));
+		dynamicQuery.add(
+			workflowStatusProperty.in(
+				stagedModelDataHandler.getExportableStatuses()));
 
-		return dynamicQuery.list(true);
+		return BookmarksEntryLocalServiceUtil.dynamicQuery(dynamicQuery);
 	}
 
 }

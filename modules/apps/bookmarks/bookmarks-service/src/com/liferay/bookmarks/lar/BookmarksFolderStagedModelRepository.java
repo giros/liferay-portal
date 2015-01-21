@@ -18,12 +18,16 @@ import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.model.BookmarksFolderConstants;
 import com.liferay.bookmarks.service.BookmarksEntryLocalServiceUtil;
 import com.liferay.bookmarks.service.BookmarksFolderLocalServiceUtil;
+import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.Property;
+import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.portal.kernel.lar.StagedModelRepository;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.model.StagedModel;
+import org.osgi.service.component.annotations.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +35,8 @@ import java.util.List;
 /**
  * @author Mate Thurzo
  */
+@Component(
+	property = {"model.name=com.liferay.bookmarks.model.BookmarksFolder"})
 public class BookmarksFolderStagedModelRepository
 	implements StagedModelRepository<BookmarksFolder> {
 
@@ -98,7 +104,14 @@ public class BookmarksFolderStagedModelRepository
 
 	@Override
 	public List<BookmarksFolder> fetchStagedModels(long groupId) {
-		return BookmarksFolderLocalServiceUtil.getFolders(groupId);
+		DynamicQuery dynamicQuery =
+			BookmarksFolderLocalServiceUtil.dynamicQuery();
+
+		Property groupIdProperty = PropertyFactoryUtil.forName("groupId");
+
+		dynamicQuery.add(groupIdProperty.eq(groupId));
+
+		return BookmarksFolderLocalServiceUtil.dynamicQuery(dynamicQuery);
 	}
 
 	@Override

@@ -1,3 +1,5 @@
+<%@ page
+	import="com.liferay.bookmarks.service.BookmarksEntryLocalServiceUtil" %>
 <%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
@@ -75,6 +77,10 @@ if (folder != null) {
 />
 
 <liferay-util:include page="/html/portlet/bookmarks/top_links.jsp" servletContext="<%= application %>" />
+
+<%
+	System.out.println(BookmarksEntryLocalServiceUtil.getGroupEntries(scopeGroupId, -1, -1));
+%>
 
 <c:choose>
 	<c:when test="<%= useAssetEntryQuery %>">

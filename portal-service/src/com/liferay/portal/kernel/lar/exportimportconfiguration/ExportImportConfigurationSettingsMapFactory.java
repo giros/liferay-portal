@@ -87,6 +87,8 @@ public class ExportImportConfigurationSettingsMapFactory {
 			timeZone);
 	}
 
+	// for remote staging publication
+
 	public static Map<String, Serializable> buildSettingsMap(
 		long userId, long sourceGroupId, boolean privateLayout,
 		Map<Long, Boolean> layoutIdMap, Map<String, String[]> parameterMap,
@@ -101,6 +103,8 @@ public class ExportImportConfigurationSettingsMapFactory {
 			remotePrivateLayout, StringPool.BLANK, locale, timeZone,
 			StringPool.BLANK);
 	}
+
+	// for local staging publication
 
 	public static Map<String, Serializable> buildSettingsMap(
 		long userId, long sourceGroupId, long targetGroupId,
