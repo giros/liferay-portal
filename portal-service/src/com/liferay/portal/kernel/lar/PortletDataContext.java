@@ -383,6 +383,12 @@ public interface PortletDataContext extends Serializable {
 
 	public Map<String, Map<?, ?>> getNewPrimaryKeysMaps();
 
+	public String getNewPrimaryKey(String className, String oldPrimaryKey);
+
+	public long getNewPrimaryKey(Class<?> clazz, long oldPrimaryKey);
+
+	public String getNewPrimaryKey(Class<?> clazz, String oldPrimaryKey);
+
 	/**
 	 * @deprecated As of 7.0.0, with no direct replacement
 	 */

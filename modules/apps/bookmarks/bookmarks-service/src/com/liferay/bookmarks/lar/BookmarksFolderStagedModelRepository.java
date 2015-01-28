@@ -16,8 +16,8 @@ package com.liferay.bookmarks.lar;
 
 import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.model.BookmarksFolderConstants;
-import com.liferay.bookmarks.service.BookmarksEntryLocalServiceUtil;
-import com.liferay.bookmarks.service.BookmarksFolderLocalServiceUtil;
+import com.liferay.bookmarks.service.BookmarksEntryLocalService;
+import com.liferay.bookmarks.service.BookmarksFolderLocalService;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
@@ -27,10 +27,13 @@ import com.liferay.portal.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.portal.kernel.lar.StagedModelRepository;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.model.StagedModel;
-import org.osgi.service.component.annotations.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Mate Thurzo
@@ -41,17 +44,25 @@ public class BookmarksFolderStagedModelRepository
 	implements StagedModelRepository<BookmarksFolder> {
 
 	@Override
+	public BookmarksFolder addStagedModel(
+			BookmarksFolder bookmarksFolder, Map<String, Object> attributes)
+		throws Exception {
+
+		return null;
+	}
+
+	@Override
 	public List<? extends StagedModel> fetchChildStagedModels(
 		BookmarksFolder bookmarksFolder) {
 
 		List<StagedModel> childStagedModels = new ArrayList<>();
 
 		childStagedModels.addAll(
-			BookmarksFolderLocalServiceUtil.getFolders(
+			_bookmarksFolderLocalService.getFolders(
 				bookmarksFolder.getGroupId(), bookmarksFolder.getFolderId()));
 
 		childStagedModels.addAll(
-			BookmarksEntryLocalServiceUtil.getEntries(
+			_bookmarksEntryLocalService.getEntries(
 				bookmarksFolder.getGroupId(), bookmarksFolder.getFolderId(),
 				QueryUtil.ALL_POS, QueryUtil.ALL_POS));
 
@@ -78,14 +89,20 @@ public class BookmarksFolderStagedModelRepository
 	}
 
 	@Override
+	public BookmarksFolder fetchStagedModelByCustomAttributes(
+		Map<String, Object> attributes) {
+
+		return null;
+	}
+
+	@Override
 	public BookmarksFolder fetchStagedModelByUuidAndCompanyId(
 		String uuid, long companyId) {
 
 		List<BookmarksFolder> folders =
-			BookmarksFolderLocalServiceUtil.
-				getBookmarksFoldersByUuidAndCompanyId(
-					uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					new StagedModelModifiedDateComparator<BookmarksFolder>());
+			_bookmarksFolderLocalService.getBookmarksFoldersByUuidAndCompanyId(
+				uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				new StagedModelModifiedDateComparator<BookmarksFolder>());
 
 		if (ListUtil.isEmpty(folders)) {
 			return null;
@@ -98,20 +115,19 @@ public class BookmarksFolderStagedModelRepository
 	public BookmarksFolder fetchStagedModelByUuidAndGroupId(
 		String uuid, long groupId) {
 
-		return BookmarksFolderLocalServiceUtil.
+		return _bookmarksFolderLocalService.
 			fetchBookmarksFolderByUuidAndGroupId(uuid, groupId);
 	}
 
 	@Override
 	public List<BookmarksFolder> fetchStagedModels(long groupId) {
-		DynamicQuery dynamicQuery =
-			BookmarksFolderLocalServiceUtil.dynamicQuery();
+		DynamicQuery dynamicQuery = _bookmarksFolderLocalService.dynamicQuery();
 
 		Property groupIdProperty = PropertyFactoryUtil.forName("groupId");
 
 		dynamicQuery.add(groupIdProperty.eq(groupId));
 
-		return BookmarksFolderLocalServiceUtil.dynamicQuery(dynamicQuery);
+		return _bookmarksFolderLocalService.dynamicQuery(dynamicQuery);
 	}
 
 	@Override
@@ -120,5 +136,32 @@ public class BookmarksFolderStagedModelRepository
 
 		return null;
 	}
+
+	@Reference(unbind = "-")
+	public void setBookmarksEntryLocalService(
+		BookmarksEntryLocalService bookmarksEntryLocalService) {
+
+		_bookmarksEntryLocalService = bookmarksEntryLocalService;
+	}
+
+	@Reference(unbind = "-")
+	public void setBookmarksFolderLocalService(
+		BookmarksFolderLocalService bookmarksFolderLocalService) {
+
+		_bookmarksFolderLocalService = bookmarksFolderLocalService;
+	}
+
+	@Override
+	public BookmarksFolder updateStagedModel(
+			BookmarksFolder bookmarksFolder,
+			BookmarksFolder existingBookmarksFolder,
+			Map<String, Object> attributes)
+		throws Exception {
+
+		return null;
+	}
+
+	private BookmarksEntryLocalService _bookmarksEntryLocalService;
+	private BookmarksFolderLocalService _bookmarksFolderLocalService;
 
 }

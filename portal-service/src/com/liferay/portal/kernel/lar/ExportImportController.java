@@ -19,16 +19,22 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.manifest.ManifestTreeNode;
 import com.liferay.portal.kernel.util.DateRange;
+import com.liferay.portal.kernel.zip.ZipReaderFactoryUtil;
 import com.liferay.portal.kernel.zip.ZipWriterFactoryUtil;
 import com.liferay.portal.model.ExportImportConfiguration;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.StagedModel;
 import com.liferay.portal.service.GroupLocalServiceUtil;
+import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.portlet.sitesadmin.lar.StagedGroup;
+import com.liferay.registry.collections.ServiceTrackerCollections;
+import com.liferay.registry.collections.ServiceTrackerMap;
 
+import java.io.File;
 import java.io.Serializable;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +48,92 @@ public class ExportImportController {
 
 	public static ExportImportController getInstance() {
 		return _instance;
+	}
+
+	public void importLar() throws Exception {
+
+		long companyId = 0;
+		long groupId = 0;
+		Map<String, String[]> parameterMap = Collections.emptyMap();
+		UserIdStrategy userIdStrategy = null;
+
+		final PortletDataContext portletDataContext =
+			PortletDataContextFactoryUtil.createImportPortletDataContext(
+				companyId, groupId, parameterMap, userIdStrategy,
+				ZipReaderFactoryUtil.getZipReader((File)null));
+
+		ServiceTrackerMap<String, ModelStager> serviceTrackerMap =
+			ServiceTrackerCollections.singleValueMap(
+				ModelStager.class, "model.name");
+
+		serviceTrackerMap.open();
+
+		ModelStager<JournalArticle> journalArticleModelStager = null;
+
+		try {
+			journalArticleModelStager = serviceTrackerMap.getService(
+				JournalArticle.class.getName());
+		}
+		finally {
+			serviceTrackerMap.close();
+		}
+
+		// TODO open the stream for the stager
+
+		// stager will read all the information from the stream
+
+		JournalArticle journalArticle =
+			journalArticleModelStager.importStagedModel(null);
+
+
+		ServiceTrackerMap<String, StagedModelRepository>
+			stagedModelRepositoryServiceTrackerMap =
+				ServiceTrackerCollections.singleValueMap(
+					StagedModelRepository.class, "model.name");
+
+		stagedModelRepositoryServiceTrackerMap.open();
+
+		StagedModelRepository stagedModelRepository = null;
+
+		try {
+			stagedModelRepository =
+				stagedModelRepositoryServiceTrackerMap.getService(
+					JournalArticle.class.getName());
+		}
+		finally {
+			serviceTrackerMap.close();
+		}
+
+		if (portletDataContext.isDataStrategyMirror()) {
+
+			// use the deserialized information from the stager to find if
+			// there is an existing staged model
+
+			StagedModel existingStagedModel = null;
+
+			/*StagedModel existingStagedModel =
+				stagedModelRepository.fetchStagedModelByCustomAttributes(
+					article.getUuid(), articleResourceUuid,
+					portletDataContext.getScopeGroupId(), articleId,
+					newArticleId, article.getVersion(), preloaded);*/
+
+			if (existingStagedModel == null) {
+
+				// pass every necesssary information to the repository
+
+				stagedModelRepository.addStagedModel(
+					(StagedModel)null, (Map<String, Object>)null);
+			}
+			else {
+				stagedModelRepository.updateStagedModel(
+					(StagedModel)null, existingStagedModel,
+					(Map<String, Object>)null);
+			}
+		}
+		else {
+			stagedModelRepository.addStagedModel(
+				(StagedModel)null, (Map<String, Object>)null);
+		}
 	}
 
 	public void export(ExportImportConfiguration exportImportConfiguration)

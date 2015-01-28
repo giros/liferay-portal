@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mate Thurzo
@@ -33,6 +34,14 @@ import java.util.List;
 	property = {"model.name=com.liferay.portlet.sitesadmin.lar.StagedGroup"})
 public class StagedGroupStagedModelRepository
 	implements StagedModelRepository<StagedGroup> {
+
+	@Override
+	public StagedGroup addStagedModel(
+			StagedGroup stagedGroup, Map<String, Object> attributes)
+		throws Exception {
+
+		return stagedGroup;
+	}
 
 	@Override
 	public List<? extends StagedModel> fetchChildStagedModels(
@@ -71,6 +80,13 @@ public class StagedGroupStagedModelRepository
 	}
 
 	@Override
+	public StagedGroup fetchStagedModelByCustomAttributes(
+		Map<String, Object> attributes) {
+
+		return null;
+	}
+
+	@Override
 	public StagedGroup fetchStagedModelByUuidAndCompanyId(
 		String uuid, long companyId) {
 
@@ -94,6 +110,14 @@ public class StagedGroupStagedModelRepository
 		PortletDataContext portletDataContext) {
 
 		return null;
+	}
+
+	@Override
+	public StagedGroup updateStagedModel(
+		StagedGroup stagedGroup, StagedGroup existingStagedGroup,
+		Map<String, Object> attributes) throws Exception {
+
+		return stagedGroup;
 	}
 
 }

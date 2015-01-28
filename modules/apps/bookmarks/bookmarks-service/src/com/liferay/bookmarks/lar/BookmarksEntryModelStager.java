@@ -17,6 +17,7 @@ package com.liferay.bookmarks.lar;
 import com.liferay.bookmarks.model.BookmarksEntry;
 import com.liferay.portal.kernel.lar.BaseModelStager;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
@@ -29,7 +30,16 @@ public class BookmarksEntryModelStager extends BaseModelStager<BookmarksEntry> {
 			BookmarksEntry bookmarksEntry, OutputStream outputStream)
 		throws Exception {
 
-		super.doExportStagedModel(bookmarksEntry, outputStream);
+		// TODO serialize
+
+		//outputStream.writeObject();
+	}
+
+	@Override
+	protected BookmarksEntry doImportStagedModel(InputStream inputStream)
+		throws Exception {
+
+		return super.doImportStagedModel(inputStream);
 	}
 
 }

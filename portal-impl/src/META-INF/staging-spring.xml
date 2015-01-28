@@ -61,4 +61,5 @@
 	<bean id="com.liferay.portlet.sitesadmin.lar.StagedGroupModelAdapterBuilder" class="com.liferay.portlet.sitesadmin.lar.StagedGroupModelAdapterBuilder" />
 	<bean id="com.liferay.portlet.layoutsadmin.lar.StagedThemeModelAdapterBuilder" class="com.liferay.portlet.layoutsadmin.lar.StagedThemeModelAdapterBuilder" />
 	<bean id="com.liferay.portlet.sitesadmin.lar.StagedGroupStagedModelRepository" class="com.liferay.portlet.sitesadmin.lar.StagedGroupStagedModelRepository" />
+	<bean id="com.liferay.portlet.journal.lar.JournalArticleStagedModelRepository" class="com.liferay.portlet.journal.lar.JournalArticleStagedModelRepository" />
 </beans>

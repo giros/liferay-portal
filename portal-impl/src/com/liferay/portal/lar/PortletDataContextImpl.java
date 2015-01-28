@@ -97,9 +97,9 @@ import com.liferay.portlet.expando.model.ExpandoColumn;
 import com.liferay.portlet.expando.service.ExpandoColumnLocalServiceUtil;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.ratings.model.RatingsEntry;
-
 import com.liferay.registry.collections.ServiceTrackerCollections;
 import com.liferay.registry.collections.ServiceTrackerMap;
+
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.core.ClassLoaderReference;
 import com.thoughtworks.xstream.io.xml.XppDriver;
@@ -1077,6 +1077,32 @@ public class PortletDataContextImpl implements PortletDataContext {
 	@Override
 	public List<Layout> getNewLayouts() {
 		return _newLayouts;
+	}
+
+	@Override
+	public long getNewPrimaryKey(Class<?> clazz, long oldPrimaryKey) {
+		Map<Long, Long> newPrimaryKeysMap =
+			(Map<Long, Long>)getNewPrimaryKeysMap(clazz);
+
+		return MapUtil.getLong(newPrimaryKeysMap, oldPrimaryKey, oldPrimaryKey);
+	}
+
+	@Override
+	public String getNewPrimaryKey(Class<?> clazz, String oldPrimaryKey) {
+		Map<String, String> newPrimaryKeysMap =
+			(Map<String, String>)getNewPrimaryKeysMap(clazz);
+
+		return MapUtil.getString(
+			newPrimaryKeysMap, oldPrimaryKey, oldPrimaryKey);
+	}
+
+	@Override
+	public String getNewPrimaryKey(String className, String oldPrimaryKey) {
+		Map<String, String> newPrimaryKeysMap =
+			(Map<String, String>)getNewPrimaryKeysMap(className);
+
+		return MapUtil.getString(
+			newPrimaryKeysMap, oldPrimaryKey, oldPrimaryKey);
 	}
 
 	@Override
@@ -2501,6 +2527,23 @@ public class PortletDataContextImpl implements PortletDataContext {
 			String.valueOf(classedModel.getPrimaryKeyObj()));
 	}
 
+	protected StagedModelRepository getStagedModelRepository(
+		Class<?> modelClass) {
+
+		ServiceTrackerMap<String, StagedModelRepository> serviceTrackerMap =
+			ServiceTrackerCollections.singleValueMap(
+				StagedModelRepository.class, "model.name");
+
+		serviceTrackerMap.open();
+
+		try {
+			return serviceTrackerMap.getService(modelClass.getName());
+		}
+		finally {
+			serviceTrackerMap.close();
+		}
+	}
+
 	protected long getUserId(AuditedModel auditedModel) {
 		try {
 			String userUuid = auditedModel.getUserUuid();
@@ -2559,23 +2602,6 @@ public class PortletDataContextImpl implements PortletDataContext {
 		}
 
 		return manifestTreeNode;
-	}
-
-	protected StagedModelRepository getStagedModelRepository(
-		Class<?> modelClass) {
-
-		ServiceTrackerMap<String, StagedModelRepository> serviceTrackerMap =
-			ServiceTrackerCollections.singleValueMap(
-				StagedModelRepository.class, "model.name");
-
-		serviceTrackerMap.open();
-
-		try {
-			return serviceTrackerMap.getService(modelClass.getName());
-		}
-		finally {
-			serviceTrackerMap.close();
-		}
 	}
 
 	private void prepareInContextChildren(

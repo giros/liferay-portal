@@ -67,6 +67,15 @@ public abstract class BaseModelStager<T extends StagedModel>
 	public T importStagedModel(InputStream inputStream)
 		throws PortletDataException {
 
+		try {
+			return doImportStagedModel(inputStream);
+		}
+		catch (Exception e) {
+			return null;
+		}
+	}
+
+	protected T doImportStagedModel(InputStream inputStream) throws Exception {
 		return null;
 	}
 

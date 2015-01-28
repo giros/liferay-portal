@@ -17,11 +17,20 @@ package com.liferay.portal.kernel.lar;
 import com.liferay.portal.model.StagedModel;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mate Thurzo
  */
 public interface StagedModelRepository<T extends StagedModel> {
+
+	public T addStagedModel(T stagedModel, Map<String, Object> attributes)
+		throws Exception;
+
+	public T updateStagedModel(
+			T stagedModel, T existingStagedModel,
+			Map<String, Object> attributes)
+		throws Exception;
 
 	public List<? extends StagedModel> fetchChildStagedModels(T stagedModel);
 
@@ -30,6 +39,8 @@ public interface StagedModelRepository<T extends StagedModel> {
 	public T fetchStagedModelByUuidAndCompanyId(String uuid, long companyId);
 
 	public T fetchStagedModelByUuidAndGroupId(String uuid, long groupId);
+
+	public T fetchStagedModelByCustomAttributes(Map<String, Object> attributes);
 
 	public List<T> fetchStagedModels(long groupId);
 

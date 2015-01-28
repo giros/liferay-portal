@@ -17,7 +17,7 @@ package com.liferay.bookmarks.lar;
 import com.liferay.bookmarks.model.BookmarksEntry;
 import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.model.BookmarksFolderConstants;
-import com.liferay.bookmarks.service.BookmarksEntryLocalServiceUtil;
+import com.liferay.bookmarks.service.BookmarksEntryLocalService;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
@@ -30,11 +30,14 @@ import com.liferay.portal.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.portal.kernel.lar.StagedModelRepository;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.model.StagedModel;
-import org.osgi.service.component.annotations.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Mate Thurzo
@@ -42,6 +45,14 @@ import java.util.List;
 @Component(property = {"model.name=com.liferay.bookmarks.model.BookmarksEntry"})
 public class BookmarksEntryStagedModelRepository
 	implements StagedModelRepository<BookmarksEntry> {
+
+	@Override
+	public BookmarksEntry addStagedModel(
+			BookmarksEntry bookmarksEntry, Map<String, Object> attributes)
+		throws Exception {
+
+		return null;
+	}
 
 	@Override
 	public List<? extends StagedModel> fetchChildStagedModels(
@@ -70,14 +81,20 @@ public class BookmarksEntryStagedModelRepository
 	}
 
 	@Override
+	public BookmarksEntry fetchStagedModelByCustomAttributes(
+		Map<String, Object> attributes) {
+
+		return null;
+	}
+
+	@Override
 	public BookmarksEntry fetchStagedModelByUuidAndCompanyId(
 		String uuid, long companyId) {
 
 		List<BookmarksEntry> entries =
-			BookmarksEntryLocalServiceUtil.
-				getBookmarksEntriesByUuidAndCompanyId(
-					uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					new StagedModelModifiedDateComparator<BookmarksEntry>());
+			_bookmarksEntryLocalService.getBookmarksEntriesByUuidAndCompanyId(
+				uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				new StagedModelModifiedDateComparator<BookmarksEntry>());
 
 		if (ListUtil.isEmpty(entries)) {
 			return null;
@@ -90,28 +107,26 @@ public class BookmarksEntryStagedModelRepository
 	public BookmarksEntry fetchStagedModelByUuidAndGroupId(
 		String uuid, long groupId) {
 
-		return BookmarksEntryLocalServiceUtil.
-			fetchBookmarksEntryByUuidAndGroupId(uuid, groupId);
+		return _bookmarksEntryLocalService.fetchBookmarksEntryByUuidAndGroupId(
+			uuid, groupId);
 	}
 
 	@Override
 	public List<BookmarksEntry> fetchStagedModels(long groupId) {
-		DynamicQuery dynamicQuery =
-			BookmarksEntryLocalServiceUtil.dynamicQuery();
+		DynamicQuery dynamicQuery = _bookmarksEntryLocalService.dynamicQuery();
 
 		Property groupIdProperty = PropertyFactoryUtil.forName("groupId");
 
 		dynamicQuery.add(groupIdProperty.eq(groupId));
 
-		return BookmarksEntryLocalServiceUtil.dynamicQuery(dynamicQuery);
+		return _bookmarksEntryLocalService.dynamicQuery(dynamicQuery);
 	}
 
 	@Override
 	public List<BookmarksEntry> fetchStagedModels(
 		PortletDataContext portletDataContext) {
 
-		DynamicQuery dynamicQuery =
-			BookmarksEntryLocalServiceUtil.dynamicQuery();
+		DynamicQuery dynamicQuery = _bookmarksEntryLocalService.dynamicQuery();
 
 		portletDataContext.addDateRangeCriteria(dynamicQuery, "modifiedDate");
 
@@ -135,7 +150,26 @@ public class BookmarksEntryStagedModelRepository
 			workflowStatusProperty.in(
 				stagedModelDataHandler.getExportableStatuses()));
 
-		return BookmarksEntryLocalServiceUtil.dynamicQuery(dynamicQuery);
+		return _bookmarksEntryLocalService.dynamicQuery(dynamicQuery);
 	}
+
+	@Reference(unbind = "-")
+	public void setBookmarksEntryLocalService(
+		BookmarksEntryLocalService bookmarksEntryLocalService) {
+
+		_bookmarksEntryLocalService = bookmarksEntryLocalService;
+	}
+
+	@Override
+	public BookmarksEntry updateStagedModel(
+			BookmarksEntry bookmarksEntry,
+			BookmarksEntry existingBookmarksEntry,
+			Map<String, Object> attributes)
+		throws Exception {
+
+		return null;
+	}
+
+	private BookmarksEntryLocalService _bookmarksEntryLocalService;
 
 }
