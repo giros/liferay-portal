@@ -43,6 +43,11 @@ public class StagedGroupImpl extends GroupImpl implements StagedGroup {
 	}
 
 	@Override
+	public long getGroupId() {
+		return _group.getGroupId();
+	}
+
+	@Override
 	public Class<?> getModelClass() {
 		return StagedGroup.class;
 	}
@@ -55,6 +60,16 @@ public class StagedGroupImpl extends GroupImpl implements StagedGroup {
 	@Override
 	public Date getModifiedDate() {
 		return new Date();
+	}
+
+	@Override
+	public long getPrimaryKey() {
+		return _group.getPrimaryKey();
+	}
+
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _group.getPrimaryKeyObj();
 	}
 
 	@Override

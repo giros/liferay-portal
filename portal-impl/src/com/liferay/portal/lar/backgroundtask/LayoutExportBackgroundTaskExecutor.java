@@ -17,7 +17,7 @@ package com.liferay.portal.lar.backgroundtask;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskResult;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.lar.ExportImportDateUtil;
-import com.liferay.portal.kernel.lar.PortletDataHandlerKeys;
+import com.liferay.portal.kernel.lar.ExportImportController;
 import com.liferay.portal.kernel.util.DateRange;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
@@ -28,7 +28,6 @@ import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.model.BackgroundTask;
 import com.liferay.portal.model.ExportImportConfiguration;
 import com.liferay.portal.service.BackgroundTaskLocalServiceUtil;
-import com.liferay.portal.service.LayoutLocalServiceUtil;
 
 import java.io.File;
 import java.io.Serializable;
@@ -78,21 +77,28 @@ public class LayoutExportBackgroundTaskExecutor
 		sb.append(Time.getShortTimestamp());
 		sb.append(".lar");
 
-		File larFile = LayoutLocalServiceUtil.exportLayoutsAsFile(
+		ExportImportController exportImportController =
+			ExportImportController.getInstance();
+
+		File larFile = exportImportController.export(exportImportConfiguration);
+
+		/*File larFile = LayoutLocalServiceUtil.exportLayoutsAsFile(
 			groupId, privateLayout, layoutIds, parameterMap,
 			dateRange.getStartDate(), dateRange.getEndDate());
+		*/
 
 		BackgroundTaskLocalServiceUtil.addBackgroundTaskAttachment(
 			userId, backgroundTask.getBackgroundTaskId(), sb.toString(),
 			larFile);
 
+		/*
 		boolean updateLastPublishDate = MapUtil.getBoolean(
 			parameterMap, PortletDataHandlerKeys.UPDATE_LAST_PUBLISH_DATE);
 
 		if (updateLastPublishDate) {
 			ExportImportDateUtil.updateLastPublishDate(
 				groupId, privateLayout, dateRange, dateRange.getEndDate());
-		}
+		}*/
 
 		return BackgroundTaskResult.SUCCESS;
 	}

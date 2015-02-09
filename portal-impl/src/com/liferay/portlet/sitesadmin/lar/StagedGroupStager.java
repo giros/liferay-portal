@@ -12,32 +12,28 @@
  * details.
  */
 
-package com.liferay.bookmarks.lar;
+package com.liferay.portlet.sitesadmin.lar;
 
-import com.liferay.bookmarks.model.BookmarksEntry;
 import com.liferay.portal.kernel.lar.BaseModelStager;
+import com.liferay.portal.kernel.lar.ModelStager;
+import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
 
 import java.io.OutputStream;
 
-import com.liferay.portal.kernel.lar.ModelStager;
-import org.osgi.service.component.annotations.Component;
-
 /**
- * @author Mate Thurzo
+ * @author Daniel Kocsis
  */
-@Component(
-	immediate = true,
-	property = {"model.name=com.liferay.bookmarks.model.BookmarksEntry"},
-	service = ModelStager.class
+@OSGiBeanProperties(
+	property = {"model.name=com.liferay.portlet.sitesadmin.lar.StagedGroup"}
 )
-public class BookmarksEntryModelStager extends BaseModelStager<BookmarksEntry> {
+public class StagedGroupStager extends BaseModelStager<StagedGroup> {
 
 	@Override
 	protected void doExportStagedModel(
-			BookmarksEntry bookmarksEntry, OutputStream outputStream)
+			StagedGroup stagedGroup, OutputStream outputStream)
 		throws Exception {
 
-		super.doExportStagedModel(bookmarksEntry, outputStream);
+		super.doExportStagedModel(stagedGroup, outputStream);
 	}
 
 }

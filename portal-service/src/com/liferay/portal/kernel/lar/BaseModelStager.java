@@ -19,6 +19,7 @@ import com.liferay.portal.model.StagedModel;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 /**
  * @author Mate Thurzo
@@ -30,6 +31,19 @@ public abstract class BaseModelStager<T extends StagedModel>
 	public void deleteStagedModel(T stagedModel) throws PortletDataException {
 		try {
 			doDeleteStagedModel(stagedModel);
+		}
+		catch (Exception e) {
+			throw new PortletDataException(e);
+		}
+	}
+
+	@Override
+	public void exportStagedModel(
+			PortletDataContext portletDataContext, T stagedModel)
+		throws PortletDataException {
+
+		try {
+			doExportStagedModel(portletDataContext, stagedModel);
 		}
 		catch (Exception e) {
 			throw new PortletDataException(e);
@@ -86,6 +100,17 @@ public abstract class BaseModelStager<T extends StagedModel>
 
 	protected void doExportStagedModel(T stagedModel, OutputStream outputStream)
 		throws Exception {
+
+		outputStream.write(
+			stagedModel.toString().getBytes(Charset.forName("UTF-8")));
 	}
+
+	protected void doExportStagedModel(
+		PortletDataContext portletDataContext, T stagedModel) {
+
+		portletDataContext.addZipEntry(
+			ExportImportPathUtil.getModelPath(stagedModel), stagedModel);
+	}
+
 
 }

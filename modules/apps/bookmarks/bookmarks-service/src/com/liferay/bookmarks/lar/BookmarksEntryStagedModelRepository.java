@@ -17,12 +17,11 @@ package com.liferay.bookmarks.lar;
 import com.liferay.bookmarks.model.BookmarksEntry;
 import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.model.BookmarksFolderConstants;
-import com.liferay.bookmarks.service.BookmarksEntryLocalServiceUtil;
+import com.liferay.bookmarks.service.BookmarksEntryLocalService;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.StagedModelDataHandler;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerRegistryUtil;
@@ -31,13 +30,19 @@ import com.liferay.portal.kernel.lar.StagedModelRepository;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.model.StagedModel;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Mate Thurzo
  */
+@Component(
+	immediate = true,
+	property = {"model.name=com.liferay.bookmarks.model.BookmarksEntry"}
+)
 public class BookmarksEntryStagedModelRepository
 	implements StagedModelRepository<BookmarksEntry> {
 
@@ -45,26 +50,29 @@ public class BookmarksEntryStagedModelRepository
 	public List<? extends StagedModel> fetchChildStagedModels(
 		BookmarksEntry bookmarksEntry) {
 
-		return Collections.emptyList();
+		return Collections.<BookmarksEntry>emptyList();
 	}
 
 	@Override
-	public List<? extends StagedModel> fetchParentStagedModels(
+	public BookmarksFolder fetchParentStagedModel(
 		BookmarksEntry bookmarksEntry) {
-
-		List<BookmarksFolder> folders = new ArrayList<>();
 
 		if (bookmarksEntry.getFolderId() !=
 				BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
 			try {
-				folders.add(bookmarksEntry.getFolder());
+				return bookmarksEntry.getFolder();
 			}
-			catch (PortalException pe) {
+			catch (Exception e) {
 			}
 		}
 
-		return folders;
+		return null;
+	}
+
+	@Override
+	public BookmarksEntry fetchStagedModel(long entryId) {
+		return _bookmarksEntryLocalService.fetchBookmarksEntry(entryId);
 	}
 
 	@Override
@@ -72,10 +80,9 @@ public class BookmarksEntryStagedModelRepository
 		String uuid, long companyId) {
 
 		List<BookmarksEntry> entries =
-			BookmarksEntryLocalServiceUtil.
-				getBookmarksEntriesByUuidAndCompanyId(
-					uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					new StagedModelModifiedDateComparator<BookmarksEntry>());
+			_bookmarksEntryLocalService.getBookmarksEntriesByUuidAndCompanyId(
+				uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				new StagedModelModifiedDateComparator<BookmarksEntry>());
 
 		if (ListUtil.isEmpty(entries)) {
 			return null;
@@ -88,22 +95,22 @@ public class BookmarksEntryStagedModelRepository
 	public BookmarksEntry fetchStagedModelByUuidAndGroupId(
 		String uuid, long groupId) {
 
-		return BookmarksEntryLocalServiceUtil.
-			fetchBookmarksEntryByUuidAndGroupId(uuid, groupId);
+		return _bookmarksEntryLocalService.fetchBookmarksEntryByUuidAndGroupId(
+			uuid, groupId);
 	}
 
 	@Override
 	public List<BookmarksEntry> fetchStagedModels(long groupId) {
-		return BookmarksEntryLocalServiceUtil.getGroupEntries(
-			groupId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+		return _bookmarksEntryLocalService.getEntries(
+			groupId, BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 	}
 
 	@Override
 	public List<BookmarksEntry> fetchStagedModels(
 		PortletDataContext portletDataContext) {
 
-		DynamicQuery dynamicQuery =
-			BookmarksEntryLocalServiceUtil.dynamicQuery();
+		DynamicQuery dynamicQuery = _bookmarksEntryLocalService.dynamicQuery();
 
 		portletDataContext.addDateRangeCriteria(dynamicQuery, "modifiedDate");
 
@@ -123,10 +130,20 @@ public class BookmarksEntryStagedModelRepository
 
 		Property workflowStatusProperty = PropertyFactoryUtil.forName("status");
 
-		dynamicQuery.add(workflowStatusProperty.in(
-			stagedModelDataHandler.getExportableStatuses()));
+		dynamicQuery.add(
+			workflowStatusProperty.in(
+				stagedModelDataHandler.getExportableStatuses()));
 
-		return dynamicQuery.list(true);
+		return _bookmarksEntryLocalService.dynamicQuery(dynamicQuery);
 	}
+
+	@Reference(unbind = "-")
+	protected void setReleaseLocalService(
+		BookmarksEntryLocalService bookmarksEntryLocalService) {
+
+		_bookmarksEntryLocalService = bookmarksEntryLocalService;
+	}
+
+	private BookmarksEntryLocalService _bookmarksEntryLocalService;
 
 }

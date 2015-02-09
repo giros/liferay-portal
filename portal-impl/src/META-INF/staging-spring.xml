@@ -60,4 +60,6 @@
 	<bean id="com.liferay.portlet.asset.model.adapter.builder.StagedAssetTagModelAdapterBuilder" class="com.liferay.portlet.asset.model.adapter.builder.StagedAssetTagModelAdapterBuilder" />
 	<bean id="com.liferay.portlet.sitesadmin.lar.StagedGroupModelAdapterBuilder" class="com.liferay.portlet.sitesadmin.lar.StagedGroupModelAdapterBuilder" />
 	<bean id="com.liferay.portlet.layoutsadmin.lar.StagedThemeModelAdapterBuilder" class="com.liferay.portlet.layoutsadmin.lar.StagedThemeModelAdapterBuilder" />
+	<bean id="com.liferay.portlet.sitesadmin.lar.StagedGroupStager" class="com.liferay.portlet.sitesadmin.lar.StagedGroupStager" />
+	<bean id="com.liferay.portlet.sitesadmin.lar.StagedGroupStagedModelRepository" class="com.liferay.portlet.sitesadmin.lar.StagedGroupStagedModelRepository" />
 </beans>

@@ -728,6 +728,8 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			return content;
 		}
 
+		System.out.println(fileName);
+
 		return format(file, fileName, absolutePath, newContent);
 	}
 

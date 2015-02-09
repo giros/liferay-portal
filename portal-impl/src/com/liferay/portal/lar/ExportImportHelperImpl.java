@@ -136,6 +136,7 @@ import java.util.regex.Pattern;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 
+import com.liferay.portlet.sitesadmin.lar.StagedGroup;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
@@ -697,7 +698,9 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 	public boolean isReferenceWithinExportScope(
 		PortletDataContext portletDataContext, StagedModel stagedModel) {
 
-		if (!(stagedModel instanceof StagedGroupedModel)) {
+		if (!(stagedModel instanceof StagedGroupedModel) ||
+			(stagedModel instanceof StagedGroup)) {
+
 			return true;
 		}
 

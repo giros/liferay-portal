@@ -30,6 +30,10 @@ public interface ModelStager<T extends StagedModel> {
 	public void exportStagedModel(T stagedModel, OutputStream outputStream)
 		throws PortletDataException;
 
+	public void exportStagedModel(
+			PortletDataContext portletDataContext, T stagedModel)
+		throws PortletDataException;
+
 	public String[] getClassNames();
 
 	public String getDisplayName(T StagedModel);

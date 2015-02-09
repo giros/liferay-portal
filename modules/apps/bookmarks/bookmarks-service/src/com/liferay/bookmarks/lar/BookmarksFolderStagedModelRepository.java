@@ -16,8 +16,8 @@ package com.liferay.bookmarks.lar;
 
 import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.model.BookmarksFolderConstants;
-import com.liferay.bookmarks.service.BookmarksEntryLocalServiceUtil;
-import com.liferay.bookmarks.service.BookmarksFolderLocalServiceUtil;
+import com.liferay.bookmarks.service.BookmarksEntryLocalService;
+import com.liferay.bookmarks.service.BookmarksFolderLocalService;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.StagedModelModifiedDateComparator;
@@ -28,9 +28,16 @@ import com.liferay.portal.model.StagedModel;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 /**
  * @author Mate Thurzo
  */
+@Component(
+	immediate = true,
+	property = {"model.name=com.liferay.bookmarks.model.BookmarksFolder"}
+)
 public class BookmarksFolderStagedModelRepository
 	implements StagedModelRepository<BookmarksFolder> {
 
@@ -41,11 +48,12 @@ public class BookmarksFolderStagedModelRepository
 		List<StagedModel> childStagedModels = new ArrayList<>();
 
 		childStagedModels.addAll(
-			BookmarksFolderLocalServiceUtil.getFolders(
-				bookmarksFolder.getGroupId(), bookmarksFolder.getFolderId()));
+			_bookmarksFolderLocalService.getFolders(
+				bookmarksFolder.getGroupId(),
+				bookmarksFolder.getFolderId()));
 
 		childStagedModels.addAll(
-			BookmarksEntryLocalServiceUtil.getEntries(
+			_bookmarksEntryLocalService.getEntries(
 				bookmarksFolder.getGroupId(), bookmarksFolder.getFolderId(),
 				QueryUtil.ALL_POS, QueryUtil.ALL_POS));
 
@@ -53,22 +61,20 @@ public class BookmarksFolderStagedModelRepository
 	}
 
 	@Override
-	public List<? extends StagedModel> fetchParentStagedModels(
+	public BookmarksFolder fetchParentStagedModel(
 		BookmarksFolder bookmarksFolder) {
 
-		List<BookmarksFolder> parentFolders = new ArrayList<>();
-
-		if (bookmarksFolder.getParentFolderId() !=
-				BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-
-			try {
-				parentFolders.add(bookmarksFolder.getParentFolder());
-			}
-			catch (Exception e) {
-			}
+		try {
+			return bookmarksFolder.getParentFolder();
 		}
+		catch (Exception e) {
+			return null;
+		}
+	}
 
-		return parentFolders;
+	@Override
+	public BookmarksFolder fetchStagedModel(long folderId) {
+		return _bookmarksFolderLocalService.fetchBookmarksFolder(folderId);
 	}
 
 	@Override
@@ -76,10 +82,9 @@ public class BookmarksFolderStagedModelRepository
 		String uuid, long companyId) {
 
 		List<BookmarksFolder> folders =
-			BookmarksFolderLocalServiceUtil.
-				getBookmarksFoldersByUuidAndCompanyId(
-					uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					new StagedModelModifiedDateComparator<BookmarksFolder>());
+			_bookmarksFolderLocalService.getBookmarksFoldersByUuidAndCompanyId(
+				uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				new StagedModelModifiedDateComparator<BookmarksFolder>());
 
 		if (ListUtil.isEmpty(folders)) {
 			return null;
@@ -92,13 +97,14 @@ public class BookmarksFolderStagedModelRepository
 	public BookmarksFolder fetchStagedModelByUuidAndGroupId(
 		String uuid, long groupId) {
 
-		return BookmarksFolderLocalServiceUtil.
+		return _bookmarksFolderLocalService.
 			fetchBookmarksFolderByUuidAndGroupId(uuid, groupId);
 	}
 
 	@Override
 	public List<BookmarksFolder> fetchStagedModels(long groupId) {
-		return BookmarksFolderLocalServiceUtil.getFolders(groupId);
+		return _bookmarksFolderLocalService.getFolders(
+			groupId, BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID);
 	}
 
 	@Override
@@ -107,5 +113,22 @@ public class BookmarksFolderStagedModelRepository
 
 		return null;
 	}
+
+	@Reference(unbind = "-")
+	protected void setBookmarksEntryLocalService(
+		BookmarksEntryLocalService bookmarksEntryLocalService) {
+
+		_bookmarksEntryLocalService = bookmarksEntryLocalService;
+	}
+
+	@Reference(unbind = "-")
+	protected void setBookmarksFolderLocalService(
+		BookmarksFolderLocalService bookmarksFolderLocalService) {
+
+		_bookmarksFolderLocalService = bookmarksFolderLocalService;
+	}
+
+	private BookmarksEntryLocalService _bookmarksEntryLocalService;
+	private BookmarksFolderLocalService _bookmarksFolderLocalService;
 
 }

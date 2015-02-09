@@ -41,6 +41,9 @@ if (defaultFolderView) {
 int foldersCount = BookmarksFolderServiceUtil.getFoldersCount(scopeGroupId, folderId);
 int entriesCount = BookmarksEntryServiceUtil.getEntriesCount(scopeGroupId, folderId);
 
+System.out.println("foldersCount: " + foldersCount);
+System.out.println("entriesCount: " + entriesCount);
+
 long assetCategoryId = ParamUtil.getLong(request, "categoryId");
 String assetTagName = ParamUtil.getString(request, "tag");
 
@@ -147,6 +150,12 @@ if (folder != null) {
 								<liferay-ui:search-container-results
 									results="<%= BookmarksFolderServiceUtil.getFolders(scopeGroupId, folderId, searchContainer.getStart(), searchContainer.getEnd()) %>"
 								/>
+
+								<%
+									List<BookmarksFolder> folders = BookmarksFolderServiceUtil.getFolders(scopeGroupId, folderId, searchContainer.getStart(), searchContainer.getEnd());
+
+									System.out.println(folders.size());
+								%>
 
 								<liferay-ui:search-container-row
 									className="com.liferay.bookmarks.model.BookmarksFolder"

@@ -25,7 +25,9 @@ public interface StagedModelRepository<T extends StagedModel> {
 
 	public List<? extends StagedModel> fetchChildStagedModels(T stagedModel);
 
-	public List<? extends StagedModel> fetchParentStagedModels(T stagedModel);
+	public <U extends StagedModel> U fetchParentStagedModel(T stagedModel);
+
+	public T fetchStagedModel(long primaryKey);
 
 	public T fetchStagedModelByUuidAndCompanyId(String uuid, long companyId);
 

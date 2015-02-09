@@ -14,7 +14,7 @@
 
 package com.liferay.bookmarks.lar;
 
-import com.liferay.bookmarks.model.BookmarksEntry;
+import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.portal.kernel.lar.BaseModelStager;
 
 import java.io.OutputStream;
@@ -23,21 +23,21 @@ import com.liferay.portal.kernel.lar.ModelStager;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * @author Mate Thurzo
+ * @author Daniel Kocsis
  */
 @Component(
 	immediate = true,
-	property = {"model.name=com.liferay.bookmarks.model.BookmarksEntry"},
+	property = {"model.name=com.liferay.bookmarks.model.BookmarksFolder"},
 	service = ModelStager.class
 )
-public class BookmarksEntryModelStager extends BaseModelStager<BookmarksEntry> {
+public class BookmarksFolderStager extends BaseModelStager<BookmarksFolder> {
 
 	@Override
 	protected void doExportStagedModel(
-			BookmarksEntry bookmarksEntry, OutputStream outputStream)
+			BookmarksFolder bookmarksFolder, OutputStream outputStream)
 		throws Exception {
 
-		super.doExportStagedModel(bookmarksEntry, outputStream);
+		super.doExportStagedModel(bookmarksFolder, outputStream);
 	}
 
 }

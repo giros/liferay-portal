@@ -25,11 +25,18 @@ import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.lar.*;
+import com.liferay.portal.kernel.lar.ExportImportClassedModelUtil;
+import com.liferay.portal.kernel.lar.ExportImportController;
+import com.liferay.portal.kernel.lar.ExportImportPathUtil;
+import com.liferay.portal.kernel.lar.ManifestSummary;
+import com.liferay.portal.kernel.lar.ModelStager;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.PortletDataException;
 import com.liferay.portal.kernel.lar.PortletDataHandlerControl;
 import com.liferay.portal.kernel.lar.PortletDataHandlerKeys;
+import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.portal.kernel.lar.StagedModelRepository;
+import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.lar.UserIdStrategy;
 import com.liferay.portal.kernel.lar.manifest.ManifestTreeNode;
 import com.liferay.portal.kernel.lar.xstream.XStreamAliasRegistryUtil;
@@ -1848,16 +1855,17 @@ public class PortletDataContextImpl implements PortletDataContext {
 	public ManifestSummary prepareInContext(StagedModel rootStagedModel)
 		throws PortletDataException {
 
-		ManifestSummary manifestSummary = new ManifestSummary();
-
 		ManifestTreeNode rootManifestTreeNode = new ManifestTreeNode(
 			rootStagedModel);
 
-		prepareInContextChildren(rootStagedModel, rootManifestTreeNode);
+		prepareInContextChildren(
+			rootStagedModel, rootManifestTreeNode, rootManifestTreeNode);
 
 		prepareInContextParent(rootStagedModel, rootManifestTreeNode);
 
-		findRootManifestTreeNode(rootManifestTreeNode);
+		ManifestSummary manifestSummary = new ManifestSummary();
+
+		manifestSummary.setRootManifestTreeNode(rootManifestTreeNode);
 
 		return manifestSummary;
 	}
@@ -2541,58 +2549,118 @@ public class PortletDataContextImpl implements PortletDataContext {
 		return true;
 	}
 
-	private void findRootManifestTreeNode(ManifestTreeNode manifestTreeNode) {
-		if (!manifestTreeNode.hasParent()) {
-			return;
+	private ManifestTreeNode findManifestTreeNode(
+		ManifestTreeNode rootManifestTreeNode, StagedModel stagedModel) {
+
+		if ((rootManifestTreeNode.getClassName() ==
+				ExportImportClassedModelUtil.getClassName(stagedModel)) &&
+			(rootManifestTreeNode.getClassPK() ==
+				ExportImportClassedModelUtil.getClassPK(stagedModel))) {
+
+			return rootManifestTreeNode;
 		}
 
-		/*List<ManifestTreeNode> parents = manifestTreeNode.getParents();
+		ManifestTreeNode manifestTreeNode = null;
 
-		for ()*/
+		for (ManifestTreeNode childManifestTreeNode :
+				rootManifestTreeNode.getChildren()) {
+
+			manifestTreeNode = findManifestTreeNode(
+				childManifestTreeNode, stagedModel);
+
+			if (manifestTreeNode != null) {
+				break;
+			}
+		}
+
+		return manifestTreeNode;
+	}
+
+	private ManifestTreeNode insertManifestTreeNode(
+		ManifestTreeNode rootManifestTreeNode, StagedModel stagedModel) {
+
+		ManifestTreeNode manifestTreeNode = findManifestTreeNode(
+			rootManifestTreeNode, stagedModel);
+
+		if (manifestTreeNode == null) {
+			return new ManifestTreeNode(stagedModel);
+		}
+
+		return manifestTreeNode;
 	}
 
 	private void prepareInContextChildren(
-		StagedModel stagedModel, ManifestTreeNode manifestTreeNode) {
+		StagedModel stagedModel, ManifestTreeNode rootManifestTreeNode,
+		ManifestTreeNode manifestTreeNode) {
 
-		StagedModelRepository stagedModelRepository = null;
+		StagedModelRepository stagedModelRepository =
+			ExportImportController.getStagedModelRepository(
+				ExportImportClassedModelUtil.getClassName(stagedModel));
 
-		List<StagedModel> childStagedModels =
-			stagedModelRepository.fetchChildStagedModels(stagedModel);
+		List<StagedModel> childStagedModels = null;
+
+		ClassLoader classLoader =
+			Thread.currentThread().getContextClassLoader();
+
+		try {
+			Thread.currentThread().setContextClassLoader(
+				stagedModelRepository.getClass().getClassLoader());
+
+			childStagedModels = stagedModelRepository.fetchChildStagedModels(
+				stagedModel);
+		}
+		finally {
+			Thread.currentThread().setContextClassLoader(classLoader);
+		}
 
 		if (ListUtil.isEmpty(childStagedModels)) {
 			return;
 		}
 
 		for (StagedModel childStagedModel : childStagedModels) {
-			ManifestTreeNode childManifestTreeNode = new ManifestTreeNode(
-				childStagedModel);
+			ManifestTreeNode childManifestTreeNode = insertManifestTreeNode(
+				rootManifestTreeNode, childStagedModel);
 
 			manifestTreeNode.addChild(childManifestTreeNode);
 
-			prepareInContextChildren(childStagedModel, childManifestTreeNode);
+			prepareInContextChildren(
+				childStagedModel, rootManifestTreeNode, childManifestTreeNode);
 		}
 	}
 
 	private void prepareInContextParent(
 		StagedModel stagedModel, ManifestTreeNode manifestTreeNode) {
 
-		StagedModelRepository stagedModelRepository = null;
+		StagedModelRepository stagedModelRepository =
+			ExportImportController.getStagedModelRepository(
+				ExportImportClassedModelUtil.getClassName(stagedModel));
 
-		List<StagedModel> parentStagedModels =
-			stagedModelRepository.fetchParentStagedModels(stagedModel);
+		ClassLoader classLoader =
+			Thread.currentThread().getContextClassLoader();
 
-		if (ListUtil.isEmpty(parentStagedModels)) {
+		StagedModel parentStagedModel = null;
+
+		try {
+			Thread.currentThread().setContextClassLoader(
+				stagedModelRepository.getClass().getClassLoader());
+
+			parentStagedModel = stagedModelRepository.fetchParentStagedModel(
+				stagedModel);
+		}
+		finally {
+			Thread.currentThread().setContextClassLoader(classLoader);
+		}
+
+		if (parentStagedModel == null) {
 			return;
 		}
 
-		for (StagedModel parentStagedModel : parentStagedModels) {
-			ManifestTreeNode parentManifestTreeNode = new ManifestTreeNode(
-				parentStagedModel);
+		ManifestTreeNode parentManifestTreeNode = insertManifestTreeNode(
+			manifestTreeNode, parentStagedModel);
 
-			manifestTreeNode.addParent(parentManifestTreeNode);
+		manifestTreeNode.addParent(parentManifestTreeNode);
 
-			prepareInContextParent(parentStagedModel, parentManifestTreeNode);
-		}
+		prepareInContextParent(parentStagedModel, parentManifestTreeNode);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

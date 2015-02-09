@@ -16,7 +16,10 @@ package com.liferay.portlet.sitesadmin.lar;
 
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.StagedModelRepository;
+import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.model.StagedModel;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 
@@ -28,6 +31,9 @@ import java.util.List;
 /**
  * @author Mate Thurzo
  */
+@OSGiBeanProperties(
+	property = {"model.name=com.liferay.portlet.sitesadmin.lar.StagedGroup"}
+)
 public class StagedGroupStagedModelRepository
 	implements StagedModelRepository<StagedGroup> {
 
@@ -52,19 +58,39 @@ public class StagedGroupStagedModelRepository
 		for (StagedModelRepository stagedModelRepository :
 				stagedModelRepositories) {
 
-			childStagedModels.addAll(
-				stagedModelRepository.fetchStagedModels(
-					stagedGroup.getGroupId()));
+			ClassLoader classLoader =
+				Thread.currentThread().getContextClassLoader();
+
+			try {
+				Thread.currentThread().setContextClassLoader(
+					stagedModelRepository.getClass().getClassLoader());
+
+				childStagedModels.addAll(
+					stagedModelRepository.fetchStagedModels(
+						stagedGroup.getGroupId()));
+			}
+			finally {
+				Thread.currentThread().setContextClassLoader(classLoader);
+			}
 		}
 
 		return childStagedModels;
 	}
 
 	@Override
-	public List<? extends StagedModel> fetchParentStagedModels(
-		StagedGroup stagedGroup) {
+	public StagedGroup fetchParentStagedModel(StagedGroup stagedGroup) {
+		return null;
+	}
 
-		return Collections.emptyList();
+	@Override
+	public StagedGroup fetchStagedModel(long groupId) {
+		Group group = GroupLocalServiceUtil.fetchGroup(groupId);
+
+		if (group == null) {
+			return null;
+		}
+
+		return new StagedGroupImpl(group);
 	}
 
 	@Override

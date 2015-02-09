@@ -70,8 +70,10 @@ import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.portlet.journal.util.test.JournalTestUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -912,6 +914,11 @@ public class ExportImportHelperUtilTest extends PowerMockito {
 
 		@Override
 		public File getFile() {
+			return null;
+		}
+
+		@Override
+		public OutputStream getOutputStream(String name) throws IOException {
 			return null;
 		}
 
