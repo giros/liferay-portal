@@ -62,7 +62,7 @@ public class BookmarksEntryStagedModelRepository
 	}
 
 	@Override
-	public List<? extends StagedModel> fetchParentStagedModels(
+	public List<? extends StagedModel> fetchDependentStagedModels(
 		BookmarksEntry bookmarksEntry) {
 
 		List<BookmarksFolder> folders = new ArrayList<>();

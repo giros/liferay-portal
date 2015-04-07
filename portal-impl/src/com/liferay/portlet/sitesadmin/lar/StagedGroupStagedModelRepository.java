@@ -73,7 +73,7 @@ public class StagedGroupStagedModelRepository
 	}
 
 	@Override
-	public List<? extends StagedModel> fetchParentStagedModels(
+	public List<? extends StagedModel> fetchDependentStagedModels(
 		StagedGroup stagedGroup) {
 
 		return Collections.emptyList();

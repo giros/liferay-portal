@@ -125,7 +125,7 @@ public class JournalArticleStagedModelRepository
 	}
 
 	@Override
-	public List<? extends StagedModel> fetchParentStagedModels(
+	public List<? extends StagedModel> fetchDependentStagedModels(
 		JournalArticle journalArticle) {
 
 		return null;

@@ -27,23 +27,24 @@ public interface StagedModelRepository<T extends StagedModel> {
 	public T addStagedModel(T stagedModel, Map<String, Object> attributes)
 		throws Exception;
 
-	public T updateStagedModel(
-			T stagedModel, T existingStagedModel,
-			Map<String, Object> attributes)
-		throws Exception;
-
 	public List<? extends StagedModel> fetchChildStagedModels(T stagedModel);
 
-	public List<? extends StagedModel> fetchParentStagedModels(T stagedModel);
+	public List<? extends StagedModel> fetchDependentStagedModels(
+		T stagedModel);
+
+	public T fetchStagedModelByCustomAttributes(Map<String, Object> attributes);
 
 	public T fetchStagedModelByUuidAndCompanyId(String uuid, long companyId);
 
 	public T fetchStagedModelByUuidAndGroupId(String uuid, long groupId);
 
-	public T fetchStagedModelByCustomAttributes(Map<String, Object> attributes);
-
 	public List<T> fetchStagedModels(long groupId);
 
 	public List<T> fetchStagedModels(PortletDataContext portletDataContext);
+
+	public T updateStagedModel(
+			T stagedModel, T existingStagedModel,
+			Map<String, Object> attributes)
+		throws Exception;
 
 }
