@@ -51,6 +51,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,63 +71,7 @@ public class BlogsEntryStagedModelRepository
 			BlogsEntry entry, Map<String, Object> attributes)
 		throws Exception {
 
-		// TODO Avoid duplicate code before add/update
-
-		PortletDataContext portletDataContext =
-			(PortletDataContext)attributes.get("portletDataContext");
-
-		ServiceContext serviceContext =
-			(ServiceContext)attributes.get("serviceContext");
-
-		long userId = portletDataContext.getUserId(entry.getUserUuid());
-
-		String content = ExportImportHelperUtil.replaceImportContentReferences(
-			portletDataContext, entry, entry.getContent());
-
-		entry.setContent(content);
-
-		Calendar displayDateCal = CalendarFactoryUtil.getCalendar();
-
-		displayDateCal.setTime(entry.getDisplayDate());
-
-		int displayDateMonth = displayDateCal.get(Calendar.MONTH);
-		int displayDateDay = displayDateCal.get(Calendar.DATE);
-		int displayDateYear = displayDateCal.get(Calendar.YEAR);
-		int displayDateHour = displayDateCal.get(Calendar.HOUR);
-		int displayDateMinute = displayDateCal.get(Calendar.MINUTE);
-
-		if (displayDateCal.get(Calendar.AM_PM) == Calendar.PM) {
-			displayDateHour += 12;
-		}
-
-		boolean allowPingbacks = entry.isAllowPingbacks();
-		boolean allowTrackbacks = entry.isAllowTrackbacks();
-		String[] trackbacks = StringUtil.split(entry.getTrackbacks());
-
-		long smallImageFileEntryId = getSmallImageFileEntryId(
-			entry, portletDataContext, serviceContext);
-
-		ImageSelector coverImageImageSelector = new ImageSelector(
-			smallImageFileEntryId, entry.getCoverImageURL(), null);
-
-		ImageSelector smallImageImageSelector = null;
-
-		if (!entry.isSmallImage()) {
-			smallImageImageSelector = new ImageSelector(0);
-		}
-		else {
-			smallImageImageSelector = new ImageSelector(
-				smallImageFileEntryId, entry.getSmallImageURL(), null);
-		}
-
-		return BlogsEntryLocalServiceUtil.addEntry(
-			userId, entry.getTitle(), entry.getSubtitle(),
-			entry.getDescription(), entry.getContent(),
-			displayDateMonth, displayDateDay, displayDateYear,
-			displayDateHour, displayDateMinute, allowPingbacks,
-			allowTrackbacks, trackbacks, entry.getCoverImageCaption(),
-			coverImageImageSelector, smallImageImageSelector,
-			serviceContext);
+		return doAddUpdateEntry(entry, null, attributes);
 	}
 
 	@Override
@@ -238,65 +183,9 @@ public class BlogsEntryStagedModelRepository
 			Map<String, Object> attributes)
 		throws Exception {
 
-		// TODO Avoid duplicate code before add/update
-
-		PortletDataContext portletDataContext =
-			(PortletDataContext)attributes.get("portletDataContext");
-
-		ServiceContext serviceContext =
-			(ServiceContext)attributes.get("serviceContext");
-
-		long userId = portletDataContext.getUserId(entry.getUserUuid());
-
-		String content = ExportImportHelperUtil.replaceImportContentReferences(
-			portletDataContext, entry, entry.getContent());
-
-		entry.setContent(content);
-
-		Calendar displayDateCal = CalendarFactoryUtil.getCalendar();
-
-		displayDateCal.setTime(entry.getDisplayDate());
-
-		int displayDateMonth = displayDateCal.get(Calendar.MONTH);
-		int displayDateDay = displayDateCal.get(Calendar.DATE);
-		int displayDateYear = displayDateCal.get(Calendar.YEAR);
-		int displayDateHour = displayDateCal.get(Calendar.HOUR);
-		int displayDateMinute = displayDateCal.get(Calendar.MINUTE);
-
-		if (displayDateCal.get(Calendar.AM_PM) == Calendar.PM) {
-			displayDateHour += 12;
-		}
-
-		boolean allowPingbacks = entry.isAllowPingbacks();
-		boolean allowTrackbacks = entry.isAllowTrackbacks();
-		String[] trackbacks = StringUtil.split(entry.getTrackbacks());
-
-		long smallImageFileEntryId = getSmallImageFileEntryId(
-			entry, portletDataContext, serviceContext);
-
-		ImageSelector coverImageImageSelector = new ImageSelector(
-			smallImageFileEntryId, entry.getCoverImageURL(), null);
-
-		ImageSelector smallImageImageSelector = null;
-
-		if (!entry.isSmallImage()) {
-			smallImageImageSelector = new ImageSelector(0);
-		}
-		else {
-			smallImageImageSelector = new ImageSelector(
-				smallImageFileEntryId, entry.getSmallImageURL(), null);
-		}
-
-		return BlogsEntryLocalServiceUtil.updateEntry(
-			userId, existingEntry.getEntryId(), entry.getTitle(),
-			entry.getSubtitle(), entry.getDescription(),
-			entry.getContent(), displayDateMonth, displayDateDay,
-			displayDateYear, displayDateHour, displayDateMinute,
-			allowPingbacks, allowTrackbacks, trackbacks,
-			entry.getCoverImageCaption(), coverImageImageSelector,
-			smallImageImageSelector, serviceContext);
+		return doAddUpdateEntry(entry, existingEntry, attributes);
 	}
-	
+
 	protected InputStream getSmallImageInputStream(
 		PortletDataContext portletDataContext, Element attachmentElement) {
 
@@ -412,6 +301,80 @@ public class BlogsEntryStagedModelRepository
 		}
 
 		return smallImageFileEntryId;
+	}
+
+	protected BlogsEntry doAddUpdateEntry(
+			BlogsEntry entry, BlogsEntry existingEntry,
+			Map<String, Object> attributes)
+		throws Exception {
+
+		PortletDataContext portletDataContext =
+			(PortletDataContext)attributes.get("portletDataContext");
+
+		String content = ExportImportHelperUtil.replaceImportContentReferences(
+			portletDataContext, entry, entry.getContent());
+
+		entry.setContent(content);
+
+		long userId = portletDataContext.getUserId(entry.getUserUuid());
+
+		Calendar displayDateCal = CalendarFactoryUtil.getCalendar();
+
+		displayDateCal.setTime(entry.getDisplayDate());
+
+		int displayDateMonth = displayDateCal.get(Calendar.MONTH);
+		int displayDateDay = displayDateCal.get(Calendar.DATE);
+		int displayDateYear = displayDateCal.get(Calendar.YEAR);
+		int displayDateHour = displayDateCal.get(Calendar.HOUR);
+		int displayDateMinute = displayDateCal.get(Calendar.MINUTE);
+
+		if (displayDateCal.get(Calendar.AM_PM) == Calendar.PM) {
+			displayDateHour += 12;
+		}
+
+		boolean allowPingbacks = entry.isAllowPingbacks();
+		boolean allowTrackbacks = entry.isAllowTrackbacks();
+		String[] trackbacks = StringUtil.split(entry.getTrackbacks());
+
+		ServiceContext serviceContext =
+			(ServiceContext)attributes.get("serviceContext");
+
+		long smallImageFileEntryId = getSmallImageFileEntryId(
+			entry, portletDataContext, serviceContext);
+
+		ImageSelector coverImageImageSelector = new ImageSelector(
+			smallImageFileEntryId, entry.getCoverImageURL(), null);
+
+		ImageSelector smallImageImageSelector = null;
+
+		if (!entry.isSmallImage()) {
+			smallImageImageSelector = new ImageSelector(0);
+		}
+		else {
+			smallImageImageSelector = new ImageSelector(
+				smallImageFileEntryId, entry.getSmallImageURL(), null);
+		}
+
+		if (existingEntry == null) {
+			return BlogsEntryLocalServiceUtil.addEntry(
+				userId, entry.getTitle(), entry.getSubtitle(),
+				entry.getDescription(), entry.getContent(),
+				displayDateMonth, displayDateDay, displayDateYear,
+				displayDateHour, displayDateMinute, allowPingbacks,
+				allowTrackbacks, trackbacks, entry.getCoverImageCaption(),
+				coverImageImageSelector, smallImageImageSelector,
+				serviceContext);
+		}
+		else {
+			return BlogsEntryLocalServiceUtil.updateEntry(
+				userId, existingEntry.getEntryId(), entry.getTitle(),
+				entry.getSubtitle(), entry.getDescription(),
+				entry.getContent(), displayDateMonth, displayDateDay,
+				displayDateYear, displayDateHour, displayDateMinute,
+				allowPingbacks, allowTrackbacks, trackbacks,
+				entry.getCoverImageCaption(), coverImageImageSelector,
+				smallImageImageSelector, serviceContext);
+		}
 	}
 
 	private BlogsEntryLocalService _blogsEntryLocalService;
