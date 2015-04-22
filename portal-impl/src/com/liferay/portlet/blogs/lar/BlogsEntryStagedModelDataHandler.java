@@ -20,8 +20,12 @@ import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
+import com.liferay.portal.kernel.lar.StagedModelDataHandler;
+import com.liferay.portal.kernel.lar.StagedModelDataHandlerRegistryUtil;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.portal.kernel.lar.StagedModelModifiedDateComparator;
+import com.liferay.portal.kernel.lar.StagedModelRepository;
+import com.liferay.portal.kernel.lar.StagedModelRepositoryRegistryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
@@ -36,6 +40,7 @@ import com.liferay.portal.kernel.util.TempFileEntryUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.model.Image;
+import com.liferay.portal.model.StagedModel;
 import com.liferay.portal.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.service.ImageLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
@@ -132,12 +137,19 @@ public class BlogsEntryStagedModelDataHandler
 			}
 		}
 
-		if (entry.getSmallImageFileEntryId() != 0) {
-			FileEntry fileEntry = PortletFileRepositoryUtil.getPortletFileEntry(
-				entry.getSmallImageFileEntryId());
+		StagedModelRepository<BlogsEntry> stagedModelRepository =
+			(StagedModelRepository<BlogsEntry>)
+				StagedModelRepositoryRegistryUtil.getStagedModelRepository(
+					BlogsEntry.class.getName());
 
+		List<? extends StagedModel> dependentStageModels =
+			stagedModelRepository.fetchDependentStagedModels(entry);
+
+		// TODO Reference type?
+
+		for (StagedModel stagedModel : dependentStageModels) {
 			StagedModelDataHandlerUtil.exportReferenceStagedModel(
-				portletDataContext, entry, fileEntry,
+				portletDataContext, entry, stagedModel,
 				PortletDataContext.REFERENCE_TYPE_WEAK);
 		}
 
@@ -157,14 +169,17 @@ public class BlogsEntryStagedModelDataHandler
 			PortletDataContext portletDataContext, BlogsEntry entry)
 		throws Exception {
 
-		// TODO StagedModelRepositoryRegistryUtil
-
 		Map<String, Object> attributes = new HashMap<>();
 
 		attributes.put("portletDataContext", portletDataContext);
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
 			entry);
+
+		StagedModelRepository<BlogsEntry> stagedModelRepository =
+			(StagedModelRepository<BlogsEntry>)
+				StagedModelRepositoryRegistryUtil.getStagedModelRepository(
+					BlogsEntry.class.getName());
 
 		BlogsEntry importedEntry = null;
 
@@ -174,26 +189,24 @@ public class BlogsEntryStagedModelDataHandler
 			attributes.put("serviceContext", serviceContext);
 
 			BlogsEntry existingEntry =
-				BlogsEntryStagedModelRepository.
-					fetchStagedModelByUuidAndGroupId(
-						entry.getUuid(), portletDataContext.getScopeGroupId());
+				stagedModelRepository.fetchStagedModelByUuidAndGroupId(
+					entry.getUuid(), portletDataContext.getScopeGroupId());
 
 			if (existingEntry == null) {
 				serviceContext.setUuid(entry.getUuid());
 
 				attributes.put("serviceContext", serviceContext);
 
-				importedEntry = BlogsEntryStagedModelRepository.addStagedModel(
+				importedEntry = stagedModelRepository.addStagedModel(
 					entry, attributes);
 			}
 			else {
-				importedEntry =
-					BlogsEntryStagedModelRepository.updateStagedModel(
-						entry, existingEntry, attributes);
+				importedEntry = stagedModelRepository.updateStagedModel(
+					entry, existingEntry, attributes);
 			}
 		}
 		else {
-			importedEntry = BlogsEntryStagedModelRepository.addStagedModel(
+			importedEntry = stagedModelRepository.addStagedModel(
 				entry, attributes);
 		}
 
