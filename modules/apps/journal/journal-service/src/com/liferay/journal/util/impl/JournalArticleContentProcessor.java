@@ -12,14 +12,16 @@
  * details.
  */
 
-package com.liferay.journal.lar;
+package com.liferay.journal.util.impl;
 
+import com.liferay.portal.NoSuchLayoutException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.portal.kernel.util.ContentProcessor;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -42,11 +44,11 @@ import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.portlet.documentlibrary.NoSuchFileEntryException;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.util.DLUtil;
-import com.liferay.portlet.exportimport.lar.ExportImportContentProcessor;
 import com.liferay.portlet.exportimport.lar.ExportImportPathUtil;
 import com.liferay.portlet.exportimport.lar.PortletDataContext;
 import com.liferay.portlet.exportimport.lar.PortletDataHandlerKeys;
@@ -66,10 +68,9 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(
 	property = {"model.class.name=com.liferay.journal.model.JournalArticle"},
-	service = ExportImportContentProcessor.class
+	service = ContentProcessor.class
 )
-public class JournalArticleExportImportContentProcessor
-	implements ExportImportContentProcessor {
+public class JournalArticleContentProcessor implements ContentProcessor {
 
 	public String replaceExportContentReferences(
 			PortletDataContext portletDataContext,
@@ -107,6 +108,15 @@ public class JournalArticleExportImportContentProcessor
 		content = replaceImportLinksToLayouts(portletDataContext, content);
 
 		return content;
+	}
+
+	public void validateContentReferences(
+			PortletDataContext portletDataContext, String content)
+		throws Exception {
+
+		validateDLReferences(portletDataContext, content);
+		validateLayoutReferences(portletDataContext, content);
+		validateLinksToLayoutsReferences(portletDataContext, content);
 	}
 
 	protected void deleteTimestampParameters(StringBuilder sb, int beginPos) {
@@ -983,7 +993,213 @@ public class JournalArticleExportImportContentProcessor
 		return content;
 	}
 
+	protected void validateDLReferences(
+			PortletDataContext portletDataContext, String content)
+		throws NoSuchFileEntryException {
+
+		String contextPath = PortalUtil.getPathContext();
+
+		String[] patterns = {
+			contextPath.concat("/c/document_library/get_file?"),
+			contextPath.concat("/documents/"),
+			contextPath.concat("/image/image_gallery?")
+		};
+
+		int beginPos = -1;
+		int endPos = content.length();
+
+		while (true) {
+			beginPos = StringUtil.lastIndexOfAny(content, patterns, endPos);
+
+			if (beginPos == -1) {
+				break;
+			}
+
+			Map<String, String[]> dlReferenceParameters =
+				getDLReferenceParameters(
+					portletDataContext, content,
+					beginPos + contextPath.length(), endPos);
+
+			FileEntry fileEntry = getFileEntry(dlReferenceParameters);
+
+			if (fileEntry == null) {
+				throw new NoSuchFileEntryException();
+			}
+
+			endPos = beginPos - 1;
+		}
+	}
+
+	protected void validateLayoutReferences(
+			PortletDataContext portletDataContext, String content)
+		throws NoSuchLayoutException {
+
+		String[] patterns = {"href=", "[["};
+
+		int beginPos = -1;
+		int endPos = content.length();
+		int offset = 0;
+
+		while (true) {
+			if (beginPos > -1) {
+				endPos = beginPos - 1;
+			}
+
+			beginPos = StringUtil.lastIndexOfAny(content, patterns, endPos);
+
+			if (beginPos == -1) {
+				break;
+			}
+
+			if (content.startsWith("href=", beginPos)) {
+				offset = 5;
+
+				char c = content.charAt(beginPos + offset);
+
+				if ((c == CharPool.APOSTROPHE) || (c == CharPool.QUOTE)) {
+					offset++;
+				}
+			}
+			else if (content.charAt(beginPos) == CharPool.OPEN_BRACKET) {
+				offset = 2;
+			}
+
+			endPos = StringUtil.indexOfAny(
+				content, LAYOUT_REFERENCE_STOP_CHARS, beginPos + offset,
+				endPos);
+
+			if (endPos == -1) {
+				continue;
+			}
+
+			String url = content.substring(beginPos + offset, endPos);
+
+			StringBundler urlSB = new StringBundler(5);
+			
+			url = replaceExportHostname(portletDataContext, url, urlSB);
+
+			if (!url.startsWith(StringPool.SLASH)) {
+				continue;
+			}
+
+			String pathContext = PortalUtil.getPathContext();
+
+			if (pathContext.length() > 1) {
+				if (!url.startsWith(pathContext)) {
+					continue;
+				}
+
+				url = url.substring(pathContext.length());
+			}
+
+			if (!url.startsWith(StringPool.SLASH)) {
+				continue;
+			}
+
+			int pos = url.indexOf(StringPool.SLASH, 1);
+
+			String localePath = StringPool.BLANK;
+
+			Locale locale = null;
+
+			if (pos != -1) {
+				localePath = url.substring(0, pos);
+
+				locale = LocaleUtil.fromLanguageId(
+					localePath.substring(1), true, false);
+			}
+
+			if (locale != null) {
+				String urlWithoutLocale = url.substring(
+					localePath.length());
+
+				if (urlWithoutLocale.startsWith(
+						PRIVATE_GROUP_SERVLET_MAPPING) ||
+					urlWithoutLocale.startsWith(
+						PRIVATE_USER_SERVLET_MAPPING) ||
+					urlWithoutLocale.startsWith(
+						PUBLIC_GROUP_SERVLET_MAPPING)) {
+
+					url = urlWithoutLocale;
+				}
+			}
+
+			boolean privateLayout = false;
+
+			if (url.startsWith(PRIVATE_GROUP_SERVLET_MAPPING)) {
+
+				url = url.substring(
+					PRIVATE_GROUP_SERVLET_MAPPING.length() - 1);
+
+				privateLayout = true;
+			}
+			else if (url.startsWith(PRIVATE_USER_SERVLET_MAPPING)) {
+
+				url = url.substring(
+					PRIVATE_USER_SERVLET_MAPPING.length() - 1);
+
+				privateLayout = true;
+			}
+			else if (url.startsWith(PUBLIC_GROUP_SERVLET_MAPPING)) {
+
+				url = url.substring(
+					PUBLIC_GROUP_SERVLET_MAPPING.length() - 1);
+			}
+			else {
+				String urlSBString = urlSB.toString();
+
+				LayoutSet layoutSet = null;
+
+				if (urlSBString.contains(
+						DATA_HANDLER_PUBLIC_LAYOUT_SET_SECURE_URL) ||
+					urlSBString.contains(
+						DATA_HANDLER_PUBLIC_LAYOUT_SET_URL)) {
+
+					layoutSet = group.getPublicLayoutSet();
+				}
+				else if (urlSBString.contains(
+							DATA_HANDLER_PRIVATE_LAYOUT_SET_SECURE_URL) ||
+						 urlSBString.contains(
+							 DATA_HANDLER_PRIVATE_LAYOUT_SET_URL)) {
+
+					layoutSet = group.getPrivateLayoutSet();
+				}
+
+				if (layoutSet == null) {
+					continue;
+				}
+
+				privateLayout = layoutSet.isPrivateLayout();
+
+				// TODO
+			}
+		}
+	}
+
+	protected void validateLinksToLayoutsReferences(
+			PortletDataContext portletDataContext, String content)
+		throws NoSuchLayoutException {
+
+		Matcher matcher = exportLinksToLayoutPattern.matcher(content);
+
+		while (matcher.find()) {
+			long layoutId = GetterUtil.getLong(matcher.group(1));
+
+			String type = matcher.group(2);
+
+			boolean privateLayout = type.startsWith("private");
+
+			Layout layout = LayoutLocalServiceUtil.fetchLayout(
+				portletDataContext.getScopeGroupId(), privateLayout,
+				layoutId);
+
+			if (layout == null) {
+				throw new NoSuchLayoutException();
+			}
+		}
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
-		JournalArticleExportImportContentProcessor.class);
+		JournalArticleContentProcessor.class);
 
 }

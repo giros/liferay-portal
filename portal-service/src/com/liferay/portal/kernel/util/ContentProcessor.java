@@ -12,20 +12,21 @@
  * details.
  */
 
-package com.liferay.portlet.exportimport.lar;
+package com.liferay.portal.kernel.util;
 
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.StagedModel;
+import com.liferay.portlet.exportimport.lar.PortletDataContext;
 
 import java.util.regex.Pattern;
 
 /**
  * @author Gergely Mathe
  */
-public interface ExportImportContentProcessor {
+public interface ContentProcessor {
 
 	public static final String DATA_HANDLER_COMPANY_SECURE_URL =
 		"@data_handler_company_secure_url@";
@@ -107,6 +108,10 @@ public interface ExportImportContentProcessor {
 	public String replaceImportContentReferences(
 			PortletDataContext portletDataContext,
 			StagedModel entityStagedModel, String content)
+		throws Exception;
+
+	public void validateContentReferences(
+			PortletDataContext portletDataContext, String content)
 		throws Exception;
 
 }

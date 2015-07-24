@@ -29,6 +29,8 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
+import com.liferay.portal.kernel.util.ContentProcessor;
+import com.liferay.portal.kernel.util.ContentProcessorRegistryUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
@@ -50,8 +52,6 @@ import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
 import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalServiceUtil;
 import com.liferay.portlet.exportimport.lar.BaseStagedModelDataHandler;
-import com.liferay.portlet.exportimport.lar.ExportImportContentProcessor;
-import com.liferay.portlet.exportimport.lar.ExportImportContentProcessorRegistryUtil;
 import com.liferay.portlet.exportimport.lar.ExportImportPathUtil;
 import com.liferay.portlet.exportimport.lar.PortletDataContext;
 import com.liferay.portlet.exportimport.lar.PortletDataException;
@@ -339,8 +339,7 @@ public class JournalArticleStagedModelDataHandler
 				PortletDataContext.REFERENCE_TYPE_DEPENDENCY, true);
 		}
 
-		ExportImportContentProcessor exportImportContentProcessor =
-			getExportImportContentProcessor();
+		ContentProcessor contentProcessor = getContentProcessor();
 
 		if (article.isSmallImage()) {
 			Image smallImage = ImageLocalServiceUtil.fetchImage(
@@ -348,7 +347,7 @@ public class JournalArticleStagedModelDataHandler
 
 			if (Validator.isNotNull(article.getSmallImageURL())) {
 				String smallImageURL =
-					exportImportContentProcessor.replaceExportContentReferences(
+					contentProcessor.replaceExportContentReferences(
 						portletDataContext, article,
 						article.getSmallImageURL() + StringPool.SPACE, true,
 						false);
@@ -383,7 +382,7 @@ public class JournalArticleStagedModelDataHandler
 		article.setStatusByUserUuid(article.getStatusByUserUuid());
 
 		String content =
-			exportImportContentProcessor.replaceExportContentReferences(
+			contentProcessor.replaceExportContentReferences(
 				portletDataContext, article, article.getContent(),
 				portletDataContext.getBooleanParameter(
 					"journal", "referenced-content"),
@@ -901,12 +900,12 @@ public class JournalArticleStagedModelDataHandler
 			groupId, articleId, version);
 	}
 
-	protected ExportImportContentProcessor getExportImportContentProcessor() {
-		ExportImportContentProcessor exportImportContentProcessor =
-			ExportImportContentProcessorRegistryUtil.
-				getExportImportContentProcessor(JournalArticle.class.getName());
+	protected ContentProcessor getContentProcessor() {
+		ContentProcessor contentProcessor =
+			ContentProcessorRegistryUtil.getContentProcessor(
+				JournalArticle.class.getName());
 
-		return exportImportContentProcessor;
+		return contentProcessor;
 	}
 
 	@Reference

@@ -5987,6 +5987,10 @@ public class JournalArticleLocalServiceImpl
 			groupId, classNameId, oldDDMTemplateKey, newDDMTemplateKey);
 	}
 
+	public void validateReferences() {
+		// TODO
+	}
+
 	protected String buildArticleURL(
 		String articleURL, long groupId, long folderId, String articleId) {
 
