@@ -18,6 +18,7 @@ import com.liferay.portal.LayoutFriendlyURLException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
@@ -170,9 +171,9 @@ public class VerifyLayout extends VerifyProcess {
 					LayoutFriendlyURLException.DUPLICATE);
 			}
 
-			layout.setFriendlyURL(newFriendlyURL);
-
-			LayoutLocalServiceUtil.updateLayout(layout);
+			LayoutLocalServiceUtil.updateFriendlyURL(
+				layout.getUserId(), layout.getPlid(), newFriendlyURL,
+				LocaleUtil.toLanguageId(LocaleUtil.getSiteDefault()));
 		}
 		catch (LayoutFriendlyURLException lfurle) {
 			int type = lfurle.getType();
