@@ -46,66 +46,60 @@ TeamDisplayTerms searchTerms = (TeamDisplayTerms)teamSearchContainer.getSearchTe
 	</aui:nav-bar-search>
 </aui:nav-bar>
 
-<div class="management-bar-container">
-	<liferay-frontend:management-bar
-		includeCheckBox="<%= true %>"
-	>
+<liferay-frontend:management-bar
+	checkBoxContainerId="teamsSearchContainer"
+	includeCheckBox="<%= true %>"
+>
 
-		<%
-		PortletURL displayStyleURL = renderResponse.createRenderURL();
-		%>
+	<%
+	PortletURL displayStyleURL = renderResponse.createRenderURL();
+	%>
 
-		<liferay-frontend:management-bar-buttons>
-			<liferay-frontend:management-bar-display-buttons
-				displayStyleURL="<%= displayStyleURL %>"
-				displayViews='<%= new String[]{"descriptive", "list"} %>'
-				selectedDisplayStyle="<%= displayStyle %>"
-			/>
-		</liferay-frontend:management-bar-buttons>
+	<liferay-frontend:management-bar-buttons>
+		<liferay-frontend:management-bar-display-buttons
+			displayStyleURL="<%= displayStyleURL %>"
+			displayViews='<%= new String[]{"descriptive", "list"} %>'
+			selectedDisplayStyle="<%= displayStyle %>"
+		/>
+	</liferay-frontend:management-bar-buttons>
 
-		<%
-		PortletURL iteratorURL = renderResponse.createRenderURL();
+	<%
+	PortletURL iteratorURL = renderResponse.createRenderURL();
 
-		iteratorURL.setParameter("displayStyle", displayStyle);
-		%>
+	iteratorURL.setParameter("displayStyle", displayStyle);
+	%>
 
-		<liferay-frontend:management-bar-filters>
-			<liferay-frontend:management-bar-sort
-				orderByCol="<%= teamSearchContainer.getOrderByCol() %>"
-				orderByType="<%= teamSearchContainer.getOrderByType() %>"
-				orderColumns='<%= new String[]{"name"} %>'
-				portletURL="<%= iteratorURL %>"
-			/>
-		</liferay-frontend:management-bar-filters>
-	</liferay-frontend:management-bar>
+	<liferay-frontend:management-bar-filters>
+		<liferay-frontend:management-bar-sort
+			orderByCol="<%= teamSearchContainer.getOrderByCol() %>"
+			orderByType="<%= teamSearchContainer.getOrderByType() %>"
+			orderColumns='<%= new String[]{"name"} %>'
+			portletURL="<%= iteratorURL %>"
+		/>
+	</liferay-frontend:management-bar-filters>
 
-	<liferay-frontend:management-bar
-		cssClass="management-bar-no-collapse"
-		id="teamsActionsButton"
-	>
-		<liferay-frontend:management-bar-buttons>
-			<aui:a cssClass="btn" href="javascript:;" iconCssClass="icon-trash" id="deleteSelectedTeams" />
-		</liferay-frontend:management-bar-buttons>
-	</liferay-frontend:management-bar>
-</div>
+	<liferay-frontend:management-bar-action-buttons>
+		<aui:a cssClass="btn" href="javascript:;" iconCssClass="icon-trash" id="deleteSelectedTeams" />
+	</liferay-frontend:management-bar-action-buttons>
+</liferay-frontend:management-bar>
 
 <aui:form cssClass="container-fluid-1280" name="fm">
 	<aui:input name="teamIds" type="hidden" />
 
 	<liferay-ui:search-container
 		id="teams"
-		rowChecker="<%= new RowChecker(renderResponse) %>"
+		rowChecker="<%= new EmptyOnClickRowChecker(renderResponse) %>"
 		searchContainer="<%= teamSearchContainer %>"
 	>
 
 		<%
-		total = TeamLocalServiceUtil.searchCount(scopeGroupId, searchTerms.getName(), searchTerms.getDescription(), new LinkedHashMap<String, Object>());
+		total = TeamServiceUtil.searchCount(scopeGroupId, searchTerms.getName(), searchTerms.getDescription(), new LinkedHashMap<String, Object>());
 
 		searchContainer.setTotal(total);
 		%>
 
 		<liferay-ui:search-container-results
-			results="<%= TeamLocalServiceUtil.search(scopeGroupId, searchTerms.getName(), searchTerms.getDescription(), new LinkedHashMap<String, Object>(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
+			results="<%= TeamServiceUtil.search(scopeGroupId, searchTerms.getName(), searchTerms.getDescription(), new LinkedHashMap<String, Object>(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
 		/>
 
 		<liferay-ui:search-container-row
@@ -136,9 +130,7 @@ TeamDisplayTerms searchTerms = (TeamDisplayTerms)teamSearchContainer.getSearchTe
 						colspan="<%= 2 %>"
 					>
 						<h5>
-							<a href="<%= rowURL.toString() %>">
-								<%= team.getName() %>
-							</a>
+							<aui:a href="<%= (rowURL != null) ? rowURL.toString() : null %>"><%= team.getName() %></aui:a>
 						</h5>
 
 						<h6 class="text-default">
@@ -192,16 +184,6 @@ TeamDisplayTerms searchTerms = (TeamDisplayTerms)teamSearchContainer.getSearchTe
 	var Util = Liferay.Util;
 
 	var form = $(document.<portlet:namespace />fm);
-
-	$('#<portlet:namespace />teamsSearchContainer').on(
-		'click',
-		'input[type=checkbox]',
-		function() {
-			var hide = (Util.listCheckedExcept(form, '<portlet:namespace /><%= RowChecker.ALL_ROW_IDS %>').length == 0);
-
-			$('#<portlet:namespace />teamsActionsButton').toggleClass('on', !hide);
-		}
-	);
 
 	$('#<portlet:namespace />deleteSelectedTeams').on(
 		'click',

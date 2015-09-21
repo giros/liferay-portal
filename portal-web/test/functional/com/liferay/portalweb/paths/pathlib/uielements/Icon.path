@@ -19,8 +19,13 @@
 	<td></td>
 </tr>
 <tr>
+	<td>ANGLE_LEFT_BACK</td>
+	<td>//div[contains(@class,'toolbar-group-content')]//span[contains(@class,'icon-angle-left')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>BACK</td>
-	<td>//a[contains(@class,'icon-circle-arrow-left') and contains(@class,'previous-level')]</td>
+	<td>//a[contains(@class,'icon-circle-arrow-left') and contains(@class,'previous-level')] | //span[contains(@class,'icon-angle-left')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -59,23 +64,28 @@
 	<td></td>
 </tr>
 <tr>
+	<td>DESCRIPTIVE_VERTICAL_ELLIPSIS</td>
+	<td>//li[contains(@class,'selectable') and contains(@class,'active')]//span[contains(@class,'icon-ellipsis-vertical')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>DETAILS</td>
 	<td>//div[contains(.,'Details')]/span/a/i[@class='icon-file-alt']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DISPLAY_STYLE_DESCRIPTIVE</td>
-	<td>//a[contains(@href,'descriptive')]/span</td>
+	<td>//a[contains(@href,'=descriptive')]/span</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DISPLAY_STYLE_ICON</td>
-	<td>//a[contains(@href,'icon')]/span</td>
+	<td>//a[contains(@href,'=icon')]/span</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DISPLAY_STYLE_LIST</td>
-	<td>//a[contains(@href,'list')]/span</td>
+	<td>//a[contains(@href,'=list')]/span</td>
 	<td></td>
 </tr>
 <tr>
@@ -151,6 +161,11 @@
 <tr>
 	<td>PRINT</td>
 	<td>//span/a[contains(.,'Print')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>REMOVE</td>
+	<td>//a/i[@class='icon-remove']</td>
 	<td></td>
 </tr>
 <tr>

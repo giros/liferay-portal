@@ -40,7 +40,6 @@ import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.ServerDetector;
 import com.liferay.portal.kernel.util.SessionParamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -404,7 +403,7 @@ public class ServicePreAction extends Action {
 						PortletCategoryKeys.SITE_ADMINISTRATION)) {
 
 					portletControlPanelEntryCategory =
-						PortletCategoryKeys.SITES;
+						PortletCategoryKeys.CONTROL_PANEL_SITES;
 				}
 
 				if (!controlPanelCategory.startsWith(
@@ -1772,7 +1771,8 @@ public class ServicePreAction extends Action {
 
 			if (controlPanelCategory.startsWith(
 					PortletCategoryKeys.CURRENT_SITE) ||
-				controlPanelCategory.startsWith(PortletCategoryKeys.SITES)) {
+				controlPanelCategory.startsWith(
+					PortletCategoryKeys.CONTROL_PANEL_SITES)) {
 
 				if (doAsGroupId <= 0) {
 					doAsGroupId = layout.getGroupId();
@@ -2193,18 +2193,6 @@ public class ServicePreAction extends Action {
 
 			request.setAttribute(
 				WebKeys.PORTLET_AJAX_RENDER, portletAjaxRender);
-		}
-
-		// Parallel render
-
-		if (PropsValues.LAYOUT_PARALLEL_RENDER_ENABLE &&
-			ServerDetector.isTomcat()) {
-
-			boolean portletParallelRender = ParamUtil.getBoolean(
-				request, "p_p_parallel", true);
-
-			request.setAttribute(
-				WebKeys.PORTLET_PARALLEL_RENDER, portletParallelRender);
 		}
 	}
 

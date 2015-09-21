@@ -1,6 +1,3 @@
-@import "bourbon";
-@import "mixins";
-
 @import "custom_responsive";
 
 $bg-color: #F5F7F8;
@@ -19,11 +16,14 @@ body {
 	background-color: transparent;
 }
 
+#navigation .input-container {
+	position: relative;
+}
+
 #wrapper {
 	padding: 0;
 
 	#banner {
-		padding: 40px 0 30px;
 		position: relative;
 
 		a:active, a:hover, a:focus {
@@ -43,7 +43,7 @@ body {
 		}
 
 		.navbar-form {
-			@include respond-to(desktop, tablet) {
+			@include sm {
 				margin-left: 30px;
 			}
 
@@ -51,16 +51,6 @@ body {
 				border-bottom-width: 1px;
 				border-color: #D6DCE2;
 				margin-top: 2px;
-			}
-
-			.search-input {
-				font-size: 16px;
-				height: auto;
-				padding-right: 40px;
-
-				@include respond-to(desktop, tablet) {
-					max-width: 200px;
-				}
 			}
 
 			.search-select {
@@ -101,7 +91,7 @@ body {
 		}
 
 		.user-personal-bar {
-			@include respond-to(desktop, tablet) {
+			@include sm {
 				position: absolute;
 				right: 20px;
 				top: 0;
@@ -123,7 +113,7 @@ body {
 				width: 32px;
 			}
 
-			@include respond-to(desktop, tablet) {
+			@include sm {
 				.icon-caret-down, .user-full-name {
 					display: none;
 				}
@@ -131,7 +121,7 @@ body {
 		}
 	}
 
-	#content{
+	#content {
 		.navbar-nav > li {
 			& > a {
 				color: $solid-color;
