@@ -16,6 +16,7 @@ package com.liferay.taglib.ui;
 
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.Group;
@@ -55,8 +56,8 @@ public class AssetTagsSelectorTag extends IncludeTag {
 		_curTags = curTags;
 	}
 
-	public void setGroupIds(long[] groupIds) {
-		_groupIds = groupIds;
+	public void setGroupIds(String groupIds) {
+		_strGroupIds = groupIds;
 	}
 
 	public void setHiddenInput(String hiddenInput) {
@@ -83,6 +84,7 @@ public class AssetTagsSelectorTag extends IncludeTag {
 		_className = null;
 		_classPK = 0;
 		_curTags = null;
+		_strGroupIds=null;
 		_groupIds = null;
 		_hiddenInput = "assetTagNames";
 		_id = null;
@@ -124,7 +126,7 @@ public class AssetTagsSelectorTag extends IncludeTag {
 			"liferay-ui:asset-tags-selector:removeCallback",
 			String.valueOf(_removeCallback));
 
-		if (_groupIds == null) {
+		if (_strGroupIds == null) {
 			ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 				WebKeys.THEME_DISPLAY);
 
@@ -147,6 +149,10 @@ public class AssetTagsSelectorTag extends IncludeTag {
 			_groupIds = groupIds;
 		}
 
+		else {
+			_groupIds = StringUtil.split(_strGroupIds, StringPool.COMMA, 0L);
+		}
+
 		request.setAttribute(
 			"liferay-ui:asset-tags-selector:groupIds", _groupIds);
 
@@ -167,6 +173,7 @@ public class AssetTagsSelectorTag extends IncludeTag {
 	private String _className;
 	private long _classPK;
 	private String _curTags;
+	private String _strGroupIds;
 	private long[] _groupIds;
 	private String _hiddenInput = "assetTagNames";
 	private String _id;

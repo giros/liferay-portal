@@ -69,7 +69,7 @@ if (queryLogicIndex >= 0) {
 	<div class="field tags-selector <%= Validator.equals(queryName, "assetTags") ? StringPool.BLANK : "hide" %>">
 		<liferay-ui:asset-tags-selector
 			curTags='<%= Validator.equals(queryName, "assetTags") ? queryValues : null %>'
-			groupIds="<%= categorizableGroupIds %>"
+			groupIds="<%= StringUtil.merge(categorizableGroupIds) %>"
 			hiddenInput='<%= "queryTagNames" + index %>'
 		/>
 	</div>
