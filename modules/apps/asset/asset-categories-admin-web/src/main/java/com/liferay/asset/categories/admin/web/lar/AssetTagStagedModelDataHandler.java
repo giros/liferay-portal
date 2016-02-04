@@ -15,16 +15,12 @@
 package com.liferay.asset.categories.admin.web.lar;
 
 import com.liferay.asset.kernel.model.AssetTag;
-import com.liferay.asset.kernel.service.AssetTagLocalService;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.xml.Element;
-
-import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -37,47 +33,6 @@ public class AssetTagStagedModelDataHandler
 	extends BaseStagedModelDataHandler<AssetTag> {
 
 	public static final String[] CLASS_NAMES = {AssetTag.class.getName()};
-
-	@Override
-	public void deleteStagedModel(AssetTag stagedAssetTag)
-		throws PortalException {
-
-		_assetTagLocalService.deleteTag(stagedAssetTag);
-	}
-
-	@Override
-	public void deleteStagedModel(
-			String uuid, long groupId, String className, String extraData)
-		throws PortalException {
-
-		AssetTag assetTag = fetchStagedModelByUuidAndGroupId(uuid, groupId);
-
-		if (assetTag != null) {
-			deleteStagedModel(assetTag);
-		}
-	}
-
-	@Override
-	public AssetTag fetchStagedModelByUuidAndGroupId(
-		String uuid, long groupId) {
-
-		AssetTag assetTag = _assetTagLocalService.fetchAssetTagByUuidAndGroupId(
-			uuid, groupId);
-
-		if (assetTag == null) {
-			return null;
-		}
-
-		return assetTag;
-	}
-
-	@Override
-	public List<AssetTag> fetchStagedModelsByUuidAndCompanyId(
-		String uuid, long companyId) {
-
-		return _assetTagLocalService.getAssetTagsByUuidAndCompanyId(
-			uuid, companyId);
-	}
 
 	@Override
 	public String[] getClassNames() {
@@ -121,39 +76,33 @@ public class AssetTagStagedModelDataHandler
 			PortletDataContext portletDataContext, AssetTag assetTag)
 		throws Exception {
 
-		long userId = portletDataContext.getUserId(assetTag.getUserUuid());
+		AssetTag importedAssetTag = (AssetTag)assetTag.clone();
 
-		ServiceContext serviceContext = createServiceContext(
-			portletDataContext, assetTag);
-
-		AssetTag existingAssetTag = fetchStagedModelByUuidAndGroupId(
-			assetTag.getUuid(), portletDataContext.getScopeGroupId());
-
-		AssetTag importedAssetTag = null;
+		AssetTag existingAssetTag =
+			_stagedModelRepository.fetchStagedModelByUuidAndGroupId(
+				assetTag.getUuid(), portletDataContext.getScopeGroupId());
 
 		if (existingAssetTag == null) {
-			serviceContext.setUuid(assetTag.getUuid());
-
-			importedAssetTag = _assetTagLocalService.addTag(
-				userId, portletDataContext.getScopeGroupId(),
-				assetTag.getName(), serviceContext);
+			importedAssetTag = _stagedModelRepository.addStagedModel(
+				portletDataContext, importedAssetTag);
 		}
 		else {
-			importedAssetTag = _assetTagLocalService.updateTag(
-				userId, existingAssetTag.getTagId(), assetTag.getName(),
-				serviceContext);
+			importedAssetTag.setTagId(assetTag.getTagId());
+
+			importedAssetTag = _stagedModelRepository.updateStagedModel(
+				portletDataContext, importedAssetTag);
 		}
 
 		portletDataContext.importClassedModel(assetTag, importedAssetTag);
 	}
 
-	@Reference(unbind = "-")
-	protected void setAssetTagLocalService(
-		AssetTagLocalService assetTagLocalService) {
+	@Reference(target ="com.liferay.portlet.asset.model.AssetTag", unbind = "-")
+	protected void setStagedModelRepository(
+		StagedModelRepository<AssetTag> stagedModelRepository) {
 
-		_assetTagLocalService = assetTagLocalService;
+		_stagedModelRepository = stagedModelRepository;
 	}
 
-	private AssetTagLocalService _assetTagLocalService;
+	private StagedModelRepository<AssetTag> _stagedModelRepository;
 
 }
