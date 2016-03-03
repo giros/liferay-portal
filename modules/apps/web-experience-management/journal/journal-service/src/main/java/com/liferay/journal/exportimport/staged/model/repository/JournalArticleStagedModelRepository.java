@@ -14,10 +14,33 @@
 
 package com.liferay.journal.exportimport.staged.model.repository;
 
+import com.liferay.dynamic.data.mapping.model.DDMStructure;
+import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataException;
+import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
+import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
+import com.liferay.exportimport.staged.model.repository.base.BaseStagedModelRepository;
 import com.liferay.journal.lar.JournalCreationStrategy;
 import com.liferay.journal.lar.JournalCreationStrategyFactory;
+import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.model.JournalArticleResource;
+import com.liferay.journal.service.JournalArticleLocalService;
+import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.trash.TrashHandler;
+import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.xml.Element;
+
+import java.util.List;
+import java.util.Map;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Gergely Mathe
@@ -49,7 +72,7 @@ public class JournalArticleStagedModelRepository
 			userId = authorId;
 		}
 	}
-	
+
 	@Override
 	public void deleteStagedModel(JournalArticle journalArticle)
 		throws PortalException {
@@ -102,13 +125,41 @@ public class JournalArticleStagedModelRepository
 		return _journalArticleLocalService.getExportActionableDynamicQuery(
 			portletDataContext);
 	}
-	
+
 	@Override
 	public void restoreStagedModel(
 			PortletDataContext portletDataContext,
 			JournalArticle journalArticle)
 		throws PortletDataException {
 		
+		long userId = portletDataContext.getUserId(
+			journalArticle.getUserUuid());
+
+		Element articleElement =
+			portletDataContext.getImportDataStagedModelElement(journalArticle);
+
+		String articleResourceUuid = articleElement.attributeValue(
+			"article-resource-uuid");
+
+		boolean preloaded = GetterUtil.getBoolean(
+			articleElement.attributeValue("preloaded"));
+
+		JournalArticle existingArticle = fetchExistingArticle(
+			journalArticle.getUuid(), articleResourceUuid,
+			portletDataContext.getScopeGroupId(), journalArticle.getArticleId(),
+			journalArticle.getArticleId(), journalArticle.getVersion(),
+			preloaded);
+
+		if ((existingArticle == null) || !existingArticle.isInTrash()) {
+			return;
+		}
+
+		TrashHandler trashHandler = existingArticle.getTrashHandler();
+
+		if (trashHandler.isRestorable(existingArticle.getResourcePrimKey())) {
+			trashHandler.restoreTrashEntry(
+				userId, existingArticle.getResourcePrimKey());
+		}
 	}
 
 	@Override
@@ -123,6 +174,69 @@ public class JournalArticleStagedModelRepository
 			PortletDataContext portletDataContext, JournalArticle journalArticle)
 		throws PortalException {
 
+	}
+
+	protected JournalArticle fetchExistingArticle(
+		String articleResourceUuid, long groupId, String articleId,
+		String newArticleId, boolean preloaded) {
+
+		JournalArticle existingArticle = null;
+
+		if (!preloaded) {
+			JournalArticleResource journalArticleResource =
+				_journalArticleResourceLocalService.
+					fetchJournalArticleResourceByUuidAndGroupId(
+						articleResourceUuid, groupId);
+
+			if (journalArticleResource == null) {
+				return null;
+			}
+
+			return _journalArticleLocalService.fetchArticle(
+				groupId, journalArticleResource.getArticleId());
+		}
+
+		if (Validator.isNotNull(newArticleId)) {
+			existingArticle = _journalArticleLocalService.fetchArticle(
+				groupId, newArticleId);
+		}
+
+		if ((existingArticle == null) && Validator.isNull(newArticleId)) {
+			existingArticle = _journalArticleLocalService.fetchArticle(
+				groupId, articleId);
+		}
+
+		return existingArticle;
+	}
+
+	protected JournalArticle fetchExistingArticle(
+		String articleUuid, String articleResourceUuid, long groupId,
+		String articleId, String newArticleId, double version,
+		boolean preloaded) {
+
+		JournalArticle article = fetchExistingArticle(
+			articleResourceUuid, groupId, articleId, newArticleId, preloaded);
+
+		if (article != null) {
+			article = fetchExistingArticleVersion(
+				articleUuid, groupId, article.getArticleId(), version);
+		}
+
+		return article;
+	}
+
+	protected JournalArticle fetchExistingArticleVersion(
+		String articleUuid, long groupId, String articleId, double version) {
+
+		JournalArticle existingArticle = fetchStagedModelByUuidAndGroupId(
+			articleUuid, groupId);
+
+		if (existingArticle != null) {
+			return existingArticle;
+		}
+
+		return _journalArticleLocalService.fetchArticle(
+			groupId, articleId, version);
 	}
 
 	@Reference(unbind = "-")
