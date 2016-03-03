@@ -14,6 +14,8 @@
 
 package com.liferay.journal.exportimport.staged.model.repository;
 
+import com.liferay.exportimport.kernel.lar.PortletDataContext;
+import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.journal.lar.JournalCreationStrategy;
 import com.liferay.journal.lar.JournalCreationStrategyFactory;
 
@@ -99,6 +101,14 @@ public class JournalArticleStagedModelRepository
 
 		return _journalArticleLocalService.getExportActionableDynamicQuery(
 			portletDataContext);
+	}
+	
+	@Override
+	public void restoreStagedModel(
+			PortletDataContext portletDataContext,
+			JournalArticle journalArticle)
+		throws PortletDataException {
+		
 	}
 
 	@Override
