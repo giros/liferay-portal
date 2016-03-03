@@ -24,6 +24,7 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
+import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
 import com.liferay.journal.exception.FeedTargetLayoutFriendlyUrlException;
 import com.liferay.journal.exportimport.content.processor.JournalFeedExportImportContentProcessor;
 import com.liferay.journal.model.JournalArticle;
@@ -55,40 +56,6 @@ public class JournalFeedStagedModelDataHandler
 	extends BaseStagedModelDataHandler<JournalFeed> {
 
 	public static final String[] CLASS_NAMES = {JournalFeed.class.getName()};
-
-	@Override
-	public void deleteStagedModel(JournalFeed feed) throws PortalException {
-		_journalFeedLocalService.deleteFeed(feed);
-	}
-
-	@Override
-	public void deleteStagedModel(
-			String uuid, long groupId, String className, String extraData)
-		throws PortalException {
-
-		JournalFeed feed = fetchStagedModelByUuidAndGroupId(uuid, groupId);
-
-		if (feed != null) {
-			deleteStagedModel(feed);
-		}
-	}
-
-	@Override
-	public JournalFeed fetchStagedModelByUuidAndGroupId(
-		String uuid, long groupId) {
-
-		return _journalFeedLocalService.fetchJournalFeedByUuidAndGroupId(
-			uuid, groupId);
-	}
-
-	@Override
-	public List<JournalFeed> fetchStagedModelsByUuidAndCompanyId(
-		String uuid, long companyId) {
-
-		return _journalFeedLocalService.getJournalFeedsByUuidAndCompanyId(
-			uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-			new StagedModelModifiedDateComparator<JournalFeed>());
-	}
 
 	@Override
 	public String[] getClassNames() {
@@ -171,31 +138,8 @@ public class JournalFeedStagedModelDataHandler
 			PortletDataContext portletDataContext, JournalFeed feed)
 		throws Exception {
 
-		long userId = portletDataContext.getUserId(feed.getUserUuid());
-
-		JournalCreationStrategy creationStrategy =
-			JournalCreationStrategyFactory.getInstance();
-
-		long authorId = creationStrategy.getAuthorUserId(
-			portletDataContext, feed);
-
-		if (authorId != JournalCreationStrategy.USE_DEFAULT_USER_ID_STRATEGY) {
-			userId = authorId;
-		}
-
 		_journalFeedExportImportContentProcessor.replaceImportContentReferences(
 			portletDataContext, feed, StringPool.BLANK);
-
-		String feedId = feed.getFeedId();
-
-		boolean autoFeedId = false;
-
-		if (Validator.isNumber(feedId) ||
-			(_journalFeedLocalService.fetchFeed(
-				portletDataContext.getScopeGroupId(), feedId) != null)) {
-
-			autoFeedId = true;
-		}
 
 		Map<String, String> ddmStructureKeys =
 			(Map<String, String>)portletDataContext.getNewPrimaryKeysMap(
@@ -216,67 +160,32 @@ public class JournalFeedStagedModelDataHandler
 			ddmTemplateKeys, feed.getDDMRendererTemplateKey(),
 			feed.getDDMRendererTemplateKey());
 
-		ServiceContext serviceContext = portletDataContext.createServiceContext(
-			feed);
+		JournalFeed importedFeed = (JournalFeed)feed.clone();
 
-		boolean addGroupPermissions = creationStrategy.addGroupPermissions(
-			portletDataContext, feed);
-
-		serviceContext.setAddGroupPermissions(addGroupPermissions);
-
-		boolean addGuestPermissions = creationStrategy.addGuestPermissions(
-			portletDataContext, feed);
-
-		serviceContext.setAddGuestPermissions(addGuestPermissions);
-
-		JournalFeed importedFeed = null;
+		importedFeed.setDDMStructureKey(parentDDMStructureKey);
+		importedFeed.setDDMTemplateKey(parentDDMTemplateKey);
+		importedFeed.setDDMRendererTemplateKey(parentRendererDDMTemplateKey);
 
 		try {
-			if (portletDataContext.isDataStrategyMirror()) {
-				JournalFeed existingFeed = fetchStagedModelByUuidAndGroupId(
+			JournalFeed existingFeed =
+				_stagedModelRepository.fetchStagedModelByUuidAndGroupId(
 					feed.getUuid(), portletDataContext.getScopeGroupId());
 
-				if (existingFeed == null) {
-					serviceContext.setUuid(feed.getUuid());
-
-					importedFeed = _journalFeedLocalService.addFeed(
-						userId, portletDataContext.getScopeGroupId(), feedId,
-						autoFeedId, feed.getName(), feed.getDescription(),
-						parentDDMStructureKey, parentDDMTemplateKey,
-						parentRendererDDMTemplateKey, feed.getDelta(),
-						feed.getOrderByCol(), feed.getOrderByType(),
-						feed.getTargetLayoutFriendlyUrl(),
-						feed.getTargetPortletId(), feed.getContentField(),
-						feed.getFeedFormat(), feed.getFeedVersion(),
-						serviceContext);
-				}
-				else {
-					importedFeed = _journalFeedLocalService.updateFeed(
-						existingFeed.getGroupId(), existingFeed.getFeedId(),
-						feed.getName(), feed.getDescription(),
-						parentDDMStructureKey, parentDDMTemplateKey,
-						parentRendererDDMTemplateKey, feed.getDelta(),
-						feed.getOrderByCol(), feed.getOrderByType(),
-						feed.getTargetLayoutFriendlyUrl(),
-						feed.getTargetPortletId(), feed.getContentField(),
-						feed.getFeedFormat(), feed.getFeedVersion(),
-						serviceContext);
-				}
+			if (existingFeed == null) {
+				importedFeed = _stagedModelRepository.addStagedModel(
+					portletDataContext, importedFeed);
 			}
 			else {
-				importedFeed = _journalFeedLocalService.addFeed(
-					userId, portletDataContext.getScopeGroupId(), feedId,
-					autoFeedId, feed.getName(), feed.getDescription(),
-					parentDDMStructureKey, parentDDMTemplateKey,
-					parentRendererDDMTemplateKey, feed.getDelta(),
-					feed.getOrderByCol(), feed.getOrderByType(),
-					feed.getTargetLayoutFriendlyUrl(),
-					feed.getTargetPortletId(), feed.getContentField(),
-					feed.getFeedFormat(), feed.getFeedVersion(),
-					serviceContext);
+				importedFeed.setGroupId(existingFeed.getGroupId());
+				importedFeed.setFeedId(existingFeed.getFeedId());
+
+				importedFeed = _stagedModelRepository.updateStagedModel(
+					portletDataContext, importedFeed);
 			}
 
 			portletDataContext.importClassedModel(feed, importedFeed);
+
+			String feedId = feed.getFeedId();
 
 			if (!feedId.equals(importedFeed.getFeedId())) {
 				if (_log.isWarnEnabled()) {
@@ -297,7 +206,7 @@ public class JournalFeedStagedModelDataHandler
 				StringBundler sb = new StringBundler(7);
 
 				sb.append("A feed with the ID ");
-				sb.append(feedId);
+				sb.append(feed.getFeedId());
 				sb.append(" cannot be imported because layout with friendly ");
 				sb.append("URL ");
 				sb.append(feed.getTargetLayoutFriendlyUrl());
@@ -332,11 +241,15 @@ public class JournalFeedStagedModelDataHandler
 			journalFeedExportImportContentProcessor;
 	}
 
-	@Reference(unbind = "-")
-	protected void setJournalFeedLocalService(
-		JournalFeedLocalService journalFeedLocalService) {
+	@Reference(
+		target =
+			"(model.class.name=com.liferay.journal.model.JournalFeed)",
+		unbind = "-"
+	)
+	protected void setStagedModelRepository(
+		StagedModelRepository<JournalFeed> stagedModelRepository) {
 
-		_journalFeedLocalService = journalFeedLocalService;
+		_stagedModelRepository = stagedModelRepository; 
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
@@ -346,6 +259,6 @@ public class JournalFeedStagedModelDataHandler
 	private DDMTemplateLocalService _ddmTemplateLocalService;
 	private JournalFeedExportImportContentProcessor
 		_journalFeedExportImportContentProcessor;
-	private JournalFeedLocalService _journalFeedLocalService;
+	private StagedModelRepository<JournalFeed> _stagedModelRepository;
 
 }
