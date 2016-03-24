@@ -410,19 +410,7 @@ public class JournalArticleStagedModelDataHandler
 			PortletDataContext portletDataContext, JournalArticle article)
 		throws Exception {
 
-		long userId = portletDataContext.getUserId(article.getUserUuid());
-
-		JournalCreationStrategy creationStrategy =
-			JournalCreationStrategyFactory.getInstance();
-
-		long authorId = creationStrategy.getAuthorUserId(
-			portletDataContext, article);
-
-		if (authorId != JournalCreationStrategy.USE_DEFAULT_USER_ID_STRATEGY) {
-			userId = authorId;
-		}
-
-		User user = _userLocalService.getUser(userId);
+		JournalArticle importedArticle = (JournalArticle)article.clone();
 
 		Map<Long, Long> folderIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
@@ -430,6 +418,8 @@ public class JournalArticleStagedModelDataHandler
 
 		long folderId = MapUtil.getLong(
 			folderIds, article.getFolderId(), article.getFolderId());
+
+		importedArticle.setFolderId(folderId);
 
 		String articleId = article.getArticleId();
 
@@ -458,6 +448,8 @@ public class JournalArticleStagedModelDataHandler
 			autoArticleId = false;
 		}
 
+		importedArticle.setArticleId(articleId);
+
 		String content = article.getContent();
 
 		content =
@@ -466,91 +458,17 @@ public class JournalArticleStagedModelDataHandler
 					portletDataContext, article, content);
 
 		article.setContent(content);
+		importedArticle.setContent(content);
+
+		JournalCreationStrategy creationStrategy =
+			JournalCreationStrategyFactory.getInstance();
 
 		String newContent = creationStrategy.getTransformedContent(
 			portletDataContext, article);
 
 		if (newContent != JournalCreationStrategy.ARTICLE_CONTENT_UNCHANGED) {
 			article.setContent(newContent);
-		}
-
-		Date displayDate = article.getDisplayDate();
-
-		int displayDateMonth = 0;
-		int displayDateDay = 0;
-		int displayDateYear = 0;
-		int displayDateHour = 0;
-		int displayDateMinute = 0;
-
-		if (displayDate != null) {
-			Calendar displayCal = CalendarFactoryUtil.getCalendar(
-				user.getTimeZone());
-
-			displayCal.setTime(displayDate);
-
-			displayDateMonth = displayCal.get(Calendar.MONTH);
-			displayDateDay = displayCal.get(Calendar.DATE);
-			displayDateYear = displayCal.get(Calendar.YEAR);
-			displayDateHour = displayCal.get(Calendar.HOUR);
-			displayDateMinute = displayCal.get(Calendar.MINUTE);
-
-			if (displayCal.get(Calendar.AM_PM) == Calendar.PM) {
-				displayDateHour += 12;
-			}
-		}
-
-		Date expirationDate = article.getExpirationDate();
-
-		int expirationDateMonth = 0;
-		int expirationDateDay = 0;
-		int expirationDateYear = 0;
-		int expirationDateHour = 0;
-		int expirationDateMinute = 0;
-		boolean neverExpire = true;
-
-		if (expirationDate != null) {
-			Calendar expirationCal = CalendarFactoryUtil.getCalendar(
-				user.getTimeZone());
-
-			expirationCal.setTime(expirationDate);
-
-			expirationDateMonth = expirationCal.get(Calendar.MONTH);
-			expirationDateDay = expirationCal.get(Calendar.DATE);
-			expirationDateYear = expirationCal.get(Calendar.YEAR);
-			expirationDateHour = expirationCal.get(Calendar.HOUR);
-			expirationDateMinute = expirationCal.get(Calendar.MINUTE);
-			neverExpire = false;
-
-			if (expirationCal.get(Calendar.AM_PM) == Calendar.PM) {
-				expirationDateHour += 12;
-			}
-		}
-
-		Date reviewDate = article.getReviewDate();
-
-		int reviewDateMonth = 0;
-		int reviewDateDay = 0;
-		int reviewDateYear = 0;
-		int reviewDateHour = 0;
-		int reviewDateMinute = 0;
-		boolean neverReview = true;
-
-		if (reviewDate != null) {
-			Calendar reviewCal = CalendarFactoryUtil.getCalendar(
-				user.getTimeZone());
-
-			reviewCal.setTime(reviewDate);
-
-			reviewDateMonth = reviewCal.get(Calendar.MONTH);
-			reviewDateDay = reviewCal.get(Calendar.DATE);
-			reviewDateYear = reviewCal.get(Calendar.YEAR);
-			reviewDateHour = reviewCal.get(Calendar.HOUR);
-			reviewDateMinute = reviewCal.get(Calendar.MINUTE);
-			neverReview = false;
-
-			if (reviewCal.get(Calendar.AM_PM) == Calendar.PM) {
-				reviewDateHour += 12;
-			}
+			importedArticle.setContent(content);
 		}
 
 		Map<String, String> ddmStructureKeys =
@@ -560,6 +478,8 @@ public class JournalArticleStagedModelDataHandler
 		String parentDDMStructureKey = MapUtil.getString(
 			ddmStructureKeys, article.getDDMStructureKey(),
 			article.getDDMStructureKey());
+
+		importedArticle.setDDMStructureKey(parentDDMStructureKey);
 
 		Map<String, Long> ddmStructureIds =
 			(Map<String, Long>)portletDataContext.getNewPrimaryKeysMap(
@@ -571,6 +491,8 @@ public class JournalArticleStagedModelDataHandler
 			ddmStructureId = ddmStructureIds.get(article.getClassPK());
 		}
 
+		importedArticle.setClassPK(ddmStructureId);
+
 		Map<String, String> ddmTemplateKeys =
 			(Map<String, String>)portletDataContext.getNewPrimaryKeysMap(
 				DDMTemplate.class + ".ddmTemplateKey");
@@ -578,6 +500,8 @@ public class JournalArticleStagedModelDataHandler
 		String parentDDMTemplateKey = MapUtil.getString(
 			ddmTemplateKeys, article.getDDMTemplateKey(),
 			article.getDDMTemplateKey());
+
+		importedArticle.setDDMTemplateKey(parentDDMTemplateKey);
 
 		File smallFile = null;
 
@@ -626,32 +550,6 @@ public class JournalArticleStagedModelDataHandler
 					imageKey,
 					portletDataContext.getZipEntryAsByteArray(imagePath));
 			}
-
-			String articleURL = null;
-
-			boolean addGroupPermissions = creationStrategy.addGroupPermissions(
-				portletDataContext, article);
-			boolean addGuestPermissions = creationStrategy.addGuestPermissions(
-				portletDataContext, article);
-
-			ServiceContext serviceContext =
-				portletDataContext.createServiceContext(article);
-
-			serviceContext.setAddGroupPermissions(addGroupPermissions);
-			serviceContext.setAddGuestPermissions(addGuestPermissions);
-
-			if ((expirationDate != null) && expirationDate.before(new Date())) {
-				article.setStatus(WorkflowConstants.STATUS_EXPIRED);
-			}
-
-			if ((article.getStatus() != WorkflowConstants.STATUS_APPROVED) &&
-				(article.getStatus() != WorkflowConstants.STATUS_SCHEDULED)) {
-
-				serviceContext.setWorkflowAction(
-					WorkflowConstants.ACTION_SAVE_DRAFT);
-			}
-
-			JournalArticle importedArticle = null;
 
 			String articleResourceUuid = articleElement.attributeValue(
 				"article-resource-uuid");

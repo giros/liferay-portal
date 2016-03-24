@@ -29,13 +29,18 @@ import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.trash.TrashHandler;
+import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.xml.Element;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -61,16 +66,131 @@ public class JournalArticleStagedModelRepository
 
 		long userId = portletDataContext.getUserId(
 			journalArticle.getUserUuid());
-		
+
 		JournalCreationStrategy creationStrategy =
 			JournalCreationStrategyFactory.getInstance();
 
 		long authorId = creationStrategy.getAuthorUserId(
-			portletDataContext, article);
+			portletDataContext, journalArticle);
 
 		if (authorId != JournalCreationStrategy.USE_DEFAULT_USER_ID_STRATEGY) {
 			userId = authorId;
 		}
+
+		User user = _userLocalService.getUser(userId);
+		
+		Date displayDate = journalArticle.getDisplayDate();
+
+		int displayDateMonth = 0;
+		int displayDateDay = 0;
+		int displayDateYear = 0;
+		int displayDateHour = 0;
+		int displayDateMinute = 0;
+
+		if (displayDate != null) {
+			Calendar displayCal = CalendarFactoryUtil.getCalendar(
+				user.getTimeZone());
+
+			displayCal.setTime(displayDate);
+
+			displayDateMonth = displayCal.get(Calendar.MONTH);
+			displayDateDay = displayCal.get(Calendar.DATE);
+			displayDateYear = displayCal.get(Calendar.YEAR);
+			displayDateHour = displayCal.get(Calendar.HOUR);
+			displayDateMinute = displayCal.get(Calendar.MINUTE);
+
+			if (displayCal.get(Calendar.AM_PM) == Calendar.PM) {
+				displayDateHour += 12;
+			}
+		}
+
+		Date expirationDate = journalArticle.getExpirationDate();
+
+		int expirationDateMonth = 0;
+		int expirationDateDay = 0;
+		int expirationDateYear = 0;
+		int expirationDateHour = 0;
+		int expirationDateMinute = 0;
+		boolean neverExpire = true;
+
+		if (expirationDate != null) {
+			Calendar expirationCal = CalendarFactoryUtil.getCalendar(
+				user.getTimeZone());
+
+			expirationCal.setTime(expirationDate);
+
+			expirationDateMonth = expirationCal.get(Calendar.MONTH);
+			expirationDateDay = expirationCal.get(Calendar.DATE);
+			expirationDateYear = expirationCal.get(Calendar.YEAR);
+			expirationDateHour = expirationCal.get(Calendar.HOUR);
+			expirationDateMinute = expirationCal.get(Calendar.MINUTE);
+			neverExpire = false;
+
+			if (expirationCal.get(Calendar.AM_PM) == Calendar.PM) {
+				expirationDateHour += 12;
+			}
+		}
+
+		Date reviewDate = journalArticle.getReviewDate();
+
+		int reviewDateMonth = 0;
+		int reviewDateDay = 0;
+		int reviewDateYear = 0;
+		int reviewDateHour = 0;
+		int reviewDateMinute = 0;
+		boolean neverReview = true;
+
+		if (reviewDate != null) {
+			Calendar reviewCal = CalendarFactoryUtil.getCalendar(
+				user.getTimeZone());
+
+			reviewCal.setTime(reviewDate);
+
+			reviewDateMonth = reviewCal.get(Calendar.MONTH);
+			reviewDateDay = reviewCal.get(Calendar.DATE);
+			reviewDateYear = reviewCal.get(Calendar.YEAR);
+			reviewDateHour = reviewCal.get(Calendar.HOUR);
+			reviewDateMinute = reviewCal.get(Calendar.MINUTE);
+			neverReview = false;
+
+			if (reviewCal.get(Calendar.AM_PM) == Calendar.PM) {
+				reviewDateHour += 12;
+			}
+		}
+
+		boolean addGroupPermissions = creationStrategy.addGroupPermissions(
+			portletDataContext, journalArticle);
+		boolean addGuestPermissions = creationStrategy.addGuestPermissions(
+			portletDataContext, journalArticle);
+
+		ServiceContext serviceContext =
+			portletDataContext.createServiceContext(journalArticle);
+
+		serviceContext.setAddGroupPermissions(addGroupPermissions);
+		serviceContext.setAddGuestPermissions(addGuestPermissions);
+
+		if ((expirationDate != null) && expirationDate.before(new Date())) {
+			journalArticle.setStatus(WorkflowConstants.STATUS_EXPIRED);
+		}
+
+		if ((journalArticle.getStatus() != WorkflowConstants.STATUS_APPROVED) &&
+			(journalArticle.getStatus() !=
+				WorkflowConstants.STATUS_SCHEDULED)) {
+
+			serviceContext.setWorkflowAction(
+				WorkflowConstants.ACTION_SAVE_DRAFT);
+		}
+		
+		
+
+	}
+
+	public JournalArticle addStagedModel(
+			PortletDataContext portletDataContext,
+			JournalArticle journalArticle, Map<String, Object> uniqueParameters)
+		throws PortalException {
+		
+		
 	}
 
 	@Override
