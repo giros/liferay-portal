@@ -23,14 +23,17 @@ import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
 import com.liferay.exportimport.staged.model.repository.base.BaseStagedModelRepository;
 import com.liferay.journal.lar.JournalCreationStrategy;
 import com.liferay.journal.lar.JournalCreationStrategyFactory;
+import com.liferay.journal.model.adapter.StagedJournalArticle;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleResource;
 import com.liferay.journal.service.JournalArticleLocalService;
+import com.liferay.journal.service.JournalArticleResourceLocalService;
 import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -64,6 +67,16 @@ public class JournalArticleStagedModelRepository
 			JournalArticle journalArticle)
 		throws PortalException {
 
+		return addStagedModel(
+			portletDataContext, new StagedJournalArticle(journalArticle));
+	}
+
+	@Override
+	public JournalArticle addStagedModel(
+			PortletDataContext portletDataContext,
+			StagedJournalArticle journalArticle)
+		throws PortalException {
+
 		long userId = portletDataContext.getUserId(
 			journalArticle.getUserUuid());
 
@@ -77,8 +90,15 @@ public class JournalArticleStagedModelRepository
 			userId = authorId;
 		}
 
+		String newContent = creationStrategy.getTransformedContent(
+			portletDataContext, journalArticle);
+
+		if (newContent != JournalCreationStrategy.ARTICLE_CONTENT_UNCHANGED) {
+			journalArticle.setContent(newContent);
+		}
+
 		User user = _userLocalService.getUser(userId);
-		
+
 		Date displayDate = journalArticle.getDisplayDate();
 
 		int displayDateMonth = 0;
@@ -180,17 +200,32 @@ public class JournalArticleStagedModelRepository
 			serviceContext.setWorkflowAction(
 				WorkflowConstants.ACTION_SAVE_DRAFT);
 		}
-		
-		
 
-	}
+		if (portletDataContext.isDataStrategyMirror()) {
+			serviceContext.setUuid(journalArticle.getUuid());
+			serviceContext.setAttribute(
+				"articleResourceUuid",
+				journalArticle.getArticleResourceUuid());
+			serviceContext.setAttribute(
+				"urlTitle", journalArticle.getUrlTitle());
+		}
 
-	public JournalArticle addStagedModel(
-			PortletDataContext portletDataContext,
-			JournalArticle journalArticle, Map<String, Object> uniqueParameters)
-		throws PortalException {
-		
-		
+		return _journalArticleLocalService.addArticle(
+			userId, portletDataContext.getScopeGroupId(),
+			journalArticle.getFolderId(), journalArticle.getClassNameId(),
+			journalArticle.getClassPK(), journalArticle.getArticleId(),
+			journalArticle.getAutoArticleId(), journalArticle.getVersion(),
+			journalArticle.getTitleMap(), journalArticle.getDescriptionMap(),
+			journalArticle.getContent(), journalArticle.getDDMStructureKey(),
+			journalArticle.getDDMTemplateKey(), journalArticle.getLayoutUuid(),
+			displayDateMonth, displayDateDay, displayDateYear, displayDateHour,
+			displayDateMinute, expirationDateMonth, expirationDateDay,
+			expirationDateYear, expirationDateHour, expirationDateMinute,
+			neverExpire, reviewDateMonth, reviewDateDay, reviewDateYear,
+			reviewDateHour, reviewDateMinute, neverReview,
+			journalArticle.isIndexable(), journalArticle.isSmallImage(),
+			journalArticle.getSmallImageURL(), journalArticle.getSmallFile(),
+			journalArticle.getImages(), null, serviceContext);
 	}
 
 	@Override
@@ -219,6 +254,69 @@ public class JournalArticleStagedModelRepository
 
 		_journalArticleLocalService.deleteArticles(
 			portletDataContext.getScopeGroupId());
+	}
+	
+	public JournalArticle fetchExistingArticle(
+		String articleResourceUuid, long groupId, String articleId,
+		String newArticleId, boolean preloaded) {
+
+		JournalArticle existingArticle = null;
+
+		if (!preloaded) {
+			JournalArticleResource journalArticleResource =
+				_journalArticleResourceLocalService.
+					fetchJournalArticleResourceByUuidAndGroupId(
+						articleResourceUuid, groupId);
+
+			if (journalArticleResource == null) {
+				return null;
+			}
+
+			return _journalArticleLocalService.fetchArticle(
+				groupId, journalArticleResource.getArticleId());
+		}
+
+		if (Validator.isNotNull(newArticleId)) {
+			existingArticle = _journalArticleLocalService.fetchArticle(
+				groupId, newArticleId);
+		}
+
+		if ((existingArticle == null) && Validator.isNull(newArticleId)) {
+			existingArticle = _journalArticleLocalService.fetchArticle(
+				groupId, articleId);
+		}
+
+		return existingArticle;
+	}
+
+	public JournalArticle fetchExistingArticle(
+		String articleUuid, String articleResourceUuid, long groupId,
+		String articleId, String newArticleId, double version,
+		boolean preloaded) {
+
+		JournalArticle article = fetchExistingArticle(
+			articleResourceUuid, groupId, articleId, newArticleId, preloaded);
+
+		if (article != null) {
+			article = fetchExistingArticleVersion(
+				articleUuid, groupId, article.getArticleId(), version);
+		}
+
+		return article;
+	}
+
+	public JournalArticle fetchExistingArticleVersion(
+		String articleUuid, long groupId, String articleId, double version) {
+
+		JournalArticle existingArticle = fetchStagedModelByUuidAndGroupId(
+			articleUuid, groupId);
+
+		if (existingArticle != null) {
+			return existingArticle;
+		}
+
+		return _journalArticleLocalService.fetchArticle(
+			groupId, articleId, version);
 	}
 
 	@Override
@@ -296,69 +394,6 @@ public class JournalArticleStagedModelRepository
 
 	}
 
-	protected JournalArticle fetchExistingArticle(
-		String articleResourceUuid, long groupId, String articleId,
-		String newArticleId, boolean preloaded) {
-
-		JournalArticle existingArticle = null;
-
-		if (!preloaded) {
-			JournalArticleResource journalArticleResource =
-				_journalArticleResourceLocalService.
-					fetchJournalArticleResourceByUuidAndGroupId(
-						articleResourceUuid, groupId);
-
-			if (journalArticleResource == null) {
-				return null;
-			}
-
-			return _journalArticleLocalService.fetchArticle(
-				groupId, journalArticleResource.getArticleId());
-		}
-
-		if (Validator.isNotNull(newArticleId)) {
-			existingArticle = _journalArticleLocalService.fetchArticle(
-				groupId, newArticleId);
-		}
-
-		if ((existingArticle == null) && Validator.isNull(newArticleId)) {
-			existingArticle = _journalArticleLocalService.fetchArticle(
-				groupId, articleId);
-		}
-
-		return existingArticle;
-	}
-
-	protected JournalArticle fetchExistingArticle(
-		String articleUuid, String articleResourceUuid, long groupId,
-		String articleId, String newArticleId, double version,
-		boolean preloaded) {
-
-		JournalArticle article = fetchExistingArticle(
-			articleResourceUuid, groupId, articleId, newArticleId, preloaded);
-
-		if (article != null) {
-			article = fetchExistingArticleVersion(
-				articleUuid, groupId, article.getArticleId(), version);
-		}
-
-		return article;
-	}
-
-	protected JournalArticle fetchExistingArticleVersion(
-		String articleUuid, long groupId, String articleId, double version) {
-
-		JournalArticle existingArticle = fetchStagedModelByUuidAndGroupId(
-			articleUuid, groupId);
-
-		if (existingArticle != null) {
-			return existingArticle;
-		}
-
-		return _journalArticleLocalService.fetchArticle(
-			groupId, articleId, version);
-	}
-
 	@Reference(unbind = "-")
 	protected void setJournalArticleLocalService(
 		JournalArticleLocalService journalArticleLocalService) {
@@ -366,6 +401,22 @@ public class JournalArticleStagedModelRepository
 		_journalArticleLocalService = journalArticleLocalService;
 	}
 
+	@Reference(unbind = "-")
+	protected void setJournalArticleResourceLocalService(
+		JournalArticleResourceLocalService journalArticleResourceLocalService) {
+
+		_journalArticleResourceLocalService =
+			journalArticleResourceLocalService;
+	}
+
+	@Reference(unbind = "-")
+	protected void setUserLocalService(UserLocalService userLocalService) {
+		_userLocalService = userLocalService;
+	}
+
 	private JournalArticleLocalService _journalArticleLocalService;
+	private JournalArticleResourceLocalService
+		_journalArticleResourceLocalService;
+	private UserLocalService _userLocalService;
 
 }

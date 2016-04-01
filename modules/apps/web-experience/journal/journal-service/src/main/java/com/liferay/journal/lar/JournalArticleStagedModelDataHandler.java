@@ -25,7 +25,10 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
+import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
 import com.liferay.journal.exportimport.content.processor.JournalArticleExportImportContentProcessor;
+import com.liferay.journal.exportimport.staged.model.repository.JournalArticleStagedModelRepository;
+import com.liferay.journal.model.adapter.StagedJournalArticle;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleConstants;
 import com.liferay.journal.model.JournalArticleImage;
@@ -410,7 +413,8 @@ public class JournalArticleStagedModelDataHandler
 			PortletDataContext portletDataContext, JournalArticle article)
 		throws Exception {
 
-		JournalArticle importedArticle = (JournalArticle)article.clone();
+		StagedJournalArticle importedArticle =
+			new StagedJournalArticle(article);
 
 		Map<Long, Long> folderIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
@@ -439,6 +443,8 @@ public class JournalArticleStagedModelDataHandler
 
 		String newArticleId = articleIds.get(articleId);
 
+		importedArticle.setNewArticleId(newArticleId);
+
 		if (Validator.isNotNull(newArticleId)) {
 
 			// A sibling of a different version was already assigned a new
@@ -449,6 +455,7 @@ public class JournalArticleStagedModelDataHandler
 		}
 
 		importedArticle.setArticleId(articleId);
+		importedArticle.setAutoArticleId(autoArticleId);
 
 		String content = article.getContent();
 
@@ -459,17 +466,6 @@ public class JournalArticleStagedModelDataHandler
 
 		article.setContent(content);
 		importedArticle.setContent(content);
-
-		JournalCreationStrategy creationStrategy =
-			JournalCreationStrategyFactory.getInstance();
-
-		String newContent = creationStrategy.getTransformedContent(
-			portletDataContext, article);
-
-		if (newContent != JournalCreationStrategy.ARTICLE_CONTENT_UNCHANGED) {
-			article.setContent(newContent);
-			importedArticle.setContent(content);
-		}
 
 		Map<String, String> ddmStructureKeys =
 			(Map<String, String>)portletDataContext.getNewPrimaryKeysMap(
@@ -521,6 +517,7 @@ public class JournalArticleStagedModelDataHandler
 								article.getSmallImageURL());
 
 					article.setSmallImageURL(smallImageURL);
+					importedArticle.setSmallImageURL(smallImageURL);
 				}
 				else if (Validator.isNotNull(smallImagePath)) {
 					byte[] bytes = portletDataContext.getZipEntryAsByteArray(
@@ -534,6 +531,8 @@ public class JournalArticleStagedModelDataHandler
 					}
 				}
 			}
+
+			importedArticle.setSmallFile(smallFile);
 
 			Map<String, byte[]> images = new HashMap<>();
 
@@ -551,54 +550,53 @@ public class JournalArticleStagedModelDataHandler
 					portletDataContext.getZipEntryAsByteArray(imagePath));
 			}
 
+			importedArticle.setImages(images);
+
 			String articleResourceUuid = articleElement.attributeValue(
 				"article-resource-uuid");
 
-			if (portletDataContext.isDataStrategyMirror()) {
-				serviceContext.setUuid(article.getUuid());
-				serviceContext.setAttribute(
-					"articleResourceUuid", articleResourceUuid);
-				serviceContext.setAttribute("urlTitle", article.getUrlTitle());
+			importedArticle.setArticleResourceUuid(articleResourceUuid);
 
+			if (portletDataContext.isDataStrategyMirror()) {
 				boolean preloaded = GetterUtil.getBoolean(
 					articleElement.attributeValue("preloaded"));
 
-				JournalArticle existingArticle = fetchExistingArticle(
-					articleResourceUuid, portletDataContext.getScopeGroupId(),
-					articleId, newArticleId, preloaded);
+				importedArticle.setPreloaded(preloaded);
+
+				JournalArticleStagedModelRepository
+					journalArticleStagedModelRepository =
+						(JournalArticleStagedModelRepository)
+							_stagedModelRepository;
+
+				JournalArticle existingArticle =
+					journalArticleStagedModelRepository.fetchExistingArticle(
+						articleResourceUuid,
+						portletDataContext.getScopeGroupId(),
+						articleId, newArticleId, preloaded);
 
 				JournalArticle existingArticleVersion = null;
 
 				if (existingArticle != null) {
-					existingArticleVersion = fetchExistingArticleVersion(
-						article.getUuid(), portletDataContext.getScopeGroupId(),
-						articleId, article.getVersion());
+					existingArticleVersion =
+						journalArticleStagedModelRepository.
+							fetchExistingArticleVersion(
+								article.getUuid(),
+								portletDataContext.getScopeGroupId(),
+								articleId, article.getVersion());
 				}
 
 				if ((existingArticle != null) &&
 					(existingArticleVersion == null)) {
 
-					autoArticleId = false;
-					articleId = existingArticle.getArticleId();
+					importedArticle.setAutoArticleId(false);
+					importedArticle.setArticleId(
+						existingArticle.getArticleId());
 				}
 
 				if (existingArticleVersion == null) {
-					importedArticle = _journalArticleLocalService.addArticle(
-						userId, portletDataContext.getScopeGroupId(), folderId,
-						article.getClassNameId(), ddmStructureId, articleId,
-						autoArticleId, article.getVersion(),
-						article.getTitleMap(), article.getDescriptionMap(),
-						article.getContent(), parentDDMStructureKey,
-						parentDDMTemplateKey, article.getLayoutUuid(),
-						displayDateMonth, displayDateDay, displayDateYear,
-						displayDateHour, displayDateMinute, expirationDateMonth,
-						expirationDateDay, expirationDateYear,
-						expirationDateHour, expirationDateMinute, neverExpire,
-						reviewDateMonth, reviewDateDay, reviewDateYear,
-						reviewDateHour, reviewDateMinute, neverReview,
-						article.isIndexable(), article.isSmallImage(),
-						article.getSmallImageURL(), smallFile, images,
-						articleURL, serviceContext);
+					importedArticle =
+						journalArticleStagedModelRepository.addStagedModel(
+							portletDataContext, importedArticle);
 				}
 				else {
 					importedArticle = _journalArticleLocalService.updateArticle(
@@ -850,6 +848,17 @@ public class JournalArticleStagedModelDataHandler
 			journalArticleResourceLocalService;
 	}
 
+	@Reference(
+		target =
+			"(model.class.name=com.liferay.journal.model.JournalArticle)",
+		unbind = "-"
+	)
+	protected void setStagedModelRepository(
+		StagedModelRepository<JournalArticle> stagedModelRepository) {
+
+		_stagedModelRepository = stagedModelRepository;
+	}
+
 	@Reference(unbind = "-")
 	protected void setUserLocalService(UserLocalService userLocalService) {
 		_userLocalService = userLocalService;
@@ -864,6 +873,7 @@ public class JournalArticleStagedModelDataHandler
 	private JournalArticleLocalService _journalArticleLocalService;
 	private JournalArticleResourceLocalService
 		_journalArticleResourceLocalService;
+	private StagedModelRepository<JournalArticle> _stagedModelRepository;
 	private UserLocalService _userLocalService;
 
 }
