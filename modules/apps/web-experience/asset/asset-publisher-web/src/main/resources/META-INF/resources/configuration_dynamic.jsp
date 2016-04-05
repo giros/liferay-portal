@@ -141,6 +141,7 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 						List<KeyValuePair> subtypesRightList = new ArrayList<KeyValuePair>();
 
 						boolean anyAssetSubtype = GetterUtil.getBoolean(portletPreferences.getValue("anyClassType" + className, Boolean.TRUE.toString()));
+						long anyAssetSubtypeId = GetterUtil.getLong(portletPreferences.getValue("anyClassType" + className, StringPool.BLANK), Long.MIN_VALUE);
 					%>
 
 						<div class='asset-subtype <%= (assetSelectedClassTypeIds.length < 1) ? StringPool.BLANK : "hide" %>' id="<portlet:namespace /><%= className %>Options">
@@ -160,9 +161,16 @@ String selectStyle = (String)request.getAttribute("configuration.jsp-selectStyle
 										if (Arrays.binarySearch(assetSelectedClassTypeIds, classType.getClassTypeId()) < 0) {
 											subtypesRightList.add(new KeyValuePair(String.valueOf(classType.getClassTypeId()), HtmlUtil.escape(classType.getName())));
 										}
+
+										long classTypeId = classType.getClassTypeId();
+
+										boolean selected =
+											(anyAssetSubtypeId == classTypeId) ||
+											(!anyAssetSubtype && (anyAssetSubtypeId == Long.MIN_VALUE) &&
+												(assetSelectedClassTypeIds.length == 1) && (assetSelectedClassTypeIds[0]).equals(classTypeId));
 									%>
 
-										<aui:option label="<%= HtmlUtil.escapeAttribute(classType.getName()) %>" selected="<%= !anyAssetSubtype && (assetSelectedClassTypeIds.length == 1) && ((assetSelectedClassTypeIds[0]).equals(classType.getClassTypeId())) %>" value="<%= classType.getClassTypeId() %>" />
+										<aui:option label="<%= HtmlUtil.escapeAttribute(classType.getName()) %>" selected="<%= selected %>" value="<%= classType.getClassTypeId() %>" />
 
 									<%
 									}
