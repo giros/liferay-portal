@@ -44,8 +44,10 @@ import com.liferay.portal.kernel.xml.Element;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -77,129 +79,48 @@ public class JournalArticleStagedModelRepository
 			StagedJournalArticle journalArticle)
 		throws PortalException {
 
-		long userId = portletDataContext.getUserId(
-			journalArticle.getUserUuid());
-
 		JournalCreationStrategy creationStrategy =
 			JournalCreationStrategyFactory.getInstance();
 
-		long authorId = creationStrategy.getAuthorUserId(
-			portletDataContext, journalArticle);
+		long userId = getUserId(
+			portletDataContext, journalArticle, creationStrategy);
 
-		if (authorId != JournalCreationStrategy.USE_DEFAULT_USER_ID_STRATEGY) {
-			userId = authorId;
-		}
-
-		String newContent = creationStrategy.getTransformedContent(
-			portletDataContext, journalArticle);
-
-		if (newContent != JournalCreationStrategy.ARTICLE_CONTENT_UNCHANGED) {
-			journalArticle.setContent(newContent);
-		}
+		journalArticle.setContent(
+			getNewContent(
+				portletDataContext, journalArticle, creationStrategy));
 
 		User user = _userLocalService.getUser(userId);
 
-		Date displayDate = journalArticle.getDisplayDate();
+		Map<String, Integer> displayDateComponents = getDateComponents(
+			journalArticle, user.getTimeZone(), "displayDate");
 
-		int displayDateMonth = 0;
-		int displayDateDay = 0;
-		int displayDateYear = 0;
-		int displayDateHour = 0;
-		int displayDateMinute = 0;
+		Map<String, Integer> expirationDateComponents = getDateComponents(
+			journalArticle, user.getTimeZone(), "expirationDate");
+	
+		Map<String, Integer> reviewDateComponents = getDateComponents(
+			journalArticle, user.getTimeZone(), "reviewDate");
 
-		if (displayDate != null) {
-			Calendar displayCal = CalendarFactoryUtil.getCalendar(
-				user.getTimeZone());
-
-			displayCal.setTime(displayDate);
-
-			displayDateMonth = displayCal.get(Calendar.MONTH);
-			displayDateDay = displayCal.get(Calendar.DATE);
-			displayDateYear = displayCal.get(Calendar.YEAR);
-			displayDateHour = displayCal.get(Calendar.HOUR);
-			displayDateMinute = displayCal.get(Calendar.MINUTE);
-
-			if (displayCal.get(Calendar.AM_PM) == Calendar.PM) {
-				displayDateHour += 12;
-			}
-		}
+		boolean neverExpire = true;
 
 		Date expirationDate = journalArticle.getExpirationDate();
 
-		int expirationDateMonth = 0;
-		int expirationDateDay = 0;
-		int expirationDateYear = 0;
-		int expirationDateHour = 0;
-		int expirationDateMinute = 0;
-		boolean neverExpire = true;
-
 		if (expirationDate != null) {
-			Calendar expirationCal = CalendarFactoryUtil.getCalendar(
-				user.getTimeZone());
-
-			expirationCal.setTime(expirationDate);
-
-			expirationDateMonth = expirationCal.get(Calendar.MONTH);
-			expirationDateDay = expirationCal.get(Calendar.DATE);
-			expirationDateYear = expirationCal.get(Calendar.YEAR);
-			expirationDateHour = expirationCal.get(Calendar.HOUR);
-			expirationDateMinute = expirationCal.get(Calendar.MINUTE);
 			neverExpire = false;
-
-			if (expirationCal.get(Calendar.AM_PM) == Calendar.PM) {
-				expirationDateHour += 12;
-			}
 		}
 
-		Date reviewDate = journalArticle.getReviewDate();
-
-		int reviewDateMonth = 0;
-		int reviewDateDay = 0;
-		int reviewDateYear = 0;
-		int reviewDateHour = 0;
-		int reviewDateMinute = 0;
 		boolean neverReview = true;
 
-		if (reviewDate != null) {
-			Calendar reviewCal = CalendarFactoryUtil.getCalendar(
-				user.getTimeZone());
-
-			reviewCal.setTime(reviewDate);
-
-			reviewDateMonth = reviewCal.get(Calendar.MONTH);
-			reviewDateDay = reviewCal.get(Calendar.DATE);
-			reviewDateYear = reviewCal.get(Calendar.YEAR);
-			reviewDateHour = reviewCal.get(Calendar.HOUR);
-			reviewDateMinute = reviewCal.get(Calendar.MINUTE);
+		if (journalArticle.getReviewDate() != null) {
 			neverReview = false;
-
-			if (reviewCal.get(Calendar.AM_PM) == Calendar.PM) {
-				reviewDateHour += 12;
-			}
 		}
-
-		boolean addGroupPermissions = creationStrategy.addGroupPermissions(
-			portletDataContext, journalArticle);
-		boolean addGuestPermissions = creationStrategy.addGuestPermissions(
-			portletDataContext, journalArticle);
-
-		ServiceContext serviceContext =
-			portletDataContext.createServiceContext(journalArticle);
-
-		serviceContext.setAddGroupPermissions(addGroupPermissions);
-		serviceContext.setAddGuestPermissions(addGuestPermissions);
 
 		if ((expirationDate != null) && expirationDate.before(new Date())) {
 			journalArticle.setStatus(WorkflowConstants.STATUS_EXPIRED);
 		}
 
-		if ((journalArticle.getStatus() != WorkflowConstants.STATUS_APPROVED) &&
-			(journalArticle.getStatus() !=
-				WorkflowConstants.STATUS_SCHEDULED)) {
-
-			serviceContext.setWorkflowAction(
-				WorkflowConstants.ACTION_SAVE_DRAFT);
-		}
+		ServiceContext serviceContext =
+			getServiceContext(
+				portletDataContext, journalArticle, creationStrategy);
 
 		if (portletDataContext.isDataStrategyMirror()) {
 			serviceContext.setUuid(journalArticle.getUuid());
@@ -218,11 +139,19 @@ public class JournalArticleStagedModelRepository
 			journalArticle.getTitleMap(), journalArticle.getDescriptionMap(),
 			journalArticle.getContent(), journalArticle.getDDMStructureKey(),
 			journalArticle.getDDMTemplateKey(), journalArticle.getLayoutUuid(),
-			displayDateMonth, displayDateDay, displayDateYear, displayDateHour,
-			displayDateMinute, expirationDateMonth, expirationDateDay,
-			expirationDateYear, expirationDateHour, expirationDateMinute,
-			neverExpire, reviewDateMonth, reviewDateDay, reviewDateYear,
-			reviewDateHour, reviewDateMinute, neverReview,
+			displayDateComponents.get("month"),
+			displayDateComponents.get("day"), displayDateComponents.get("year"),
+			displayDateComponents.get("hour"),
+			displayDateComponents.get("minute"),
+			expirationDateComponents.get("month"),
+			expirationDateComponents.get("day"),
+			expirationDateComponents.get("year"),
+			expirationDateComponents.get("hour"),
+			expirationDateComponents.get("minute"),
+			neverExpire, reviewDateComponents.get("month"),
+			reviewDateComponents.get("day"), reviewDateComponents.get("year"),
+			reviewDateComponents.get("hour"),
+			reviewDateComponents.get("minute"), neverReview,
 			journalArticle.isIndexable(), journalArticle.isSmallImage(),
 			journalArticle.getSmallImageURL(), journalArticle.getSmallFile(),
 			journalArticle.getImages(), null, serviceContext);
@@ -389,9 +318,194 @@ public class JournalArticleStagedModelRepository
 
 	@Override
 	public JournalArticle updateStagedModel(
-			PortletDataContext portletDataContext, JournalArticle journalArticle)
+			PortletDataContext portletDataContext,
+			JournalArticle journalArticle)
 		throws PortalException {
 
+		return updateStagedModel(
+			portletDataContext, new StagedJournalArticle(journalArticle));
+	}
+
+	@Override
+	public JournalArticle updateStagedModel(
+			PortletDataContext portletDataContext,
+			StagedJournalArticle journalArticle)
+		throws PortalException {
+		
+		JournalCreationStrategy creationStrategy =
+			JournalCreationStrategyFactory.getInstance();
+
+		long userId = getUserId(
+			portletDataContext, journalArticle, creationStrategy);
+
+		journalArticle.setContent(
+			getNewContent(
+				portletDataContext, journalArticle, creationStrategy));
+
+		User user = _userLocalService.getUser(userId);
+
+		Map<String, Integer> displayDateComponents = getDateComponents(
+			journalArticle, user.getTimeZone(), "displayDate");
+
+		Map<String, Integer> expirationDateComponents = getDateComponents(
+			journalArticle, user.getTimeZone(), "expirationDate");
+	
+		Map<String, Integer> reviewDateComponents = getDateComponents(
+			journalArticle, user.getTimeZone(), "reviewDate");
+
+		boolean neverExpire = true;
+
+		Date expirationDate = journalArticle.getExpirationDate();
+
+		if (expirationDate != null) {
+			neverExpire = false;
+		}
+
+		boolean neverReview = true;
+
+		if (journalArticle.getReviewDate() != null) {
+			neverReview = false;
+		}
+
+		if ((expirationDate != null) && expirationDate.before(new Date())) {
+			journalArticle.setStatus(WorkflowConstants.STATUS_EXPIRED);
+		}
+
+		ServiceContext serviceContext =
+			getServiceContext(
+				portletDataContext, journalArticle, creationStrategy);
+
+		return _journalArticleLocalService.updateArticle(
+			userId, journalArticle.getGroupId(), journalArticle.getFolderId(),
+			journalArticle.getArticleId(), journalArticle.getVersion(),
+			journalArticle.getTitleMap(), journalArticle.getDescriptionMap(),
+			journalArticle.getContent(), journalArticle.getDDMStructureKey(),
+			journalArticle.getDDMTemplateKey(), journalArticle.getLayoutUuid(),
+			displayDateComponents.get("month"),
+			displayDateComponents.get("day"), displayDateComponents.get("year"),
+			displayDateComponents.get("hour"),
+			displayDateComponents.get("minute"),
+			expirationDateComponents.get("month"),
+			expirationDateComponents.get("day"),
+			expirationDateComponents.get("year"),
+			expirationDateComponents.get("hour"),
+			expirationDateComponents.get("minute"),
+			neverExpire, reviewDateComponents.get("month"),
+			reviewDateComponents.get("day"), reviewDateComponents.get("year"),
+			reviewDateComponents.get("hour"),
+			reviewDateComponents.get("minute"), neverReview,
+			journalArticle.isIndexable(), journalArticle.isSmallImage(),
+			journalArticle.getSmallImageURL(), journalArticle.getSmallFile(),
+			journalArticle.getImages(), null, serviceContext);
+	}
+	
+	protected Map<String, Integer> getDateComponents(
+		JournalArticle journalArticle, TimeZone timeZone,
+		String requestedDate) {
+
+		Map<String, Integer> dateComponents = new HashMap<>();
+
+		Date date;
+
+		if (requestedDate.equals("displayDate")) {
+			date = journalArticle.getDisplayDate();
+		}
+		else if (requestedDate.equals("expirationDate")) {
+			date = journalArticle.getExpirationDate();
+		}
+		else if (requestedDate.equals("reviewDate")) {
+			date = journalArticle.getReviewDate();
+		}
+		else {
+			return dateComponents;
+		}
+
+		int month = 0;
+		int day = 0;
+		int year = 0;
+		int hour = 0;
+		int minute = 0;
+
+		if (date != null) {
+			Calendar displayCal = CalendarFactoryUtil.getCalendar(timeZone);
+
+			displayCal.setTime(date);
+
+			month = displayCal.get(Calendar.MONTH);
+			day = displayCal.get(Calendar.DATE);
+			year = displayCal.get(Calendar.YEAR);
+			hour = displayCal.get(Calendar.HOUR);
+			minute = displayCal.get(Calendar.MINUTE);
+
+			if (displayCal.get(Calendar.AM_PM) == Calendar.PM) {
+				hour += 12;
+			}
+		}
+
+		dateComponents.put("month", month);
+		dateComponents.put("day", day);
+		dateComponents.put("year", year);
+		dateComponents.put("hour", hour);
+		dateComponents.put("minute", minute);
+
+		return dateComponents;
+	}
+
+	protected String getNewContent(
+		PortletDataContext portletDataContext, JournalArticle journalArticle,
+		JournalCreationStrategy creationStrategy) {
+
+		String newContent = creationStrategy.getTransformedContent(
+			portletDataContext, journalArticle);
+
+		if (newContent != JournalCreationStrategy.ARTICLE_CONTENT_UNCHANGED) {
+			return newContent;
+		}
+
+		return journalArticle.getContent();
+	}
+	
+	protected ServiceContext getServiceContext(
+		PortletDataContext portletDataContext, JournalArticle journalArticle,
+		JournalCreationStrategy creationStrategy) {
+
+		boolean addGroupPermissions = creationStrategy.addGroupPermissions(
+			portletDataContext, journalArticle);
+		boolean addGuestPermissions = creationStrategy.addGuestPermissions(
+			portletDataContext, journalArticle);
+
+		ServiceContext serviceContext =
+			portletDataContext.createServiceContext(journalArticle);
+
+		serviceContext.setAddGroupPermissions(addGroupPermissions);
+		serviceContext.setAddGuestPermissions(addGuestPermissions);
+
+		if ((journalArticle.getStatus() != WorkflowConstants.STATUS_APPROVED) &&
+			(journalArticle.getStatus() !=
+				WorkflowConstants.STATUS_SCHEDULED)) {
+
+			serviceContext.setWorkflowAction(
+				WorkflowConstants.ACTION_SAVE_DRAFT);
+		}
+
+		return serviceContext;
+	}
+
+	protected long getUserId(
+		PortletDataContext portletDataContext, JournalArticle journalArticle,
+		JournalCreationStrategy creationStrategy) {
+
+		long userId = portletDataContext.getUserId(
+			journalArticle.getUserUuid());
+
+		long authorId = creationStrategy.getAuthorUserId(
+			portletDataContext, journalArticle);
+
+		if (authorId != JournalCreationStrategy.USE_DEFAULT_USER_ID_STRATEGY) {
+			userId = authorId;
+		}
+
+		return userId;
 	}
 
 	@Reference(unbind = "-")
