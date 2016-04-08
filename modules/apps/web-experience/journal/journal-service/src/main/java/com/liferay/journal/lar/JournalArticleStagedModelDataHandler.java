@@ -75,6 +75,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * @author Daniel Kocsis
  * @author Mate Thurzo
+ * @author Gergely Mathe
  */
 @Component(
 	immediate = true,
@@ -86,60 +87,6 @@ public class JournalArticleStagedModelDataHandler
 	extends BaseStagedModelDataHandler<JournalArticle> {
 
 	public static final String[] CLASS_NAMES = {JournalArticle.class.getName()};
-
-	@Override
-	public void deleteStagedModel(JournalArticle article)
-		throws PortalException {
-
-		_journalArticleLocalService.deleteArticle(article);
-	}
-
-	@Override
-	public void deleteStagedModel(
-			String uuid, long groupId, String className, String extraData)
-		throws PortalException {
-
-		JournalArticleResource articleResource =
-			_journalArticleResourceLocalService.
-				fetchJournalArticleResourceByUuidAndGroupId(uuid, groupId);
-
-		if (articleResource == null) {
-			return;
-		}
-
-		JSONObject extraDataJSONObject = JSONFactoryUtil.createJSONObject(
-			extraData);
-
-		if (Validator.isNotNull(extraData) && extraDataJSONObject.has("uuid")) {
-			String articleUuid = extraDataJSONObject.getString("uuid");
-
-			JournalArticle article = fetchStagedModelByUuidAndGroupId(
-				articleUuid, groupId);
-
-			deleteStagedModel(article);
-		}
-		else {
-			_journalArticleLocalService.deleteArticle(
-				groupId, articleResource.getArticleId(), null);
-		}
-	}
-
-	@Override
-	public JournalArticle fetchStagedModelByUuidAndGroupId(
-		String uuid, long groupId) {
-
-		return _journalArticleLocalService.fetchJournalArticleByUuidAndGroupId(
-			uuid, groupId);
-	}
-
-	@Override
-	public List<JournalArticle> fetchStagedModelsByUuidAndCompanyId(
-		String uuid, long companyId) {
-
-		return _journalArticleLocalService.getJournalArticlesByUuidAndCompanyId(
-			uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-			new StagedModelModifiedDateComparator<JournalArticle>());
-	}
 
 	@Override
 	public String[] getClassNames() {
@@ -443,8 +390,6 @@ public class JournalArticleStagedModelDataHandler
 
 		String newArticleId = articleIds.get(articleId);
 
-		importedArticle.setNewArticleId(newArticleId);
-
 		if (Validator.isNotNull(newArticleId)) {
 
 			// A sibling of a different version was already assigned a new
@@ -464,7 +409,6 @@ public class JournalArticleStagedModelDataHandler
 				replaceImportContentReferences(
 					portletDataContext, article, content);
 
-		article.setContent(content);
 		importedArticle.setContent(content);
 
 		Map<String, String> ddmStructureKeys =
@@ -516,7 +460,6 @@ public class JournalArticleStagedModelDataHandler
 								portletDataContext, article,
 								article.getSmallImageURL());
 
-					article.setSmallImageURL(smallImageURL);
 					importedArticle.setSmallImageURL(smallImageURL);
 				}
 				else if (Validator.isNotNull(smallImagePath)) {
