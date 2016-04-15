@@ -17,12 +17,15 @@ package com.liferay.document.library.lar;
 import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.document.library.model.adapter.StagedRepository;
+import com.liferay.document.library.model.adapter.impl.StagedRepositoryImpl;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
+import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -139,7 +142,8 @@ public class RepositoryStagedModelDataHandler
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
 			repository);
 
-		Repository importedRepository = null;
+		StagedRepository importedRepository = new StagedRepositoryImpl(
+			repository);
 
 		Element repositoryElement =
 			portletDataContext.getImportDataStagedModelElement(repository);
@@ -148,48 +152,31 @@ public class RepositoryStagedModelDataHandler
 			boolean hidden = GetterUtil.getBoolean(
 				repositoryElement.attributeValue("hidden"));
 
-			if (portletDataContext.isDataStrategyMirror()) {
-				Repository existingRepository =
-					fetchStagedModelByUuidAndGroupId(
-						repository.getUuid(),
-						portletDataContext.getScopeGroupId());
+			importedRepository.setHidden(hidden);
 
-				if (existingRepository == null) {
-					existingRepository =
-						_repositoryLocalService.fetchRepository(
-							portletDataContext.getScopeGroupId(),
-							repository.getName());
-				}
+			Repository existingRepository =
+				_stagedModelRepository.fetchStagedModelByUuidAndGroupId(
+					repository.getUuid(),
+					portletDataContext.getScopeGroupId());
 
-				if (existingRepository == null) {
-					serviceContext.setUuid(repository.getUuid());
+			if (existingRepository == null) {
+				existingRepository = _repositoryLocalService.fetchRepository(
+					portletDataContext.getScopeGroupId(),
+					repository.getName());
+			}
 
-					importedRepository = _repositoryLocalService.addRepository(
-						userId, portletDataContext.getScopeGroupId(),
-						repository.getClassNameId(),
-						DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
-						repository.getName(), repository.getDescription(),
-						repository.getPortletId(),
-						repository.getTypeSettingsProperties(), hidden,
-						serviceContext);
-				}
-				else {
-					_repositoryLocalService.updateRepository(
-						existingRepository.getRepositoryId(),
-						repository.getName(), repository.getDescription());
+			if ((existingRepository == null) ||
+				!portletDataContext.isDataStrategyMirror()) {
 
-					importedRepository = existingRepository;
-				}
+				importedRepository = _stagedModelRepository.addStagedModel(
+					portletDataContext, importedRepository);
 			}
 			else {
-				importedRepository = _repositoryLocalService.addRepository(
-					userId, portletDataContext.getScopeGroupId(),
-					repository.getClassNameId(),
-					DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
-					repository.getName(), repository.getDescription(),
-					repository.getPortletId(),
-					repository.getTypeSettingsProperties(), hidden,
-					serviceContext);
+				importedRepository.setRepositoryId(
+					existingRepository.getRepositoryId());
+
+				_stagedModelRepository.updateStagedModel(
+					portletDataContext, importedRepository);
 			}
 		}
 		catch (Exception e) {
@@ -232,11 +219,19 @@ public class RepositoryStagedModelDataHandler
 		_repositoryLocalService = repositoryLocalService;
 	}
 
+	@Reference(unbind = "-")
+	protected void setStagedModelRepository(
+		StagedModelRepository<Repository> stagedModelRepository) {
+
+		_stagedModelRepository = stagedModelRepository;
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		RepositoryStagedModelDataHandler.class);
 
 	private DLAppLocalService _dlAppLocalService;
 	private RepositoryEntryLocalService _repositoryEntryLocalService;
 	private RepositoryLocalService _repositoryLocalService;
+	private StagedModelRepository<Repository> _stagedModelRepository;
 
 }
