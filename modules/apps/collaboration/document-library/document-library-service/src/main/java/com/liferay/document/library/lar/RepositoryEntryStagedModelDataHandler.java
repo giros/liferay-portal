@@ -19,6 +19,7 @@ import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
+import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.model.Repository;
 import com.liferay.portal.kernel.model.RepositoryEntry;
@@ -42,41 +43,6 @@ public class RepositoryEntryStagedModelDataHandler
 
 	public static final String[] CLASS_NAMES =
 		{RepositoryEntry.class.getName()};
-
-	@Override
-	public void deleteStagedModel(RepositoryEntry repositoryEntry) {
-		_repositoryEntryLocalService.deleteRepositoryEntry(repositoryEntry);
-	}
-
-	@Override
-	public void deleteStagedModel(
-		String uuid, long groupId, String className, String extraData) {
-
-		RepositoryEntry repositoryEntry = fetchStagedModelByUuidAndGroupId(
-			uuid, groupId);
-
-		if (repositoryEntry != null) {
-			deleteStagedModel(repositoryEntry);
-		}
-	}
-
-	@Override
-	public RepositoryEntry fetchStagedModelByUuidAndGroupId(
-		String uuid, long groupId) {
-
-		return _repositoryEntryLocalService.
-			fetchRepositoryEntryByUuidAndGroupId(uuid, groupId);
-	}
-
-	@Override
-	public List<RepositoryEntry> fetchStagedModelsByUuidAndCompanyId(
-		String uuid, long companyId) {
-
-		return _repositoryEntryLocalService.
-			getRepositoryEntriesByUuidAndCompanyId(
-				uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-				new StagedModelModifiedDateComparator<RepositoryEntry>());
-	}
 
 	@Override
 	public String[] getClassNames() {
@@ -118,35 +84,26 @@ public class RepositoryEntryStagedModelDataHandler
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
 			repositoryEntry);
 
-		RepositoryEntry importedRepositoryEntry = null;
+		RepositoryEntry importedRepositoryEntry =
+			(RepositoryEntry)repositoryEntry.clone();
 
-		if (portletDataContext.isDataStrategyMirror()) {
-			RepositoryEntry existingRepositoryEntry =
-				fetchStagedModelByUuidAndGroupId(
-					repositoryEntry.getUuid(),
-					portletDataContext.getScopeGroupId());
+		RepositoryEntry existingRepositoryEntry =
+			_stagedModelRepository.fetchStagedModelByUuidAndGroupId(
+				repositoryEntry.getUuid(),
+				portletDataContext.getScopeGroupId());
 
-			if (existingRepositoryEntry == null) {
-				serviceContext.setUuid(repositoryEntry.getUuid());
+		if ((existingRepositoryEntry == null) ||
+			!portletDataContext.isDataStrategyMirror()) {
 
-				importedRepositoryEntry =
-					_repositoryEntryLocalService.addRepositoryEntry(
-						userId, portletDataContext.getScopeGroupId(),
-						repositoryId, repositoryEntry.getMappedId(),
-						serviceContext);
-			}
-			else {
-				importedRepositoryEntry =
-					_repositoryEntryLocalService.updateRepositoryEntry(
-						existingRepositoryEntry.getRepositoryEntryId(),
-						repositoryEntry.getMappedId());
-			}
+			importedRepositoryEntry = _stagedModelRepository.addStagedModel(
+				portletDataContext, importedRepositoryEntry);
 		}
 		else {
-			importedRepositoryEntry =
-				_repositoryEntryLocalService.addRepositoryEntry(
-					userId, portletDataContext.getScopeGroupId(), repositoryId,
-					repositoryEntry.getMappedId(), serviceContext);
+			importedRepositoryEntry.setRepositoryId(
+				existingRepositoryEntry.getRepositoryId());
+
+			importedRepositoryEntry = _stagedModelRepository.updateStagedModel(
+				portletDataContext, importedRepositoryEntry);
 		}
 
 		portletDataContext.importClassedModel(
@@ -154,12 +111,12 @@ public class RepositoryEntryStagedModelDataHandler
 	}
 
 	@Reference(unbind = "-")
-	protected void setRepositoryEntryLocalService(
-		RepositoryEntryLocalService repositoryEntryLocalService) {
+	protected void setStagedModelRepository(
+		StagedModelRepository<RepositoryEntry> stagedModelRepository) {
 
-		_repositoryEntryLocalService = repositoryEntryLocalService;
+		_stagedModelRepository = stagedModelRepository;
 	}
 
-	private RepositoryEntryLocalService _repositoryEntryLocalService;
+	private StagedModelRepository<RepositoryEntry> _stagedModelRepository;
 
 }
