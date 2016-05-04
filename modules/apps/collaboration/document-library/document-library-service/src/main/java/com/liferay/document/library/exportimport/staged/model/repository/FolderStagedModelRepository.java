@@ -76,8 +76,8 @@ public class FolderStagedModelRepository
 
 		return _dlAppLocalService.addFolder(
 			userId, portletDataContext.getScopeGroupId(),
-			folder.getParentFolderId(), folder.getName(),
-			folder.getDescription(), serviceContext);
+			folder.getParentFolderId(), name, folder.getDescription(),
+			serviceContext);
 	}
 
 	@Override
@@ -165,9 +165,7 @@ public class FolderStagedModelRepository
 		}
 	}
 
-	public Folder saveStagedModel(Folder folder) throws PortalException {
-		
-	}
+	public Folder saveStagedModel(Folder folder) throws PortalException;
 
 	public Folder updateStagedModel(
 			PortletDataContext portletDataContext, Folder folder)
@@ -181,14 +179,13 @@ public class FolderStagedModelRepository
 			folder.getParentFolderId(), folder.getName(), 2);
 
 		return _dlAppLocalService.updateFolder(
-			folder.getFolderId(), folder.getParentFolderId(), folder.getName(),
+			folder.getFolderId(), folder.getParentFolderId(), name,
 			folder.getDescription(), serviceContext);
 	}
 
 	protected String getFolderName(
 			String uuid, long groupId, long parentFolderId, String name,
-			int count)
-		throws Exception {
+			int count) {
 
 		Folder folder = FolderUtil.fetchByR_P_N(groupId, parentFolderId, name);
 

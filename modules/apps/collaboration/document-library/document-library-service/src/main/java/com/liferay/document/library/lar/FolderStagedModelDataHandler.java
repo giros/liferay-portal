@@ -70,46 +70,6 @@ public class FolderStagedModelDataHandler
 	};
 
 	@Override
-	public void deleteStagedModel(Folder folder) throws PortalException {
-		_dlAppLocalService.deleteFolder(folder.getFolderId());
-	}
-
-	@Override
-	public void deleteStagedModel(
-			String uuid, long groupId, String className, String extraData)
-		throws PortalException {
-
-		Folder folder = fetchStagedModelByUuidAndGroupId(uuid, groupId);
-
-		if (folder != null) {
-			deleteStagedModel(folder);
-		}
-	}
-
-	@Override
-	public Folder fetchStagedModelByUuidAndGroupId(String uuid, long groupId) {
-		return FolderUtil.fetchByUUID_R(uuid, groupId);
-	}
-
-	@Override
-	public List<Folder> fetchStagedModelsByUuidAndCompanyId(
-		String uuid, long companyId) {
-
-		List<DLFolder> dlFolders =
-			_dlFolderLocalService.getDLFoldersByUuidAndCompanyId(
-				uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-				new StagedModelModifiedDateComparator<DLFolder>());
-
-		List<Folder> folders = new ArrayList<>();
-
-		for (DLFolder dlFolder : dlFolders) {
-			folders.add(new LiferayFolder(dlFolder));
-		}
-
-		return folders;
-	}
-
-	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -117,22 +77,6 @@ public class FolderStagedModelDataHandler
 	@Override
 	public String getDisplayName(Folder folder) {
 		return folder.getName();
-	}
-
-	@Override
-	public void restoreStagedModel(
-			PortletDataContext portletDataContext, Folder stagedModel)
-		throws PortletDataException {
-
-		try {
-			doRestoreStagedModel(portletDataContext, stagedModel);
-		}
-		catch (PortletDataException pde) {
-			throw pde;
-		}
-		catch (Exception e) {
-			throw new PortletDataException(e);
-		}
 	}
 
 	@Override
@@ -260,37 +204,6 @@ public class FolderStagedModelDataHandler
 		folderIds.put(folder.getFolderId(), importedFolder.getFolderId());
 		folderIdsAndRepositoryEntryIds.put(
 			folder.getFolderId(), importedFolder.getFolderId());
-	}
-
-	@Override
-	protected void doRestoreStagedModel(
-			PortletDataContext portletDataContext, Folder folder)
-		throws Exception {
-
-		long userId = portletDataContext.getUserId(folder.getUserUuid());
-
-		Folder existingFolder = fetchStagedModelByUuidAndGroupId(
-			folder.getUuid(), portletDataContext.getScopeGroupId());
-
-		if ((existingFolder == null) ||
-			!(existingFolder.getModel() instanceof DLFolder)) {
-
-			return;
-		}
-
-		DLFolder dlFolder = (DLFolder)existingFolder.getModel();
-
-		if (!dlFolder.isInTrash()) {
-			return;
-		}
-
-		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
-			DLFolder.class.getName());
-
-		if (trashHandler.isRestorable(existingFolder.getFolderId())) {
-			trashHandler.restoreTrashEntry(
-				userId, existingFolder.getFolderId());
-		}
 	}
 
 	protected void exportFolderFileEntryTypes(
