@@ -21,6 +21,8 @@ import org.osgi.service.component.annotations.Reference;
 
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.document.library.model.adapter.StagedRepository;
+import com.liferay.document.library.model.adapter.impl.StagedRepositoryImpl;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
@@ -45,8 +47,19 @@ import com.liferay.portal.kernel.service.ServiceContext;
 public class RepositoryStagedModelRepository 
 	extends BaseStagedModelRepository<Repository> {
 
+	@Override
 	public Repository addStagedModel(
 			PortletDataContext portletDataContext, Repository repository)
+		throws PortalException {
+
+		StagedRepository stagedRepository =
+			new StagedRepositoryImpl(repository);
+
+		return addStagedModel(portletDataContext, stagedRepository);
+	}
+
+	public Repository addStagedModel(
+			PortletDataContext portletDataContext, StagedRepository repository)
 		throws PortalException {
 
 		long userId = portletDataContext.getUserId(repository.getUserUuid());
@@ -124,6 +137,7 @@ public class RepositoryStagedModelRepository
 		return _repositoryLocalService.updateRepository(repository);
 	}
 
+	@Override
 	public Repository updateStagedModel(
 			PortletDataContext portletDataContext, Repository repository)
 		throws PortalException {
