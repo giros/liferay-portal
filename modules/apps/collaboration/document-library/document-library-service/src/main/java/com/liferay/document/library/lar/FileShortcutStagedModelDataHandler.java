@@ -25,6 +25,7 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
+import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -57,65 +58,6 @@ public class FileShortcutStagedModelDataHandler
 		DLFileShortcutConstants.getClassName(), FileShortcut.class.getName(),
 		LiferayFileShortcut.class.getName()
 	};
-
-	@Override
-	public void deleteStagedModel(FileShortcut fileShortcut)
-		throws PortalException {
-
-		_dlFileShortcutLocalService.deleteFileShortcut(
-			fileShortcut.getFileShortcutId());
-	}
-
-	@Override
-	public void deleteStagedModel(
-			String uuid, long groupId, String className, String extraData)
-		throws PortalException {
-
-		FileShortcut fileShortcut = fetchStagedModelByUuidAndGroupId(
-			uuid, groupId);
-
-		if (fileShortcut != null) {
-			deleteStagedModel(fileShortcut);
-		}
-	}
-
-	@Override
-	public FileShortcut fetchStagedModelByUuidAndGroupId(
-		String uuid, long groupId) {
-
-		try {
-			DLFileShortcut dlFileShortcut =
-				_dlFileShortcutLocalService.getDLFileShortcutByUuidAndGroupId(
-					uuid, groupId);
-
-			return new LiferayFileShortcut(dlFileShortcut);
-		}
-		catch (PortalException pe) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
-			return null;
-		}
-	}
-
-	@Override
-	public List<FileShortcut> fetchStagedModelsByUuidAndCompanyId(
-		String uuid, long companyId) {
-
-		List<DLFileShortcut> dlFileShortcuts =
-			_dlFileShortcutLocalService.getDLFileShortcutsByUuidAndCompanyId(
-				uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-				new StagedModelModifiedDateComparator<DLFileShortcut>());
-
-		List<FileShortcut> fileShortcuts = new ArrayList<>();
-
-		for (DLFileShortcut dlFileShortcut : dlFileShortcuts) {
-			fileShortcuts.add(new LiferayFileShortcut(dlFileShortcut));
-		}
-
-		return fileShortcuts;
-	}
 
 	@Override
 	public String[] getClassNames() {
@@ -160,7 +102,7 @@ public class FileShortcutStagedModelDataHandler
 			PortletDataContext portletDataContext, FileShortcut fileShortcut)
 		throws Exception {
 
-		long userId = portletDataContext.getUserId(fileShortcut.getUserUuid());
+		FileShortcut importedFileShortcut = (FileShortcut)fileShortcut.clone();
 
 		Map<Long, Long> folderIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
@@ -169,6 +111,8 @@ public class FileShortcutStagedModelDataHandler
 		long folderId = MapUtil.getLong(
 			folderIds, fileShortcut.getFolderId(), fileShortcut.getFolderId());
 
+		importedFileShortcut.setFolderId(folderId);
+
 		long groupId = portletDataContext.getScopeGroupId();
 
 		if (folderId != DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
@@ -176,6 +120,8 @@ public class FileShortcutStagedModelDataHandler
 
 			groupId = folder.getRepositoryId();
 		}
+
+		importedFileShortcut.setGroupId(groupId);
 
 		Map<Long, Long> fileEntryIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
@@ -198,72 +144,33 @@ public class FileShortcutStagedModelDataHandler
 			return;
 		}
 
+		importedFileShortcut.setToFileEntryId(
+			importedFileEntry.getFileEntryId());
+
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
 			fileShortcut);
 
-		FileShortcut importedFileShortcut = null;
+		FileShortcut existingFileShortcut =
+			fetchStagedModelByUuidAndGroupId(
+				fileShortcut.getUuid(),
+				portletDataContext.getScopeGroupId());
 
-		if (portletDataContext.isDataStrategyMirror()) {
-			FileShortcut existingFileShortcut =
-				fetchStagedModelByUuidAndGroupId(
-					fileShortcut.getUuid(),
-					portletDataContext.getScopeGroupId());
+		if ((existingFileShortcut == null) ||
+			!portletDataContext.isDataStrategyMirror()) {
 
-			if (existingFileShortcut == null) {
-				serviceContext.setUuid(fileShortcut.getUuid());
-
-				importedFileShortcut = _dlAppLocalService.addFileShortcut(
-					userId, groupId, folderId,
-					importedFileEntry.getFileEntryId(), serviceContext);
-			}
-			else {
-				importedFileShortcut = _dlAppLocalService.updateFileShortcut(
-					userId, existingFileShortcut.getFileShortcutId(), folderId,
-					importedFileEntry.getFileEntryId(), serviceContext);
-			}
+			importedFileShortcut = _stagedModelRepository.addStagedModel(
+				portletDataContext, importedFileShortcut);
 		}
 		else {
-			importedFileShortcut = _dlAppLocalService.addFileShortcut(
-				userId, groupId, folderId, importedFileEntry.getFileEntryId(),
-				serviceContext);
+			importedFileShortcut.setFileShortcutId(
+				existingFileShortcut.getFileShortcutId());
+
+			importedFileShortcut = _stagedModelRepository.updateStagedModel(
+				portletDataContext, importedFileShortcut);
 		}
 
 		portletDataContext.importClassedModel(
 			fileShortcut, importedFileShortcut);
-	}
-
-	@Override
-	protected void doRestoreStagedModel(
-			PortletDataContext portletDataContext, FileShortcut fileShortcut)
-		throws Exception {
-
-		long userId = portletDataContext.getUserId(fileShortcut.getUserUuid());
-
-		FileShortcut existingFileShortcut = fetchStagedModelByUuidAndGroupId(
-			fileShortcut.getUuid(), portletDataContext.getScopeGroupId());
-
-		if ((existingFileShortcut == null) ||
-			!(existingFileShortcut.getModel() instanceof DLFileShortcut)) {
-
-			return;
-		}
-
-		DLFileShortcut dlFileShortcut =
-			(DLFileShortcut)existingFileShortcut.getModel();
-
-		if (!dlFileShortcut.isInTrash()) {
-			return;
-		}
-
-		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
-			DLFileShortcut.class.getName());
-
-		if (trashHandler.isRestorable(
-				existingFileShortcut.getFileShortcutId())) {
-
-			trashHandler.restoreTrashEntry(
-				userId, existingFileShortcut.getFileShortcutId());
-		}
 	}
 
 	@Reference(unbind = "-")
@@ -272,16 +179,16 @@ public class FileShortcutStagedModelDataHandler
 	}
 
 	@Reference(unbind = "-")
-	protected void setDLFileShortcutLocalService(
-		DLFileShortcutLocalService dlFileShortcutLocalService) {
+	protected void setStagedModelRepository(
+		StagedModelRepository<FileShortcut> stagedModelRepository) {
 
-		_dlFileShortcutLocalService = dlFileShortcutLocalService;
+		_stagedModelRepository = stagedModelRepository;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		FileShortcutStagedModelDataHandler.class);
 
 	private DLAppLocalService _dlAppLocalService;
-	private DLFileShortcutLocalService _dlFileShortcutLocalService;
+	private StagedModelRepository<FileShortcut> _stagedModelRepository;
 
 }
