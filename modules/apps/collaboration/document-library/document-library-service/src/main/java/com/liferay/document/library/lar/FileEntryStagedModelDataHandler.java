@@ -43,6 +43,7 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
+import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -91,58 +92,6 @@ public class FileEntryStagedModelDataHandler
 	};
 
 	@Override
-	public void deleteStagedModel(FileEntry fileEntry) throws PortalException {
-		_dlAppLocalService.deleteFileEntry(fileEntry.getFileEntryId());
-	}
-
-	@Override
-	public void deleteStagedModel(
-			String uuid, long groupId, String className, String extraData)
-		throws PortalException {
-
-		FileEntry fileEntry = fetchStagedModelByUuidAndGroupId(uuid, groupId);
-
-		if (fileEntry != null) {
-			deleteStagedModel(fileEntry);
-		}
-	}
-
-	@Override
-	public FileEntry fetchStagedModelByUuidAndGroupId(
-		String uuid, long groupId) {
-
-		try {
-			return _dlAppLocalService.getFileEntryByUuidAndGroupId(
-				uuid, groupId);
-		}
-		catch (PortalException pe) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
-			return null;
-		}
-	}
-
-	@Override
-	public List<FileEntry> fetchStagedModelsByUuidAndCompanyId(
-		String uuid, long companyId) {
-
-		List<DLFileEntry> dlFileEntries =
-			_dlFileEntryLocalService.getDLFileEntriesByUuidAndCompanyId(
-				uuid, companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-				new StagedModelModifiedDateComparator<DLFileEntry>());
-
-		List<FileEntry> fileEntries = new ArrayList<>();
-
-		for (DLFileEntry dlFileEntry : dlFileEntries) {
-			fileEntries.add(new LiferayFileEntry(dlFileEntry));
-		}
-
-		return fileEntries;
-	}
-
-	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -179,7 +128,8 @@ public class FileEntryStagedModelDataHandler
 		throws PortletDataException {
 
 		try {
-			doRestoreStagedModel(portletDataContext, stagedModel);
+			_stagedModelRepository.restoreStagedModel(
+				portletDataContext, stagedModel);
 		}
 		catch (PortletDataException pde) {
 			throw pde;
@@ -566,29 +516,6 @@ public class FileEntryStagedModelDataHandler
 			fileEntry.getFileEntryId(), importedFileEntry.getFileEntryId());
 	}
 
-	@Override
-	protected void doRestoreStagedModel(
-			PortletDataContext portletDataContext, FileEntry fileEntry)
-		throws Exception {
-
-		long userId = portletDataContext.getUserId(fileEntry.getUserUuid());
-
-		FileEntry existingFileEntry = fetchStagedModelByUuidAndGroupId(
-			fileEntry.getUuid(), portletDataContext.getScopeGroupId());
-
-		if ((existingFileEntry == null) || !existingFileEntry.isInTrash()) {
-			return;
-		}
-
-		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
-			DLFileEntry.class.getName());
-
-		if (trashHandler.isRestorable(existingFileEntry.getFileEntryId())) {
-			trashHandler.restoreTrashEntry(
-				userId, existingFileEntry.getFileEntryId());
-		}
-	}
-
 	protected void exportDDMFormValues(
 			PortletDataContext portletDataContext, DDMStructure ddmStructure,
 			FileEntry fileEntry, Element fileEntryElement)
@@ -809,6 +736,13 @@ public class FileEntryStagedModelDataHandler
 	}
 
 	@Reference(unbind = "-")
+	protected void setStagedModelRepository(
+		StagedModelRepository<FileEntry> stagedModelRepository) {
+
+		_stagedModelRepository = stagedModelRepository;
+	}
+
+	@Reference(unbind = "-")
 	protected void setStorageEngine(StorageEngine storageEngine) {
 		_storageEngine = storageEngine;
 	}
@@ -885,6 +819,7 @@ public class FileEntryStagedModelDataHandler
 	private DLFileVersionLocalService _dlFileVersionLocalService;
 	private DLTrashService _dlTrashService;
 	private RepositoryLocalService _repositoryLocalService;
+	private StagedModelRepository<FileEntry> _stagedModelRepository;
 	private StorageEngine _storageEngine;
 
 }
