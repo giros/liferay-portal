@@ -98,7 +98,8 @@ public class FolderStagedModelRepository
 	}
 
 	public void deleteStagedModels(PortletDataContext portletDataContext)
-		throws PortalException;
+		throws PortalException {
+	}
 
 	@Override
 	public Folder fetchStagedModelByUuidAndGroupId(String uuid, long groupId) {
@@ -165,7 +166,9 @@ public class FolderStagedModelRepository
 		}
 	}
 
-	public Folder saveStagedModel(Folder folder) throws PortalException;
+	public Folder saveStagedModel(Folder folder) throws PortalException {
+		return null;
+	}
 
 	public Folder updateStagedModel(
 			PortletDataContext portletDataContext, Folder folder)
