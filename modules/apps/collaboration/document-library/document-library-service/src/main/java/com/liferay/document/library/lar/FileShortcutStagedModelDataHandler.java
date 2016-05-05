@@ -151,9 +151,8 @@ public class FileShortcutStagedModelDataHandler
 			fileShortcut);
 
 		FileShortcut existingFileShortcut =
-			fetchStagedModelByUuidAndGroupId(
-				fileShortcut.getUuid(),
-				portletDataContext.getScopeGroupId());
+			_stagedModelRepository.fetchStagedModelByUuidAndGroupId(
+				fileShortcut.getUuid(), portletDataContext.getScopeGroupId());
 
 		if ((existingFileShortcut == null) ||
 			!portletDataContext.isDataStrategyMirror()) {
