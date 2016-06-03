@@ -136,20 +136,19 @@ public class DDMStructurePermission extends BaseResourcePermissionChecker {
 			return true;
 		}
 
-		boolean hasSiteScopePermission = false;
+		boolean hasSiteScopePermission =  permissionChecker.hasPermission(
+			groupId, structureModelResourceName, structure.getStructureId(),
+			actionId);
 
-		if (groupId > 0) {
-			hasSiteScopePermission = permissionChecker.hasPermission(
-				groupId, structureModelResourceName, structure.getStructureId(),
-				actionId);
-		}
-
-		boolean hasStructureScopePermission = false;
-		hasStructureScopePermission = permissionChecker.hasPermission(
+		boolean hasStructureScopePermission = permissionChecker.hasPermission(
 			structure.getGroupId(), structureModelResourceName,
 			structure.getStructureId(), actionId);
 
-		return (hasSiteScopePermission || hasStructureScopePermission);
+		if (hasSiteScopePermission || hasStructureScopePermission) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public static boolean contains(
