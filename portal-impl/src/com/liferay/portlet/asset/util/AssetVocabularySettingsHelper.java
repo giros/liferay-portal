@@ -54,6 +54,12 @@ public class AssetVocabularySettingsHelper {
 		return getClassNameIds(classNameIdsAndClassTypePKs);
 	}
 
+	public String[] getClassNames() {
+		String[] classNameIdsAndClassTypePKs = getClassNameIdsAndClassTypePKs();
+
+		return getClassNames(classNameIdsAndClassTypePKs);
+	}
+
 	public long[] getClassTypePKs() {
 		String[] classNameIdsAndClassTypePKs = getClassNameIdsAndClassTypePKs();
 
@@ -141,6 +147,52 @@ public class AssetVocabularySettingsHelper {
 			StringUtil.merge(selectedClassNameIds));
 	}
 
+	public void setClassNamesAndClassTypePKs(
+		String[] classNames, long[] classTypePKs, boolean[] requireds) {
+
+		Set<String> requiredClassNameIds = new LinkedHashSet<>();
+		Set<String> selectedClassNameIds = new LinkedHashSet<>();
+
+		for (int i = 0; i < classNames.length; ++i) {
+			String className = classNames[i];
+			long classTypePK = classTypePKs[i];
+			boolean required = requireds[i];
+
+			String classNameAndClassTypePK = getClassNameAndClassTypePK(
+				className, classTypePK);
+
+			if (className.equals(
+					String.valueOf(AssetCategoryConstants.ALL_CLASS_NAME_ID))) {
+
+				if (required) {
+					requiredClassNameIds.clear();
+
+					requiredClassNameIds.add(classNameAndClassTypePK);
+				}
+
+				selectedClassNameIds.clear();
+
+				selectedClassNameIds.add(classNameAndClassTypePK);
+
+				break;
+			}
+			else {
+				if (required) {
+					requiredClassNameIds.add(classNameAndClassTypePK);
+				}
+
+				selectedClassNameIds.add(classNameAndClassTypePK);
+			}
+		}
+
+		_properties.setProperty(
+			_KEY_REQUIRED_CLASS_NAME_IDS_AND_CLASS_TYPE_PKS,
+			StringUtil.merge(requiredClassNameIds));
+		_properties.setProperty(
+			_KEY_SELECTED_CLASS_NAME_IDS_AND_CLASS_TYPE_PKS,
+			StringUtil.merge(selectedClassNameIds));
+	}
+
 	public void setMultiValued(boolean multiValued) {
 		_properties.setProperty(_KEY_MULTI_VALUED, String.valueOf(multiValued));
 	}
@@ -148,6 +200,20 @@ public class AssetVocabularySettingsHelper {
 	@Override
 	public String toString() {
 		return _properties.toString();
+	}
+
+	protected String getClassName(String classNameIdAndClassTypePK) {
+		String[] parts = StringUtil.split(
+			classNameIdAndClassTypePK, CharPool.COLON);
+
+		return parts[0];
+	}
+
+	protected String getClassNameAndClassTypePK(
+		String className, long classTypePK) {
+
+		return className.concat(StringPool.COLON).concat(
+			String.valueOf(classTypePK));
 	}
 
 	protected long getClassNameId(String classNameIdAndClassTypePK) {
@@ -189,6 +255,18 @@ public class AssetVocabularySettingsHelper {
 		}
 
 		return StringUtil.split(value);
+	}
+
+	protected String[] getClassNames(String[] classNameIdsAndClassTypePKs) {
+		String[] classNames = new String[classNameIdsAndClassTypePKs.length];
+
+		for (int i = 0; i < classNameIdsAndClassTypePKs.length; i++) {
+			String className = getClassName(classNameIdsAndClassTypePKs[i]);
+
+			classNames[i] = className;
+		}
+
+		return classNames;
 	}
 
 	protected long getClassTypePK(String classNameIdAndClassTypePK) {
