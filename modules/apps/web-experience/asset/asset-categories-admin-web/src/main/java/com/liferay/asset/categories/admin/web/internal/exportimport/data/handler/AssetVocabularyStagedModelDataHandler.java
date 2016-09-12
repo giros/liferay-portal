@@ -14,6 +14,7 @@
 
 package com.liferay.asset.categories.admin.web.internal.exportimport.data.handler;
 
+import com.liferay.asset.kernel.model.AssetCategoryConstants;
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetVocabularyLocalService;
 import com.liferay.asset.kernel.service.persistence.AssetVocabularyUtil;
@@ -24,12 +25,16 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
+import com.liferay.portlet.asset.util.AssetVocabularySettingsHelper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -127,6 +132,8 @@ public class AssetVocabularyStagedModelDataHandler
 
 		vocabulary.setUserUuid(vocabulary.getUserUuid());
 
+		updateExportClassNameIds(vocabulary);
+
 		portletDataContext.addReferenceElement(
 			vocabulary, vocabularyElement, vocabulary,
 			PortletDataContext.REFERENCE_TYPE_DEPENDENCY, false);
@@ -166,6 +173,8 @@ public class AssetVocabularyStagedModelDataHandler
 
 		ServiceContext serviceContext = createServiceContext(
 			portletDataContext, vocabulary);
+
+		updateImportClassNameIds(vocabulary);
 
 		AssetVocabulary importedVocabulary = null;
 
@@ -252,6 +261,121 @@ public class AssetVocabularyStagedModelDataHandler
 
 		_assetVocabularyLocalService = assetVocabularyLocalService;
 	}
+
+	protected void updateExportClassNameIds(AssetVocabulary vocabulary) {
+		AssetVocabularySettingsHelper assetVocabularySettingsHelper =
+			new AssetVocabularySettingsHelper(vocabulary.getSettings());
+
+		long[] selectedClassNameIds =
+			assetVocabularySettingsHelper.getClassNameIds();
+
+		if ((selectedClassNameIds.length == 0) ||
+			(selectedClassNameIds[0] ==
+				AssetCategoryConstants.ALL_CLASS_NAME_ID)) {
+
+			return;
+		}
+
+		String[] selectedClassNames = new String[selectedClassNameIds.length];
+
+		boolean[] requireds = new boolean[selectedClassNameIds.length];
+
+		long[] selectedClassTypePKs =
+			assetVocabularySettingsHelper.getClassTypePKs();
+
+		for (int i = 0; i < selectedClassNameIds.length; i++) {
+			long selectedClassNameId = selectedClassNameIds[i];
+
+			try {
+				String className = PortalUtil.getClassName(selectedClassNameId);
+
+				selectedClassNames[i] = className;
+
+				requireds[i] =
+					assetVocabularySettingsHelper.
+						isClassNameIdAndClassTypePKRequired(
+							selectedClassNameId, selectedClassTypePKs[i]);
+			}
+			catch (Exception e) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Unable to find class name for class name ID" +
+							String.valueOf(selectedClassNameId));
+				}
+
+				selectedClassNames[i] = String.valueOf(selectedClassNameId);
+
+				requireds[i] =
+					assetVocabularySettingsHelper.
+						isClassNameIdAndClassTypePKRequired(
+							selectedClassNameId, selectedClassTypePKs[i]);
+			}
+		}
+
+		assetVocabularySettingsHelper.setClassNamesAndClassTypePKs(
+			selectedClassNames, selectedClassTypePKs, requireds);
+
+		vocabulary.setSettings(assetVocabularySettingsHelper.toString());
+	}
+
+	protected void updateImportClassNameIds(AssetVocabulary vocabulary) {
+		AssetVocabularySettingsHelper assetVocabularySettingsHelper =
+			new AssetVocabularySettingsHelper(vocabulary.getSettings());
+
+		String[] selectedClassNames =
+			assetVocabularySettingsHelper.getClassNames();
+
+		if ((selectedClassNames.length == 0) ||
+			selectedClassNames[0].equals(
+				String.valueOf(AssetCategoryConstants.ALL_CLASS_NAME_ID))) {
+
+			return;
+		}
+
+		long[] selectedClassNameIds = new long[selectedClassNames.length];
+
+		boolean[] requireds = new boolean[selectedClassNameIds.length];
+
+		long[] selectedClassTypePKs =
+			assetVocabularySettingsHelper.getClassTypePKs();
+
+		for (int i = 0; i < selectedClassNames.length; i++) {
+			String selectedClassName = selectedClassNames[i];
+
+			try {
+				long classNameId = PortalUtil.getClassNameId(selectedClassName);
+
+				selectedClassNameIds[i] = classNameId;
+
+				requireds[i] =
+					assetVocabularySettingsHelper.
+						isClassNameIdAndClassTypePKRequired(
+							classNameId, selectedClassTypePKs[i]);
+			}
+			catch (Exception e) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Unable to find class name ID for class name" +
+							selectedClassName);
+				}
+
+				selectedClassNameIds[i] = GetterUtil.getLong(selectedClassName);
+
+				requireds[i] =
+					assetVocabularySettingsHelper.
+						isClassNameIdAndClassTypePKRequired(
+							selectedClassNameIds[i], selectedClassTypePKs[i]);
+			}
+		}
+
+		assetVocabularySettingsHelper.setClassNameIdsAndClassTypePKs(
+			selectedClassNameIds, selectedClassTypePKs, requireds);
+
+		vocabulary.setSettings(assetVocabularySettingsHelper.toString());
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		AssetVocabularyStagedModelDataHandler.class);
 
 	private AssetVocabularyLocalService _assetVocabularyLocalService;
 
