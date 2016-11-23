@@ -115,8 +115,12 @@ public class LPKGBundleTrackerCustomizer
 						continue;
 					}
 
-					Bundle newBundle = _bundleContext.installBundle(
+					Bundle newBundle = _installBundle(
 						url.getPath(), url.openStream());
+
+					if (newBundle == null) {
+						continue;
+					}
 
 					BundleStartLevel bundleStartLevel = newBundle.adapt(
 						BundleStartLevel.class);
@@ -148,8 +152,12 @@ public class LPKGBundleTrackerCustomizer
 				// tied its wrapper bundle. When the wrapper bundle is
 				// uninstalled, its wrapped WAR bundle will also be unintalled.
 
-				Bundle newBundle = _bundleContext.installBundle(
+				Bundle newBundle = _installBundle(
 					url.getPath(), _toWARWrapperBundle(bundle, url));
+
+				if (newBundle == null) {
+					continue;
+				}
 
 				BundleStartLevel bundleStartLevel = newBundle.adapt(
 					BundleStartLevel.class);
@@ -281,6 +289,25 @@ public class LPKGBundleTrackerCustomizer
 		}
 
 		return false;
+	}
+
+	private Bundle _installBundle(String path, InputStream inputStream)
+		throws BundleException {
+
+		Bundle newBundle = null;
+
+		try {
+			newBundle = _bundleContext.installBundle(path, inputStream);
+		}
+		catch (BundleException be) {
+			if (be.getType() != BundleException.DUPLICATE_BUNDLE_ERROR) {
+				throw be;
+			}
+
+			_log.warn(be.getMessage());
+		}
+
+		return newBundle;
 	}
 
 	private String _readServletContextName(URL url) throws IOException {
