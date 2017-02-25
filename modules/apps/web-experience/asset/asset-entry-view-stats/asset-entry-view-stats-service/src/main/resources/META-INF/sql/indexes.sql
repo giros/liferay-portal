@@ -1,0 +1,1 @@
+create index IX_F26AC8AF on AssetEntryViewStats (classNameId, classPK, createDate, createDate);
