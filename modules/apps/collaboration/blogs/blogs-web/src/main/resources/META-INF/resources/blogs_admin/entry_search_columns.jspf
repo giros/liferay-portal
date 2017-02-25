@@ -133,6 +133,56 @@
 			value="<%= String.valueOf(assetEntry.getViewCount()) %>"
 		/>
 
+		<%
+		int comments = 0;
+
+		long lastCommentByUserId = 0;
+
+		MBDiscussion mbDiscussion = MBDiscussionLocalServiceUtil.fetchDiscussion(BlogsEntry.class.getName(), entry.getEntryId());
+
+		if (mbDiscussion != null) {
+			MBThread mbThread = MBThreadLocalServiceUtil.fetchThread(mbDiscussion.getThreadId());
+
+			comments = mbThread.getMessageCount() - 1;
+
+			if (comments > 0) {
+				lastCommentByUserId = mbThread.getLastPostByUserId();
+			}
+		}
+		%>
+
+		<liferay-ui:search-container-column-text
+			name="comments"
+			orderable="<%= false %>"
+			value="<%= String.valueOf(comments) %>"
+		/>
+
+		<%
+		User lastCommentByUser = UserLocalServiceUtil.fetchUserById(lastCommentByUserId);
+		%>
+
+		<liferay-ui:search-container-column-text
+			name="last-comment-by"
+			orderable="<%= false %>"
+			value="<%= lastCommentByUser != null ? lastCommentByUser.getFullName() : StringPool.BLANK %>"
+		/>
+
+		<%
+		RatingsStats ratingsStats = RatingsStatsLocalServiceUtil.getStats(BlogsEntry.class.getName(), entry.getEntryId());
+		%>
+
+		<liferay-ui:search-container-column-text
+			name="ratings"
+			orderable="<%= false %>"
+			value="<%= String.valueOf(ratingsStats.getTotalEntries()) %>"
+		/>
+
+		<liferay-ui:search-container-column-text
+			name="average-ratings"
+			orderable="<%= false %>"
+			value="<%= String.valueOf(ratingsStats.getAverageScore()) %>"
+		/>
+
 		<liferay-ui:search-container-column-status
 			name="status"
 		/>
