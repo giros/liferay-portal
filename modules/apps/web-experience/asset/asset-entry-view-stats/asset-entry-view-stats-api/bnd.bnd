@@ -1,0 +1,7 @@
+Bundle-SymbolicName: asset.entry.view.stats-api
+Bundle-Version: 1.0.0
+Export-Package:\
+	com.liferay.asset.entry.view.stats.exception,\
+	com.liferay.asset.entry.view.stats.model,\
+	com.liferay.asset.entry.view.stats.service,\
+	com.liferay.asset.entry.view.stats.service.persistence
