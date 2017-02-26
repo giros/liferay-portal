@@ -14,13 +14,22 @@
 
 package com.liferay.portlet.asset.service.impl;
 
+import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.model.AssetEntryViewStats;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.asset.kernel.model.AssetEntryViewStatsConstants;
+import com.liferay.asset.kernel.model.AssetEntryViewStatsResult;
+import com.liferay.portal.kernel.dao.orm.Criterion;
+import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portlet.asset.service.base.AssetEntryViewStatsLocalServiceBaseImpl;
 
 import aQute.bnd.annotation.ProviderType;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * The implementation of the asset entry view stats local service.
@@ -65,6 +74,99 @@ public class AssetEntryViewStatsLocalServiceImpl
 		assetEntryViewStatsPersistence.update(stats);
 
 		return stats;
+	}
+
+	public long getViewCountBetweenDates(
+		String className, long classPK, Date startDate, Date endDate) {
+
+		return dynamicQueryCount(
+			getDateRangeDynamicQuery(className, classPK, startDate, endDate));
+	}
+
+	public List<AssetEntryViewStatsResult> getViewCounts(
+		String className, long classPK, int type) {
+
+		AssetEntry assetEntry = assetEntryLocalService.fetchEntry(
+			className, classPK);
+
+		Calendar createDateCal = CalendarFactoryUtil.getCalendar();
+		Calendar startDateCal = CalendarFactoryUtil.getCalendar();
+		Calendar endDateCal = CalendarFactoryUtil.getCalendar();
+
+		createDateCal.setTime(assetEntry.getCreateDate());
+
+		int field = Calendar.DAY_OF_MONTH;
+
+		if (type == AssetEntryViewStatsConstants.YEARLY) {
+			startDateCal.set(Calendar.MONTH, Calendar.DECEMBER);
+			startDateCal.set(Calendar.DAY_OF_MONTH, 31);
+
+			field = Calendar.YEAR;
+		}
+		else if (type == AssetEntryViewStatsConstants.MONTHLY) {
+			startDateCal.set(Calendar.DAY_OF_MONTH, 31);
+
+			field = Calendar.MONTH;
+		}
+		else if (type == AssetEntryViewStatsConstants.WEEKLY) {
+			startDateCal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+
+			field = Calendar.WEEK_OF_MONTH;
+		}
+
+		startDateCal.set(Calendar.HOUR_OF_DAY, 23);
+		startDateCal.set(Calendar.MINUTE, 59);
+		startDateCal.set(Calendar.SECOND, 59);
+		startDateCal.set(Calendar.MILLISECOND, 999);
+
+		endDateCal.setTime(startDateCal.getTime());
+		endDateCal.add(field, -1);
+
+		List<AssetEntryViewStatsResult> results = new ArrayList<>();
+
+		while (createDateCal.before(startDateCal)) {
+			long count = getViewCountBetweenDates(
+				className, classPK, startDateCal.getTime(),
+				endDateCal.getTime());
+
+			results.add(
+				new AssetEntryViewStatsResult(
+					startDateCal.getTime(), count, type));
+
+			startDateCal.add(field, -1);
+			endDateCal.add(field, -1);
+		}
+
+		return results;
+	}
+
+	public List<AssetEntryViewStats> getViewsBetweenDates(
+		String className, long classPK, Date startDate, Date endDate) {
+
+		return dynamicQuery(
+			getDateRangeDynamicQuery(className, classPK, startDate, endDate));
+	}
+
+	protected DynamicQuery getDateRangeDynamicQuery(
+		String className, long classPK, Date startDate, Date endDate) {
+
+		long classNameId = classNameLocalService.getClassNameId(className);
+
+		DynamicQuery dateRangeDynamicQuery = dynamicQuery();
+
+		Criterion criterion = RestrictionsFactoryUtil.eq(
+			"classNameId", classNameId);
+
+		criterion = RestrictionsFactoryUtil.and(
+			criterion, RestrictionsFactoryUtil.eq("classPK", classPK));
+
+		criterion = RestrictionsFactoryUtil.and(
+			criterion, RestrictionsFactoryUtil.between(
+				"createDate", startDate, endDate));
+
+		dateRangeDynamicQuery.add(criterion);
+
+		return dateRangeDynamicQuery;
 	}
 
 }
