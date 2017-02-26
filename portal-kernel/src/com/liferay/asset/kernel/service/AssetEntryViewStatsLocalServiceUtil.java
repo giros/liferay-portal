@@ -52,6 +52,14 @@ public class AssetEntryViewStatsLocalServiceUtil {
 		return getService().addAssetEntryViewStats(assetEntryViewStats);
 	}
 
+	public static com.liferay.asset.kernel.model.AssetEntryViewStats addAssetEntryViewStats(
+		long userId, long companyId, long groupId, java.lang.String className,
+		long classPK, long assetEntryId) {
+		return getService()
+				   .addAssetEntryViewStats(userId, companyId, groupId,
+			className, classPK, assetEntryId);
+	}
+
 	/**
 	* Creates a new asset entry view stats with the primary key. Does not add the asset entry view stats to the database.
 	*
