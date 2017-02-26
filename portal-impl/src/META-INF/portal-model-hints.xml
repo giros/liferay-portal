@@ -142,6 +142,16 @@
 		<field name="priority" type="double" />
 		<field name="viewCount" type="int" />
 	</model>
+	<model name="com.liferay.asset.kernel.model.AssetEntryViewStats">
+		<field name="statsId" type="long" />
+		<field name="groupId" type="long" />
+		<field name="companyId" type="long" />
+		<field name="userId" type="long" />
+		<field name="createDate" type="Date" />
+		<field name="classNameId" type="long" />
+		<field name="classPK" type="long" />
+		<field name="assetEntryId" type="long" />
+	</model>
 	<model name="com.liferay.asset.kernel.model.AssetLink">
 		<field name="linkId" type="long" />
 		<field name="companyId" type="long" />

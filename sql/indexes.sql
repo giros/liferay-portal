@@ -42,6 +42,8 @@ create index IX_FEC4A201 on AssetEntry (layoutUuid[$COLUMN_LENGTH:75$]);
 create index IX_2E4E3885 on AssetEntry (publishDate);
 create index IX_9029E15A on AssetEntry (visible);
 
+create index IX_74B71B71 on AssetEntryViewStats (classNameId, classPK, createDate);
+
 create unique index IX_8F542794 on AssetLink (entryId1, entryId2, type_);
 create index IX_14D5A20D on AssetLink (entryId1, type_);
 create index IX_91F132C on AssetLink (entryId2, type_);

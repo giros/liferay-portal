@@ -20,6 +20,7 @@ import com.liferay.asset.kernel.service.persistence.AssetCategoryFinder;
 import com.liferay.asset.kernel.service.persistence.AssetCategoryPersistence;
 import com.liferay.asset.kernel.service.persistence.AssetEntryFinder;
 import com.liferay.asset.kernel.service.persistence.AssetEntryPersistence;
+import com.liferay.asset.kernel.service.persistence.AssetEntryViewStatsPersistence;
 import com.liferay.asset.kernel.service.persistence.AssetLinkPersistence;
 import com.liferay.asset.kernel.service.persistence.AssetTagFinder;
 import com.liferay.asset.kernel.service.persistence.AssetTagPersistence;
@@ -669,6 +670,44 @@ public abstract class AssetEntryServiceBaseImpl extends BaseServiceImpl
 	}
 
 	/**
+	 * Returns the asset entry view stats local service.
+	 *
+	 * @return the asset entry view stats local service
+	 */
+	public com.liferay.asset.kernel.service.AssetEntryViewStatsLocalService getAssetEntryViewStatsLocalService() {
+		return assetEntryViewStatsLocalService;
+	}
+
+	/**
+	 * Sets the asset entry view stats local service.
+	 *
+	 * @param assetEntryViewStatsLocalService the asset entry view stats local service
+	 */
+	public void setAssetEntryViewStatsLocalService(
+		com.liferay.asset.kernel.service.AssetEntryViewStatsLocalService assetEntryViewStatsLocalService) {
+		this.assetEntryViewStatsLocalService = assetEntryViewStatsLocalService;
+	}
+
+	/**
+	 * Returns the asset entry view stats persistence.
+	 *
+	 * @return the asset entry view stats persistence
+	 */
+	public AssetEntryViewStatsPersistence getAssetEntryViewStatsPersistence() {
+		return assetEntryViewStatsPersistence;
+	}
+
+	/**
+	 * Sets the asset entry view stats persistence.
+	 *
+	 * @param assetEntryViewStatsPersistence the asset entry view stats persistence
+	 */
+	public void setAssetEntryViewStatsPersistence(
+		AssetEntryViewStatsPersistence assetEntryViewStatsPersistence) {
+		this.assetEntryViewStatsPersistence = assetEntryViewStatsPersistence;
+	}
+
+	/**
 	 * Returns the asset link local service.
 	 *
 	 * @return the asset link local service
@@ -892,6 +931,10 @@ public abstract class AssetEntryServiceBaseImpl extends BaseServiceImpl
 	protected SocialActivityCounterPersistence socialActivityCounterPersistence;
 	@BeanReference(type = SocialActivityCounterFinder.class)
 	protected SocialActivityCounterFinder socialActivityCounterFinder;
+	@BeanReference(type = com.liferay.asset.kernel.service.AssetEntryViewStatsLocalService.class)
+	protected com.liferay.asset.kernel.service.AssetEntryViewStatsLocalService assetEntryViewStatsLocalService;
+	@BeanReference(type = AssetEntryViewStatsPersistence.class)
+	protected AssetEntryViewStatsPersistence assetEntryViewStatsPersistence;
 	@BeanReference(type = com.liferay.asset.kernel.service.AssetLinkLocalService.class)
 	protected com.liferay.asset.kernel.service.AssetLinkLocalService assetLinkLocalService;
 	@BeanReference(type = AssetLinkPersistence.class)
