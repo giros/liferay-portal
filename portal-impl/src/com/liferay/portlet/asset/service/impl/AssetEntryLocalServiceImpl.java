@@ -413,6 +413,10 @@ public class AssetEntryLocalServiceImpl extends AssetEntryLocalServiceBaseImpl {
 
 		assetEntryPersistence.update(entry);
 
+		assetEntryViewStatsLocalService.addAssetEntryViewStats(
+			userId, entry.getCompanyId(), entry.getGroupId(), className,
+			classPK, entry.getEntryId());
+
 		try {
 			reindex(entry);
 		}
