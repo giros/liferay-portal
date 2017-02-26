@@ -71,6 +71,10 @@ public interface AssetEntryViewStatsLocalService extends BaseLocalService,
 	public AssetEntryViewStats addAssetEntryViewStats(
 		AssetEntryViewStats assetEntryViewStats);
 
+	public AssetEntryViewStats addAssetEntryViewStats(long userId,
+		long groupId, java.lang.String className, long classPK,
+		long assetEntryId) throws PortalException;
+
 	/**
 	* Creates a new asset entry view stats with the primary key. Does not add the asset entry view stats to the database.
 	*
