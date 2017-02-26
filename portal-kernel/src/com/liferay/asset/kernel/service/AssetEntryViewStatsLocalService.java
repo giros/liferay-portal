@@ -17,6 +17,7 @@ package com.liferay.asset.kernel.service;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.asset.kernel.model.AssetEntryViewStats;
+import com.liferay.asset.kernel.model.AssetEntryViewStatsResult;
 
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
@@ -36,6 +37,7 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 
 import java.io.Serializable;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -216,6 +218,14 @@ public interface AssetEntryViewStatsLocalService extends BaseLocalService,
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<AssetEntryViewStats> getAssetEntryViewStatses(int start, int end);
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<AssetEntryViewStatsResult> getViewCounts(
+		java.lang.String className, long classPK, int type);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<AssetEntryViewStats> getViewsBetweenDates(
+		java.lang.String className, long classPK, Date startDate, Date endDate);
+
 	/**
 	* Returns the number of rows matching the dynamic query.
 	*
@@ -233,4 +243,8 @@ public interface AssetEntryViewStatsLocalService extends BaseLocalService,
 	*/
 	public long dynamicQueryCount(DynamicQuery dynamicQuery,
 		Projection projection);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public long getViewCountBetweenDates(java.lang.String className,
+		long classPK, Date startDate, Date endDate);
 }

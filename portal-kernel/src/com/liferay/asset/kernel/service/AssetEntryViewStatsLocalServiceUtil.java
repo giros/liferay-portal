@@ -235,6 +235,18 @@ public class AssetEntryViewStatsLocalServiceUtil {
 		return getService().getAssetEntryViewStatses(start, end);
 	}
 
+	public static java.util.List<com.liferay.asset.kernel.model.AssetEntryViewStatsResult> getViewCounts(
+		java.lang.String className, long classPK, int type) {
+		return getService().getViewCounts(className, classPK, type);
+	}
+
+	public static java.util.List<com.liferay.asset.kernel.model.AssetEntryViewStats> getViewsBetweenDates(
+		java.lang.String className, long classPK, java.util.Date startDate,
+		java.util.Date endDate) {
+		return getService()
+				   .getViewsBetweenDates(className, classPK, startDate, endDate);
+	}
+
 	/**
 	* Returns the number of rows matching the dynamic query.
 	*
@@ -257,6 +269,13 @@ public class AssetEntryViewStatsLocalServiceUtil {
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery,
 		com.liferay.portal.kernel.dao.orm.Projection projection) {
 		return getService().dynamicQueryCount(dynamicQuery, projection);
+	}
+
+	public static long getViewCountBetweenDates(java.lang.String className,
+		long classPK, java.util.Date startDate, java.util.Date endDate) {
+		return getService()
+				   .getViewCountBetweenDates(className, classPK, startDate,
+			endDate);
 	}
 
 	public static AssetEntryViewStatsLocalService getService() {
