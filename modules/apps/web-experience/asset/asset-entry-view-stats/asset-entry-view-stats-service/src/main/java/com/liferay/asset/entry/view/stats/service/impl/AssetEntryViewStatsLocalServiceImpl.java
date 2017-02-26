@@ -14,9 +14,15 @@
 
 package com.liferay.asset.entry.view.stats.service.impl;
 
+import com.liferay.asset.entry.view.stats.model.AssetEntryViewStats;
+import com.liferay.asset.entry.view.stats.service.base.AssetEntryViewStatsLocalServiceBaseImpl;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.util.PortalUtil;
+
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.asset.entry.view.stats.service.base.AssetEntryViewStatsLocalServiceBaseImpl;
+import java.util.Date;
 
 /**
  * The implementation of the asset entry view stats local service.
@@ -40,4 +46,30 @@ public class AssetEntryViewStatsLocalServiceImpl
 	 *
 	 * Never reference this class directly. Always use {@link com.liferay.asset.entry.view.stats.service.AssetEntryViewStatsLocalServiceUtil} to access the asset entry view stats local service.
 	 */
+
+	public AssetEntryViewStats addAssetEntryViewStats(
+			long userId, long groupId, String className, long classPK,
+			long assetEntryId)
+		throws PortalException {
+
+		User user = userLocalService.getUser(userId);
+
+		long statsId = counterLocalService.increment();
+
+		AssetEntryViewStats stats = assetEntryViewStatsPersistence.create(
+			statsId);
+
+		stats.setUserId(userId);
+		stats.setGroupId(groupId);
+		stats.setCompanyId(user.getCompanyId());
+		stats.setCreateDate(new Date());
+		stats.setClassNameId(PortalUtil.getClassNameId(className));
+		stats.setClassPK(classPK);
+		stats.setAssetEntryId(assetEntryId);
+
+		assetEntryViewStatsPersistence.update(stats);
+
+		return stats;
+	}
+
 }
