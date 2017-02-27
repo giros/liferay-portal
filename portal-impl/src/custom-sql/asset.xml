@@ -97,6 +97,32 @@
 				(AssetEntry.classNameId = ?)
 		]]>
 	</sql>
+	<sql id=com.liferay.asset.kernel.service.persistence.AssetEntryViewStatsFinder.countByC_C_LtD_GtD">
+		<![CDATA[
+			SELECT
+				COUNT(DISTINCT AssetEntryViewStats.statsId) AS COUNT_VALUE
+			FROM
+				AssetEntryViewStats
+			WHERE
+				(AssetEntryViewStats.classNameId = ?) AND
+				(AssetEntryViewStats.classPK = ?) AND
+				(AssetEntryViewStats.createDate BETWEEN ? AND ?)
+		]]>
+	</sql>
+	<sql id=com.liferay.asset.kernel.service.persistence.AssetEntryViewStatsFinder.findByC_C_LtD_GtD">
+		<![CDATA[
+			SELECT
+				{AssetEntryViewStats.*}
+			FROM
+				AssetEntryViewStats
+			WHERE
+				(AssetEntryViewStats.classNameId = ?) AND
+				(AssetEntryViewStats.classPK = ?) AND
+				(AssetEntryViewStats.createDate BETWEEN ? AND ?)
+			ORDER BY
+				AssetEntryViewStats.createDate DESC
+		]]>
+	</sql>
 	<sql id="com.liferay.asset.kernel.service.persistence.AssetTagFinder.countByG_N">
 		<![CDATA[
 			SELECT
