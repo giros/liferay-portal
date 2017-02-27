@@ -67,4 +67,17 @@ portletURL.setParameter("mvcRenderCommandName", "/blogs/view");
 
 		<liferay-ui:icon-delete trash="<%= TrashUtil.isTrashEnabled(scopeGroupId) %>" url="<%= deleteEntryURL %>" />
 	</c:if>
+
+	<c:if test="<%= BlogsEntryPermission.contains(permissionChecker, entry, ActionKeys.UPDATE) %>">
+		<portlet:renderURL var="viewEntryStatsURL">
+			<portlet:param name="mvcRenderCommandName" value="/blogs/view_entry_stats" />
+			<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
+			<portlet:param name="entryId" value="<%= String.valueOf(entry.getEntryId()) %>" />
+		</portlet:renderURL>
+
+		<liferay-ui:icon
+			message="visits"
+			url="<%= viewEntryStatsURL %>"
+		/>
+	</c:if>
 </liferay-ui:icon-menu>
