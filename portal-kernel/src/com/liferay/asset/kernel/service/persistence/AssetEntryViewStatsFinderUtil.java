@@ -25,6 +25,19 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
  */
 @ProviderType
 public class AssetEntryViewStatsFinderUtil {
+	public static long countByC_C_LtD_GtD(long classNameId, long classPK,
+		java.util.Date startDate, java.util.Date endDate) {
+		return getFinder()
+				   .countByC_C_LtD_GtD(classNameId, classPK, startDate, endDate);
+	}
+
+	public static java.util.List<com.liferay.asset.kernel.model.AssetEntryViewStats> findByC_C_LtD_GtD(
+		long classNameId, long classPK, java.util.Date startDate,
+		java.util.Date endDate) {
+		return getFinder()
+				   .findByC_C_LtD_GtD(classNameId, classPK, startDate, endDate);
+	}
+
 	public static AssetEntryViewStatsFinder getFinder() {
 		if (_finder == null) {
 			_finder = (AssetEntryViewStatsFinder)PortalBeanLocatorUtil.locate(AssetEntryViewStatsFinder.class.getName());

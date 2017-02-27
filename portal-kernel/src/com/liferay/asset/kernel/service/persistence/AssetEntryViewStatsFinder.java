@@ -22,4 +22,10 @@ import aQute.bnd.annotation.ProviderType;
  */
 @ProviderType
 public interface AssetEntryViewStatsFinder {
+	public long countByC_C_LtD_GtD(long classNameId, long classPK,
+		java.util.Date startDate, java.util.Date endDate);
+
+	public java.util.List<com.liferay.asset.kernel.model.AssetEntryViewStats> findByC_C_LtD_GtD(
+		long classNameId, long classPK, java.util.Date startDate,
+		java.util.Date endDate);
 }
