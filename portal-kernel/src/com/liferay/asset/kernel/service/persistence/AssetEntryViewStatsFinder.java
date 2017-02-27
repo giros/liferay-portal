@@ -12,15 +12,14 @@
  * details.
  */
 
-package com.liferay.portlet.asset.service.persistence.impl;
+package com.liferay.asset.kernel.service.persistence;
 
-import com.liferay.asset.kernel.model.AssetEntryViewStats;
-import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
+import aQute.bnd.annotation.ProviderType;
 
 /**
- * @author Gergely Mathe
+ * @author Brian Wing Shun Chan
+ * @generated
  */
-public class AssetEntryViewStatsFinderImpl
-	extends AssetEntryViewStatsFinderBaseImpl {
-
+@ProviderType
+public interface AssetEntryViewStatsFinder {
 }

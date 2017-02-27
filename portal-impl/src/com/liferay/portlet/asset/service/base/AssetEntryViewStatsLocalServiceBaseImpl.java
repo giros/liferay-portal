@@ -20,6 +20,7 @@ import com.liferay.asset.kernel.model.AssetEntryViewStats;
 import com.liferay.asset.kernel.service.AssetEntryViewStatsLocalService;
 import com.liferay.asset.kernel.service.persistence.AssetEntryFinder;
 import com.liferay.asset.kernel.service.persistence.AssetEntryPersistence;
+import com.liferay.asset.kernel.service.persistence.AssetEntryViewStatsFinder;
 import com.liferay.asset.kernel.service.persistence.AssetEntryViewStatsPersistence;
 
 import com.liferay.portal.kernel.bean.BeanReference;
@@ -355,6 +356,25 @@ public abstract class AssetEntryViewStatsLocalServiceBaseImpl
 	}
 
 	/**
+	 * Returns the asset entry view stats finder.
+	 *
+	 * @return the asset entry view stats finder
+	 */
+	public AssetEntryViewStatsFinder getAssetEntryViewStatsFinder() {
+		return assetEntryViewStatsFinder;
+	}
+
+	/**
+	 * Sets the asset entry view stats finder.
+	 *
+	 * @param assetEntryViewStatsFinder the asset entry view stats finder
+	 */
+	public void setAssetEntryViewStatsFinder(
+		AssetEntryViewStatsFinder assetEntryViewStatsFinder) {
+		this.assetEntryViewStatsFinder = assetEntryViewStatsFinder;
+	}
+
+	/**
 	 * Returns the counter local service.
 	 *
 	 * @return the counter local service
@@ -523,6 +543,8 @@ public abstract class AssetEntryViewStatsLocalServiceBaseImpl
 	protected AssetEntryViewStatsLocalService assetEntryViewStatsLocalService;
 	@BeanReference(type = AssetEntryViewStatsPersistence.class)
 	protected AssetEntryViewStatsPersistence assetEntryViewStatsPersistence;
+	@BeanReference(type = AssetEntryViewStatsFinder.class)
+	protected AssetEntryViewStatsFinder assetEntryViewStatsFinder;
 	@BeanReference(type = com.liferay.counter.kernel.service.CounterLocalService.class)
 	protected com.liferay.counter.kernel.service.CounterLocalService counterLocalService;
 	@BeanReference(type = com.liferay.portal.kernel.service.ClassNameLocalService.class)

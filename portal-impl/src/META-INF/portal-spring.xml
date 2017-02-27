@@ -25,6 +25,7 @@
 	<bean class="com.liferay.portlet.asset.service.persistence.impl.AssetEntryFinderImpl" id="com.liferay.asset.kernel.service.persistence.AssetEntryFinder" parent="basePersistence" />
 	<bean class="com.liferay.portlet.asset.service.impl.AssetEntryViewStatsLocalServiceImpl" id="com.liferay.asset.kernel.service.AssetEntryViewStatsLocalService" />
 	<bean class="com.liferay.portlet.asset.service.persistence.impl.AssetEntryViewStatsPersistenceImpl" id="com.liferay.asset.kernel.service.persistence.AssetEntryViewStatsPersistence" parent="basePersistence" />
+	<bean class="com.liferay.portlet.asset.service.persistence.impl.AssetEntryViewStatsFinderImpl" id="com.liferay.asset.kernel.service.persistence.AssetEntryViewStatsFinder" parent="basePersistence" />
 	<bean class="com.liferay.portlet.asset.service.impl.AssetLinkLocalServiceImpl" id="com.liferay.asset.kernel.service.AssetLinkLocalService" />
 	<bean class="com.liferay.portlet.asset.service.persistence.impl.AssetLinkPersistenceImpl" id="com.liferay.asset.kernel.service.persistence.AssetLinkPersistence" parent="basePersistence" />
 	<bean class="com.liferay.portlet.asset.service.impl.AssetTagLocalServiceImpl" id="com.liferay.asset.kernel.service.AssetTagLocalService" />
