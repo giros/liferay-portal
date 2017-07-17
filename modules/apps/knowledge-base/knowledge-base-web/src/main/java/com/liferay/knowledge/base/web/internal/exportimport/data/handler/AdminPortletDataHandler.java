@@ -59,6 +59,11 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class AdminPortletDataHandler extends BasePortletDataHandler {
 
+	public static final String[] CLASS_NAMES = {
+		KBArticle.class.getName(), KBComment.class.getName(),
+		KBTemplate.class.getName()
+	};
+
 	public static final String NAMESPACE = "knowledge_base";
 
 	public static final String SCHEMA_VERSION = "2.0.0";
@@ -83,6 +88,11 @@ public class AdminPortletDataHandler extends BasePortletDataHandler {
 		XStreamAliasRegistryUtil.register(KBArticleImpl.class, "KBArticle");
 		XStreamAliasRegistryUtil.register(KBCommentImpl.class, "KBComment");
 		XStreamAliasRegistryUtil.register(KBTemplateImpl.class, "KBTemplate");
+	}
+
+	@Override
+	public String[] getClassNames() {
+		return CLASS_NAMES;
 	}
 
 	@Override
