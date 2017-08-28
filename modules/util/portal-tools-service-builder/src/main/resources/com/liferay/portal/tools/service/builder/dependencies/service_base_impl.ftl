@@ -46,7 +46,6 @@ import com.liferay.portal.kernel.service.PersistedModelLocalServiceRegistryUtil;
 import com.liferay.portal.kernel.util.InfrastructureUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
@@ -547,12 +546,9 @@ import ${apiPackagePath}.service.${entity.name}${sessionTypeName}Service;
 								</#if>
 
 								<#if entity.isWorkflowEnabled()>
-									Property workflowStatusProperty = PropertyFactoryUtil.forName("status");
+									if (!portletDataContext.isInitialPublication()) {
+										Property workflowStatusProperty = PropertyFactoryUtil.forName("status");
 
-									if (portletDataContext.isInitialPublication()) {
-										dynamicQuery.add(workflowStatusProperty.ne(WorkflowConstants.STATUS_IN_TRASH));
-									}
-									else {
 										StagedModelDataHandler<?> stagedModelDataHandler = StagedModelDataHandlerRegistryUtil.getStagedModelDataHandler(${entity.name}.class.getName());
 
 										dynamicQuery.add(workflowStatusProperty.in(stagedModelDataHandler.getExportableStatuses()));

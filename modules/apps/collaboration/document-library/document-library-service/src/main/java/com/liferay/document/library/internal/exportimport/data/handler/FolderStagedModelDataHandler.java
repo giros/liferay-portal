@@ -544,7 +544,9 @@ public class FolderStagedModelDataHandler
 
 			DLFolder dlFolder = (DLFolder)liferayFolder.getModel();
 
-			if (dlFolder.isInTrash() || dlFolder.isInTrashContainer()) {
+			if ((dlFolder.isInTrash() || dlFolder.isInTrashContainer()) &&
+				!portletDataContext.isInitialPublication()) {
+
 				PortletDataException pde = new PortletDataException(
 					PortletDataException.STATUS_IN_TRASH);
 

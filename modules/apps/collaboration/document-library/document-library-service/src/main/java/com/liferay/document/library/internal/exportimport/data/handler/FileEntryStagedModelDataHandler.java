@@ -952,7 +952,9 @@ public class FileEntryStagedModelDataHandler
 			}
 		}
 
-		if (fileEntry.isInTrash() || fileEntry.isInTrashContainer()) {
+		if ((fileEntry.isInTrash() || fileEntry.isInTrashContainer()) &&
+			!portletDataContext.isInitialPublication()) {
+
 			PortletDataException pde = new PortletDataException(
 				PortletDataException.STATUS_IN_TRASH);
 

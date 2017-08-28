@@ -880,7 +880,9 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 		if (stagedModel instanceof TrashedModel) {
 			TrashedModel trashedModel = (TrashedModel)stagedModel;
 
-			if (trashedModel.isInTrash()) {
+			if (trashedModel.isInTrash() &&
+				!portletDataContext.isInitialPublication()) {
+
 				PortletDataException pde = new PortletDataException(
 					PortletDataException.STATUS_IN_TRASH);
 
