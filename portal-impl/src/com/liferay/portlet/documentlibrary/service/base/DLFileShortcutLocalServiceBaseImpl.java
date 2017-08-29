@@ -65,7 +65,6 @@ import com.liferay.portal.kernel.service.persistence.UserFinder;
 import com.liferay.portal.kernel.service.persistence.UserPersistence;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import com.liferay.trash.kernel.service.persistence.TrashEntryPersistence;
 import com.liferay.trash.kernel.service.persistence.TrashVersionPersistence;
@@ -365,14 +364,10 @@ public abstract class DLFileShortcutLocalServiceBaseImpl
 						dynamicQuery.add(disjunction);
 					}
 
-					Property workflowStatusProperty = PropertyFactoryUtil.forName(
-							"status");
+					if (!portletDataContext.isInitialPublication()) {
+						Property workflowStatusProperty = PropertyFactoryUtil.forName(
+								"status");
 
-					if (portletDataContext.isInitialPublication()) {
-						dynamicQuery.add(workflowStatusProperty.ne(
-								WorkflowConstants.STATUS_IN_TRASH));
-					}
-					else {
 						StagedModelDataHandler<?> stagedModelDataHandler = StagedModelDataHandlerRegistryUtil.getStagedModelDataHandler(DLFileShortcut.class.getName());
 
 						dynamicQuery.add(workflowStatusProperty.in(

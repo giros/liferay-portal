@@ -60,7 +60,6 @@ import com.liferay.portal.kernel.service.BaseLocalServiceImpl;
 import com.liferay.portal.kernel.service.PersistedModelLocalServiceRegistry;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.io.Serializable;
 
@@ -357,14 +356,10 @@ public abstract class DLFileVersionLocalServiceBaseImpl
 						dynamicQuery.add(disjunction);
 					}
 
-					Property workflowStatusProperty = PropertyFactoryUtil.forName(
-							"status");
+					if (!portletDataContext.isInitialPublication()) {
+						Property workflowStatusProperty = PropertyFactoryUtil.forName(
+								"status");
 
-					if (portletDataContext.isInitialPublication()) {
-						dynamicQuery.add(workflowStatusProperty.ne(
-								WorkflowConstants.STATUS_IN_TRASH));
-					}
-					else {
 						StagedModelDataHandler<?> stagedModelDataHandler = StagedModelDataHandlerRegistryUtil.getStagedModelDataHandler(DLFileVersion.class.getName());
 
 						dynamicQuery.add(workflowStatusProperty.in(
