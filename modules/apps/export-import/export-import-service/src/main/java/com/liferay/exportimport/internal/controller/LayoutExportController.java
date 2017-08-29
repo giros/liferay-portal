@@ -330,7 +330,6 @@ public class LayoutExportController implements ExportController {
 		// Export other models
 
 		_portletExportController.exportAssetLinks(portletDataContext);
-		_portletExportController.exportExpandoTables(portletDataContext);
 		_portletExportController.exportLocks(portletDataContext);
 
 		portletDataContext.addDeletionSystemEventStagedModelTypes(
