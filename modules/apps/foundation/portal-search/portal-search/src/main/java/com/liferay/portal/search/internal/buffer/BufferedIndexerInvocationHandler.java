@@ -201,10 +201,17 @@ public class BufferedIndexerInvocationHandler implements InvocationHandler {
 
 		ClassedModel classedModel = (ClassedModel)baseModel.clone();
 
-		IndexerRequest indexerRequest = new IndexerRequest(
-			methodKey.getMethod(), classedModel, _indexer);
+		Long classPK = (Long)classedModel.getPrimaryKeyObj();
 
-		doBufferRequest(indexerRequest, indexerRequestBuffer);
+		if (object instanceof ResourcedModel) {
+			ResourcedModel resourcedModel = (ResourcedModel)object;
+
+			classPK = resourcedModel.getResourcePrimKey();
+		}
+
+		bufferRequest(
+			methodKey, classedModel.getModelClassName(), classPK,
+			indexerRequestBuffer);
 	}
 
 	protected void bufferRequest(
