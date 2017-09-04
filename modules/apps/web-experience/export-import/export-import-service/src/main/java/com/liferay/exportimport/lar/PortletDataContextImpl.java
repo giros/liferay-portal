@@ -1757,21 +1757,7 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 	@Override
 	public boolean isInitialPublication() {
-		Group group = null;
-
-		try {
-			group = GroupLocalServiceUtil.getGroup(getGroupId());
-		}
-		catch (Exception e) {
-		}
-
-		if (ExportImportThreadLocal.isStagingInProcess() && (group != null) &&
-			group.hasStagingGroup()) {
-
-			return true;
-		}
-
-		return false;
+		return ExportImportThreadLocal.isInitialLayoutStagingInProcess();
 	}
 
 	@Override
