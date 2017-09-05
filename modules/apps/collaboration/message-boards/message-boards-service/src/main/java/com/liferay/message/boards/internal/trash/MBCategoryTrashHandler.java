@@ -358,6 +358,13 @@ public class MBCategoryTrashHandler extends BaseTrashHandler {
 	}
 
 	@Override
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException {
+
+		_mbCategoryLocalService.moveCategoryToTrash(userId, classPK);
+	}
+
+	@Override
 	public void moveTrashEntry(
 			long userId, long classPK, long containerModelId,
 			ServiceContext serviceContext)

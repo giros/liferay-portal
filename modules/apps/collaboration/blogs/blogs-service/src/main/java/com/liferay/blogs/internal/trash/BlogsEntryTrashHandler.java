@@ -99,6 +99,13 @@ public class BlogsEntryTrashHandler extends BaseTrashHandler {
 	}
 
 	@Override
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException {
+
+		_blogsEntryLocalService.moveEntryToTrash(userId, classPK);
+	}
+
+	@Override
 	public void restoreTrashEntry(long userId, long classPK)
 		throws PortalException {
 

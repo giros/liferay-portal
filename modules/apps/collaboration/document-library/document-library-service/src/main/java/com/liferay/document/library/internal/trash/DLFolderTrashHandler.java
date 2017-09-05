@@ -234,6 +234,20 @@ public class DLFolderTrashHandler extends DLBaseTrashHandler {
 	}
 
 	@Override
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException {
+
+		DocumentRepository documentRepository = getDocumentRepository(classPK);
+
+		TrashCapability trashCapability = documentRepository.getCapability(
+			TrashCapability.class);
+
+		Folder folder = documentRepository.getFolder(classPK);
+
+		trashCapability.moveFolderToTrash(userId, folder);
+	}
+
+	@Override
 	public void moveTrashEntry(
 			long userId, long classPK, long containerModelId,
 			ServiceContext serviceContext)

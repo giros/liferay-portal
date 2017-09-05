@@ -388,6 +388,11 @@ public abstract class BaseTrashHandler implements TrashHandler {
 	}
 
 	@Override
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException {
+	}
+
+	@Override
 	public void moveTrashEntry(
 			long userId, long classPK, long containerModelId,
 			ServiceContext serviceContext)

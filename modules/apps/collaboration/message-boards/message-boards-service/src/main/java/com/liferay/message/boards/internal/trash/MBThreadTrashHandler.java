@@ -214,6 +214,13 @@ public class MBThreadTrashHandler extends BaseTrashHandler {
 	}
 
 	@Override
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException {
+
+		_mbThreadLocalService.moveThreadToTrash(userId, classPK);
+	}
+
+	@Override
 	public void moveTrashEntry(
 			long userId, long classPK, long containerModelId,
 			ServiceContext serviceContext)

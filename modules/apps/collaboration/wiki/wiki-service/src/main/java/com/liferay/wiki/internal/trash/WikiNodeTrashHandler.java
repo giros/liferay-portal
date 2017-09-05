@@ -184,6 +184,13 @@ public class WikiNodeTrashHandler extends BaseWikiTrashHandler {
 	}
 
 	@Override
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException {
+
+		_wikiNodeLocalService.moveNodeToTrash(userId, classPK);
+	}
+
+	@Override
 	public void restoreTrashEntry(long userId, long classPK)
 		throws PortalException {
 

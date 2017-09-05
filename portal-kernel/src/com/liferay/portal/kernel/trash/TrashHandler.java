@@ -657,6 +657,15 @@ public interface TrashHandler {
 		throws PortalException;
 
 	/**
+	 * Moves the entity with the class primary key to the Recycle Bin
+	 *
+	 * @param userId the user ID
+	 * @param classPK the primary key of the model entity
+	 */
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException;
+
+	/**
 	 * Moves the model entity with the primary key out of the Recycle Bin to a
 	 * new destination identified by the container model ID.
 	 *

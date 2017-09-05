@@ -96,6 +96,14 @@ public class ExportImportConfigurationTrashHandler extends BaseTrashHandler {
 	}
 
 	@Override
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException {
+
+		_exportImportConfigurationLocalService.
+			moveExportImportConfigurationToTrash(userId, classPK);
+	}
+
+	@Override
 	public void restoreTrashEntry(long userId, long classPK)
 		throws PortalException {
 

@@ -164,6 +164,13 @@ public class BookmarksFolderTrashHandler extends BookmarksBaseTrashHandler {
 	}
 
 	@Override
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException {
+
+		_bookmarksFolderLocalService.moveFolderToTrash(userId, classPK);
+	}
+
+	@Override
 	public void moveTrashEntry(
 			long userId, long classPK, long containerId,
 			ServiceContext serviceContext)

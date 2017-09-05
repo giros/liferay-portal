@@ -223,6 +223,16 @@ public class JournalArticleTrashHandler extends JournalBaseTrashHandler {
 	}
 
 	@Override
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException {
+
+		JournalArticle article = _journalArticleLocalService.getLatestArticle(
+			classPK);
+
+		_journalArticleLocalService.moveArticleToTrash(userId, article);
+	}
+
+	@Override
 	public void moveTrashEntry(
 			long userId, long classPK, long containerId,
 			ServiceContext serviceContext)

@@ -310,6 +310,16 @@ public class WikiPageTrashHandler extends BaseWikiTrashHandler {
 	}
 
 	@Override
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException {
+
+		WikiPage page = _wikiPageLocalService.getLatestPage(
+			classPK, WorkflowConstants.STATUS_ANY, false);
+
+		_wikiPageLocalService.movePageToTrash(userId, page);
+	}
+
+	@Override
 	public void restoreRelatedTrashEntry(String className, long classPK)
 		throws PortalException {
 

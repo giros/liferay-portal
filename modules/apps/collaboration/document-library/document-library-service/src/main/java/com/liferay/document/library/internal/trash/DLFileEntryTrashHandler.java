@@ -241,6 +241,16 @@ public class DLFileEntryTrashHandler extends DLBaseTrashHandler {
 	}
 
 	@Override
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException {
+
+		DLFileEntry dlFileEntry = getDLFileEntry(classPK);
+
+		_dlTrashLocalService.moveFileEntryToTrash(
+			userId, dlFileEntry.getRepositoryId(), classPK);
+	}
+
+	@Override
 	public void moveTrashEntry(
 			long userId, long classPK, long containerModelId,
 			ServiceContext serviceContext)

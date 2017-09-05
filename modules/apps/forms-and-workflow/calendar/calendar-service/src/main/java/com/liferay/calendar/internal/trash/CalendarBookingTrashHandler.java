@@ -63,6 +63,14 @@ public class CalendarBookingTrashHandler extends BaseTrashHandler {
 	}
 
 	@Override
+	public void moveEntryToTrash(long userId, long classPK)
+		throws PortalException {
+
+		_calendarBookingLocalService.moveCalendarBookingToTrash(
+			userId, classPK);
+	}
+
+	@Override
 	public void restoreTrashEntry(long userId, long classPK)
 		throws PortalException {
 
