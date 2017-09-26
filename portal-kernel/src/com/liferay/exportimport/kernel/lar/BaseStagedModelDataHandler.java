@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.exception.NoSuchModelException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.AuditedModel;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.LocalizedModel;
 import com.liferay.portal.kernel.model.ResourcedModel;
@@ -41,15 +42,26 @@ import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.model.TrashedModel;
 import com.liferay.portal.kernel.model.WorkflowedModel;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.PersistedModelLocalService;
+import com.liferay.portal.kernel.service.PersistedModelLocalServiceRegistryUtil;
+import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.TransientValue;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.ratings.kernel.model.RatingsEntry;
 import com.liferay.ratings.kernel.service.RatingsEntryLocalServiceUtil;
+import com.liferay.trash.kernel.model.TrashEntry;
+import com.liferay.trash.kernel.model.TrashVersion;
+import com.liferay.trash.kernel.service.TrashEntryLocalServiceUtil;
+import com.liferay.trash.kernel.service.TrashVersionLocalServiceUtil;
+
+import java.io.Serializable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,6 +120,7 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 			exportAssetTags(portletDataContext, stagedModel);
 			exportComments(portletDataContext, stagedModel);
 			exportRatings(portletDataContext, stagedModel);
+			exportTrashAttributes(portletDataContext, stagedModel);
 
 			if (countStagedModel(portletDataContext, stagedModel)) {
 				manifestSummary.incrementModelAdditionCount(
@@ -372,6 +385,7 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 
 			importComments(portletDataContext, stagedModel);
 			importRatings(portletDataContext, stagedModel);
+			importTrashAttributes(portletDataContext, stagedModel);
 
 			manifestSummary.incrementModelAdditionCount(
 				stagedModel.getStagedModelType());
@@ -609,6 +623,46 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 		}
 	}
 
+	protected void exportTrashAttributes(
+			PortletDataContext portletDataContext, T stagedModel)
+		throws PortalException {
+
+		if (!portletDataContext.isInitialPublication() ||
+			!isStagedModelInTrash(stagedModel)) {
+
+			return;
+		}
+
+		TrashEntry trashEntry = TrashEntryLocalServiceUtil.fetchEntry(
+			stagedModel.getModelClassName(),
+			ExportImportClassedModelUtil.getClassPK(stagedModel));
+
+		if (trashEntry == null) {
+			return;
+		}
+
+		Element stagedModelElement = portletDataContext.getExportDataElement(
+			stagedModel);
+
+		stagedModelElement.addAttribute(
+			"trash-entry-create-date",
+			Time.getRFC822(trashEntry.getCreateDate()));
+
+		stagedModelElement.addAttribute(
+			"trash-entry-status", String.valueOf(trashEntry.getStatus()));
+
+		TrashVersion trashVersion = TrashVersionLocalServiceUtil.fetchVersion(
+			stagedModel.getModelClassName(),
+			GetterUtil.getLong(stagedModel.getPrimaryKeyObj()));
+
+		if (trashVersion == null) {
+			return;
+		}
+
+		stagedModelElement.addAttribute(
+			"trash-version-status", String.valueOf(trashVersion.getStatus()));
+	}
+
 	protected int getProcessFlag() {
 
 		// Ordered by precedence
@@ -841,6 +895,76 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 			StagedModelDataHandlerUtil.importReferenceStagedModel(
 				portletDataContext, stagedModel, className, classPK);
 		}
+	}
+
+	protected void importTrashAttributes(
+			PortletDataContext portletDataContext, T stagedModel)
+		throws PortalException {
+
+		if (!portletDataContext.isInitialPublication() ||
+			!isStagedModelInTrash(stagedModel) ||
+			!(stagedModel instanceof AuditedModel)) {
+
+			return;
+		}
+
+		Map<Serializable, Serializable> newPrimaryKeysMap =
+			(Map<Serializable, Serializable>)
+				portletDataContext.getNewPrimaryKeysMap(
+					stagedModel.getModelClassName());
+
+		PersistedModelLocalService persistedModelLocalService =
+			PersistedModelLocalServiceRegistryUtil.
+				getPersistedModelLocalService(stagedModel.getModelClassName());
+
+		T importedStagedModel = (T)persistedModelLocalService.getPersistedModel(
+			newPrimaryKeysMap.get(stagedModel.getPrimaryKeyObj()));
+
+		Element stagedModelElement =
+			portletDataContext.getImportDataStagedModelElement(stagedModel);
+
+		if (!isStagedModelInTrash(importedStagedModel)) {
+			TrashedModel trashedModel = (TrashedModel)importedStagedModel;
+
+			TrashHandler trashHandler = trashedModel.getTrashHandler();
+
+			AuditedModel auditedModel = (AuditedModel)importedStagedModel;
+
+			long classPK = ExportImportClassedModelUtil.getClassPK(
+				importedStagedModel);
+
+			trashHandler.moveEntryToTrash(auditedModel.getUserId(), classPK);
+
+			TrashEntry trashEntry = TrashEntryLocalServiceUtil.fetchEntry(
+				importedStagedModel.getModelClassName(), classPK);
+
+			trashEntry.setStatus(
+				Integer.valueOf(
+					stagedModelElement.attributeValue("trash-entry-status")));
+
+			trashEntry.setCreateDate(
+				GetterUtil.getDate(
+					stagedModelElement.attributeValue(
+						"trash-entry-create-date"),
+					DateFormatFactoryUtil.getSimpleDateFormat(
+						Time.RFC822_FORMAT)));
+
+			TrashEntryLocalServiceUtil.updateTrashEntry(trashEntry);
+		}
+
+		TrashVersion trashVersion = TrashVersionLocalServiceUtil.fetchVersion(
+			stagedModel.getModelClassName(),
+			GetterUtil.getLong(importedStagedModel.getPrimaryKeyObj()));
+
+		if (trashVersion == null) {
+			return;
+		}
+
+		trashVersion.setStatus(
+			Integer.valueOf(
+				stagedModelElement.attributeValue("trash-version-status")));
+
+		TrashVersionLocalServiceUtil.updateTrashVersion(trashVersion);
 	}
 
 	protected boolean isStagedModelInTrash(T stagedModel) {
