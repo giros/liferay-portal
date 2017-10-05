@@ -81,6 +81,7 @@
 		<reference entity="LayoutSet" package-path="com.liferay.portal" />
 		<reference entity="LayoutSetBranch" package-path="com.liferay.portal" />
 		<reference entity="PortletPreferences" package-path="com.liferay.portal" />
+		<reference entity="TrashEntry" package-path="com.liferay.portlet.trash" />
 	</entity>
 	<exceptions>
 		<exception>LARFile</exception>
