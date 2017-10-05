@@ -317,6 +317,13 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 		groupLocalService.updateGroup(
 			liveGroup.getGroupId(), typeSettingsProperties.toString());
 
+		int trashEntriesCount = trashEntryLocalService.getEntriesCount(
+			liveGroup.getGroupId());
+
+		if (trashEntriesCount > 0) {
+			trashEntryLocalService.deleteEntries(liveGroup.getGroupId());
+		}
+
 		if (!hasStagingGroup) {
 			Group stagingGroup = liveGroup.getStagingGroup();
 
