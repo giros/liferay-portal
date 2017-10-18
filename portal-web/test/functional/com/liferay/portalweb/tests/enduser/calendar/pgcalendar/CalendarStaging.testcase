@@ -205,7 +205,7 @@
 		<execute macro="CalendarNavigator#gotoAddEvent" />
 
 		<execute macro="CalendarEvent#add">
-			<var name="calendarName" value="Site Name" />
+			<var name="calendarName" value="Site Name(Staging)" />
 			<var name="eventTitle" value="Site Name Staged Event" />
 			<var name="eventType" value="Regular" />
 			<var name="pageName" value="Staging Test Page" />
