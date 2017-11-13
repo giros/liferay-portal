@@ -62,7 +62,7 @@ currentURLObj.setParameter("historyKey", renderResponse.getNamespace() + "sites"
 		String stagedDescriptiveName = HtmlUtil.escape(group.getDescriptiveName(locale));
 
 		if (group.isStaged() && !group.isStagedRemotely() && group.isStagingGroup()) {
-			stagedDescriptiveName += "(" + LanguageUtil.get(request, "staging") + ")";
+			stagedDescriptiveName += " (" + LanguageUtil.get(request, "staging") + ")";
 		}
 		%>
 

@@ -426,7 +426,7 @@ String organizationRoleSyncEntitiesEventName = liferayPortletResponse.getNamespa
 				String stagedDescriptiveName = HtmlUtil.escape(group.getDescriptiveName(locale));
 
 				if (group.isStaged() && !group.isStagedRemotely() && group.isStagingGroup()) {
-					stagedDescriptiveName += "(" + LanguageUtil.get(request, "staging") + ")";
+					stagedDescriptiveName += " (" + LanguageUtil.get(request, "staging") + ")";
 				}
 				%>
 
@@ -596,16 +596,6 @@ String organizationRoleSyncEntitiesEventName = liferayPortletResponse.getNamespa
 			modelVar="userGroupGroupRole"
 		>
 
-			<%
-			Group group = userGroupGroupRole.getGroup();
-
-			String stagedDescriptiveName = HtmlUtil.escape(group.getDescriptiveName(locale));
-
-			if (group.isStaged() && !group.isStagedRemotely() && group.isStagingGroup()) {
-				stagedDescriptiveName += "(" + LanguageUtil.get(request, "staging") + ")";
-			}
-			%>
-
 			<liferay-ui:search-container-column-text
 				cssClass="table-cell-content"
 				name="title"
@@ -616,6 +606,16 @@ String organizationRoleSyncEntitiesEventName = liferayPortletResponse.getNamespa
 					message="<%= HtmlUtil.escape(userGroupGroupRole.getRole().getTitle(locale)) %>"
 				/>
 			</liferay-ui:search-container-column-text>
+
+			<%
+				Group group = userGroupGroupRole.getGroup();
+
+				String stagedDescriptiveName = HtmlUtil.escape(group.getDescriptiveName(locale));
+
+				if (group.isStaged() && !group.isStagedRemotely() && group.isStagingGroup()) {
+					stagedDescriptiveName += " (" + LanguageUtil.get(request, "staging") + ")";
+				}
+			%>
 
 			<liferay-ui:search-container-column-text
 				cssClass="table-cell-content"
