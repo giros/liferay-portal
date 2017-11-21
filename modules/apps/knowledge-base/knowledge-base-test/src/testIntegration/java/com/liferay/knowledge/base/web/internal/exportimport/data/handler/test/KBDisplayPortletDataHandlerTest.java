@@ -12,19 +12,17 @@
  * details.
  */
 
-package com.liferay.wiki.web.exportimport.data.handler.test;
+package com.liferay.knowledge.base.web.internal.exportimport.data.handler.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
-import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.test.util.RandomTestUtil;
-import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
+import com.liferay.knowledge.base.constants.KBPortletKeys;
+import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.rule.Sync;
+import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.lar.test.BasePortletDataHandlerTestCase;
 import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.wiki.constants.WikiPortletKeys;
-import com.liferay.wiki.model.WikiNode;
-import com.liferay.wiki.util.test.WikiTestUtil;
 
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -32,15 +30,19 @@ import org.junit.Rule;
 import org.junit.runner.RunWith;
 
 /**
- * @author Zsolt Berentey
+ * @author Gergely Mathe
  */
 @RunWith(Arquillian.class)
-public class WikiPortletDataHandlerTest extends BasePortletDataHandlerTestCase {
+@Sync
+public class KBDisplayPortletDataHandlerTest
+	extends BasePortletDataHandlerTestCase {
 
 	@ClassRule
 	@Rule
-	public static final LiferayIntegrationTestRule liferayIntegrationTestRule =
-		new LiferayIntegrationTestRule();
+	public static final AggregateTestRule aggregateTestRule =
+		new AggregateTestRule(
+		new LiferayIntegrationTestRule(),
+		SynchronousDestinationTestRule.INSTANCE);
 
 	@Before
 	@Override
@@ -52,25 +54,17 @@ public class WikiPortletDataHandlerTest extends BasePortletDataHandlerTestCase {
 
 	@Override
 	protected void addStagedModels() throws Exception {
-		WikiNode node = WikiTestUtil.addNode(stagingGroup.getGroupId());
-
-		ServiceContext serviceContext =
-			ServiceContextTestUtil.getServiceContext(stagingGroup.getGroupId());
-
-		WikiTestUtil.addPage(
-			TestPropsValues.getUserId(), node.getNodeId(),
-			RandomTestUtil.randomString(), RandomTestUtil.randomString(), true,
-			serviceContext);
+		return;
 	}
 
 	@Override
 	protected String[] getDataPortletPreferences() {
-		return new String[] {"hiddenNodes, visibleNodes"};
+		return new String[] {"resourceClassNameId", "resourcePrimKey"};
 	}
 
 	@Override
 	protected String getPortletId() {
-		return WikiPortletKeys.WIKI;
+		return KBPortletKeys.KNOWLEDGE_BASE_DISPLAY;
 	}
 
 }

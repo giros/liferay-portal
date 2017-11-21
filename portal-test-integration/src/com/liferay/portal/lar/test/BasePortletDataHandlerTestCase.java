@@ -59,6 +59,13 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testGetDataPortletPreferences() {
+		Assert.assertArrayEquals(
+			portletDataHandler.getDataPortletPreferences(),
+			getDataPortletPreferences());
+	}
+
+	@Test
 	public void testPrepareManifestSummary() throws Exception {
 		initExport();
 
@@ -143,6 +150,10 @@ public abstract class BasePortletDataHandlerTestCase {
 					expectedModelAdditionCount, modelAdditionCount);
 			}
 		}
+	}
+
+	protected String[] getDataPortletPreferences() {
+		return StringPool.EMPTY_ARRAY;
 	}
 
 	protected Date getEndDate() {

@@ -241,6 +241,11 @@ public class DLPortletDataHandlerTest extends BasePortletDataHandlerTestCase {
 	}
 
 	@Override
+	protected String[] getDataPortletPreferences() {
+		return new String[] {"rootFolderId"};
+	}
+
+	@Override
 	protected String getPortletId() {
 		return DLPortletKeys.DOCUMENT_LIBRARY;
 	}

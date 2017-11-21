@@ -104,6 +104,11 @@ public class BookmarksPortletDataHandlerTest
 	}
 
 	@Override
+	protected String[] getDataPortletPreferences() {
+		return new String[] {"rootFolderId"};
+	}
+
+	@Override
 	protected String getPortletId() {
 		return BookmarksPortletKeys.BOOKMARKS;
 	}
