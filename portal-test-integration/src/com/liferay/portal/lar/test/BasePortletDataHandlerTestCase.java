@@ -129,6 +129,12 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testGetStagingControls() {
+		Assert.assertArrayEquals(
+			getStagingControls(), portletDataHandler.getStagingControls());
+	}
+
+	@Test
 	public void testIsDataPortalLevel() {
 		Assert.assertEquals(
 			isDataPortalLevel(), portletDataHandler.isDataPortalLevel());
@@ -301,6 +307,10 @@ public abstract class BasePortletDataHandlerTestCase {
 
 	protected Date getStartDate() {
 		return new Date(System.currentTimeMillis() - Time.HOUR);
+	}
+
+	protected PortletDataHandlerControl[] getStagingControls() {
+		return new PortletDataHandlerControl[0];
 	}
 
 	protected void initExport() throws Exception {
