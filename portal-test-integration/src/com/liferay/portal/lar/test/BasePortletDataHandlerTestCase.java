@@ -112,6 +112,11 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testGetRank() {
+		Assert.assertEquals(getRank(), portletDataHandler.getRank());
+	}
+
+	@Test
 	public void testIsDataPortalLevel() {
 		Assert.assertEquals(
 			isDataPortalLevel(), portletDataHandler.isDataPortalLevel());
@@ -269,6 +274,10 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	protected abstract String getPortletId();
+
+	protected int getRank() {
+		return 100;
+	}
 
 	protected Date getStartDate() {
 		return new Date(System.currentTimeMillis() - Time.HOUR);
