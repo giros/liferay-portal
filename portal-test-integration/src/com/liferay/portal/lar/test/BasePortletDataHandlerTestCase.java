@@ -123,6 +123,12 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testGetServiceName() {
+		Assert.assertEquals(
+			getServiceName(), portletDataHandler.getServiceName());
+	}
+
+	@Test
 	public void testIsDataPortalLevel() {
 		Assert.assertEquals(
 			isDataPortalLevel(), portletDataHandler.isDataPortalLevel());
@@ -287,6 +293,10 @@ public abstract class BasePortletDataHandlerTestCase {
 
 	protected String getSchemaVersion() {
 		return "1.0.0";
+	}
+
+	protected String getServiceName() {
+		return null;
 	}
 
 	protected Date getStartDate() {
