@@ -26,6 +26,7 @@ import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Time;
@@ -163,6 +164,12 @@ public abstract class BasePortletDataHandlerTestCase {
 	public void testIsDataSiteLevel() {
 		Assert.assertEquals(
 			isDataSiteLevel(), portletDataHandler.isDataSiteLevel());
+	}
+
+	@Test
+	public void testIsDisplayPortlet() {
+		Assert.assertEquals(
+			isDisplayPortlet(), portletDataHandler.isDisplayPortlet());
 	}
 
 	@Test
@@ -372,6 +379,16 @@ public abstract class BasePortletDataHandlerTestCase {
 		DataLevel dataLevel = getDataLevel();
 
 		return dataLevel.equals(DataLevel.SITE);
+	}
+
+	protected boolean isDisplayPortlet() {
+		if (isDataPortletInstanceLevel() &&
+			!ArrayUtil.isEmpty(getDataPortletPreferences())) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	protected Element missingReferencesElement;
