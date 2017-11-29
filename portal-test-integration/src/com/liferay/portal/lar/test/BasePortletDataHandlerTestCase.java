@@ -187,6 +187,13 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testIsSupportsDataStrategyMirrorWithOverwriting() {
+		Assert.assertEquals(
+			isSupportsDataStrategyMirrorWithOverwriting(),
+			portletDataHandler.isSupportsDataStrategyMirrorWithOverwriting());
+	}
+
+	@Test
 	public void testPrepareManifestSummary() throws Exception {
 		initExport();
 
@@ -410,6 +417,10 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	protected boolean isRollbackOnException() {
+		return true;
+	}
+
+	protected boolean isSupportsDataStrategyMirrorWithOverwriting() {
 		return true;
 	}
 
