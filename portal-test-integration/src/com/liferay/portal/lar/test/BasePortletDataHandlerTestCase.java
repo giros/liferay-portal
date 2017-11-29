@@ -141,6 +141,12 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testIsDataLocalized() {
+		Assert.assertEquals(
+			isDataLocalized(), portletDataHandler.isDataLocalized());
+	}
+
+	@Test
 	public void testIsDataPortalLevel() {
 		Assert.assertEquals(
 			isDataPortalLevel(), portletDataHandler.isDataPortalLevel());
@@ -343,6 +349,10 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	protected boolean isDataAlwaysStaged() {
+		return false;
+	}
+
+	protected boolean isDataLocalized() {
 		return false;
 	}
 
