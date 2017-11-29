@@ -173,6 +173,13 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testIsPublishToLiveByDefault() {
+		Assert.assertEquals(
+			isPublishToLiveByDefault(),
+			portletDataHandler.isPublishToLiveByDefault());
+	}
+
+	@Test
 	public void testPrepareManifestSummary() throws Exception {
 		initExport();
 
@@ -388,6 +395,10 @@ public abstract class BasePortletDataHandlerTestCase {
 			return true;
 		}
 
+		return false;
+	}
+
+	protected boolean isPublishToLiveByDefault() {
 		return false;
 	}
 
