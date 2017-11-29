@@ -180,6 +180,13 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testIsRollbackOnException() {
+		Assert.assertEquals(
+			isRollbackOnException(),
+			portletDataHandler.isRollbackOnException());
+	}
+
+	@Test
 	public void testPrepareManifestSummary() throws Exception {
 		initExport();
 
@@ -400,6 +407,10 @@ public abstract class BasePortletDataHandlerTestCase {
 
 	protected boolean isPublishToLiveByDefault() {
 		return false;
+	}
+
+	protected boolean isRollbackOnException() {
+		return true;
 	}
 
 	protected Element missingReferencesElement;
