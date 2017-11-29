@@ -108,6 +108,11 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testGetNamespace() {
+		Assert.assertEquals(getNamespace(), portletDataHandler.getNamespace());
+	}
+
+	@Test
 	public void testGetPortletId() {
 		Assert.assertEquals(getPortletId(), portletDataHandler.getPortletId());
 	}
@@ -310,6 +315,10 @@ public abstract class BasePortletDataHandlerTestCase {
 
 	protected PortletDataHandlerControl[] getImportMetadataControls() {
 		return new PortletDataHandlerControl[0];
+	}
+
+	protected String getNamespace() {
+		return StringPool.BLANK;
 	}
 
 	protected PortletDataHandler getPortletDataHandler(String portletId) {
