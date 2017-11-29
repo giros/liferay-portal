@@ -192,6 +192,13 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testIsSupportsDataStrategyCopyAsNew() {
+		Assert.assertEquals(
+			isSupportsDataStrategyCopyAsNew(),
+			portletDataHandler.isSupportsDataStrategyCopyAsNew());
+	}
+
+	@Test
 	public void testIsSupportsDataStrategyMirrorWithOverwriting() {
 		Assert.assertEquals(
 			isSupportsDataStrategyMirrorWithOverwriting(),
@@ -426,6 +433,10 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	protected boolean isRollbackOnException() {
+		return true;
+	}
+
+	protected boolean isSupportsDataStrategyCopyAsNew() {
 		return true;
 	}
 
