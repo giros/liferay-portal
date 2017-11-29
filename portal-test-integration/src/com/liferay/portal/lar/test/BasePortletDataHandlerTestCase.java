@@ -94,6 +94,12 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testGetImportControls() throws PortletDataException {
+		Assert.assertArrayEquals(
+			getImportControls(), portletDataHandler.getImportControls());
+	}
+
+	@Test
 	public void testIsDataPortalLevel() {
 		Assert.assertEquals(
 			isDataPortalLevel(), portletDataHandler.isDataPortalLevel());
@@ -220,6 +226,10 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	protected PortletDataHandlerControl[] getExportMetadataControls() {
+		return new PortletDataHandlerControl[0];
+	}
+
+	protected PortletDataHandlerControl[] getImportControls() {
 		return new PortletDataHandlerControl[0];
 	}
 
