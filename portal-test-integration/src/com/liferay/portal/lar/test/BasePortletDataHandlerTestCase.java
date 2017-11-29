@@ -72,6 +72,13 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testGetDeletionSystemEventStagedModelTypes() {
+		Assert.assertArrayEquals(
+			getDeletionSystemEventStagedModelTypes(),
+			portletDataHandler.getDeletionSystemEventStagedModelTypes());
+	}
+
+	@Test
 	public void testIsDataPortalLevel() {
 		Assert.assertEquals(
 			isDataPortalLevel(), portletDataHandler.isDataPortalLevel());
@@ -183,6 +190,10 @@ public abstract class BasePortletDataHandlerTestCase {
 
 	protected String[] getDataPortletPreferences() {
 		return StringPool.EMPTY_ARRAY;
+	}
+
+	protected StagedModelType[] getDeletionSystemEventStagedModelTypes() {
+		return new StagedModelType[0];
 	}
 
 	protected Date getEndDate() {
