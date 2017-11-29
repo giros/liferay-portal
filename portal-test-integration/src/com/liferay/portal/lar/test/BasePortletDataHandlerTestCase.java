@@ -18,8 +18,10 @@ import com.liferay.exportimport.kernel.lar.DataLevel;
 import com.liferay.exportimport.kernel.lar.ManifestSummary;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataContextFactoryUtil;
+import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.PortletDataHandler;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerBoolean;
+import com.liferay.exportimport.kernel.lar.PortletDataHandlerControl;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
@@ -76,6 +78,12 @@ public abstract class BasePortletDataHandlerTestCase {
 		Assert.assertArrayEquals(
 			getDeletionSystemEventStagedModelTypes(),
 			portletDataHandler.getDeletionSystemEventStagedModelTypes());
+	}
+
+	@Test
+	public void testGetExportControls() throws PortletDataException {
+		Assert.assertArrayEquals(
+			getExportControls(), portletDataHandler.getExportControls());
 	}
 
 	@Test
@@ -198,6 +206,10 @@ public abstract class BasePortletDataHandlerTestCase {
 
 	protected Date getEndDate() {
 		return new Date();
+	}
+
+	protected PortletDataHandlerControl[] getExportControls() {
+		return new PortletDataHandlerControl[0];
 	}
 
 	protected PortletDataHandler getPortletDataHandler(String portletId) {
