@@ -135,6 +135,12 @@ public abstract class BasePortletDataHandlerTestCase {
 	}
 
 	@Test
+	public void testIsDataAlwaysStaged() {
+		Assert.assertEquals(
+			isDataAlwaysStaged(), portletDataHandler.isDataAlwaysStaged());
+	}
+
+	@Test
 	public void testIsDataPortalLevel() {
 		Assert.assertEquals(
 			isDataPortalLevel(), portletDataHandler.isDataPortalLevel());
@@ -334,6 +340,10 @@ public abstract class BasePortletDataHandlerTestCase {
 
 		portletDataContext.setMissingReferencesElement(
 			missingReferencesElement);
+	}
+
+	protected boolean isDataAlwaysStaged() {
+		return false;
 	}
 
 	protected boolean isDataPortalLevel() {
