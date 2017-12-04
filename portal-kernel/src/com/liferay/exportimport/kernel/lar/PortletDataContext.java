@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.DateRange;
 import com.liferay.portal.kernel.util.KeyValuePair;
+import com.liferay.portal.kernel.xml.DocumentException;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.zip.ZipReader;
 import com.liferay.portal.kernel.zip.ZipWriter;
@@ -128,6 +129,11 @@ public interface PortletDataContext extends Serializable {
 	public void addExpando(
 			Element element, String path, ClassedModel classedModel)
 		throws PortalException;
+
+	public Element addExportDataRootElement();
+
+	public Element addImportDataRootElement(String data)
+		throws DocumentException;
 
 	public void addLocks(Class<?> clazz, String key) throws PortalException;
 
@@ -323,6 +329,8 @@ public interface PortletDataContext extends Serializable {
 		Class<? extends StagedModel> clazz);
 
 	public Element getExportDataRootElement();
+
+	public String getExportDataRootElementString();
 
 	public String getExportImportProcessId();
 

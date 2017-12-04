@@ -388,6 +388,7 @@ public abstract class BasePortletDataHandler implements PortletDataHandler {
 				portletDataContext, portletId, portletPreferences, data);
 		}
 		catch (Exception e) {
+			_log.error(e.getMessage(), e);
 			throw _handleException(
 				e, PortletDataException.IMPORT_PORTLET_DATA, portletId);
 		}
@@ -415,17 +416,17 @@ public abstract class BasePortletDataHandler implements PortletDataHandler {
 
 	@Override
 	public boolean isDataPortalLevel() {
-		return _dataLevel.equals(DataLevel.PORTAL);
+		return getDataLevel().equals(DataLevel.PORTAL);
 	}
 
 	@Override
 	public boolean isDataPortletInstanceLevel() {
-		return _dataLevel.equals(DataLevel.PORTLET_INSTANCE);
+		return getDataLevel().equals(DataLevel.PORTLET_INSTANCE);
 	}
 
 	@Override
 	public boolean isDataSiteLevel() {
-		return _dataLevel.equals(DataLevel.SITE);
+		return getDataLevel().equals(DataLevel.SITE);
 	}
 
 	@Override
@@ -523,11 +524,19 @@ public abstract class BasePortletDataHandler implements PortletDataHandler {
 		}
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public void setPortletId(String portletId) {
 		_portletId = portletId;
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public void setRank(int rank) {
 		_rank = rank;

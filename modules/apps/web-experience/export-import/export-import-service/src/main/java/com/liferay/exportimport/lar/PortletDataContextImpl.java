@@ -93,6 +93,8 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.xml.Attribute;
+import com.liferay.portal.kernel.xml.Document;
+import com.liferay.portal.kernel.xml.DocumentException;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.Node;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
@@ -306,6 +308,39 @@ public class PortletDataContextImpl implements PortletDataContext {
 		Element element, String path, ClassedModel classedModel) {
 
 		addExpando(element, path, classedModel, classedModel.getModelClass());
+	}
+
+	@Override
+	public Element addExportDataRootElement() {
+		Document document = SAXReaderUtil.createDocument();
+
+		Class<?> clazz = getClass();
+
+		Element rootElement = document.addElement(clazz.getSimpleName());
+
+		setExportDataRootElement(rootElement);
+
+		return rootElement;
+	}
+
+	@Override
+	public Element addImportDataRootElement(String data)
+		throws DocumentException {
+
+		Document document = SAXReaderUtil.read(data);
+
+		Element rootElement = document.getRootElement();
+
+		setImportDataRootElement(rootElement);
+
+		long groupId = GetterUtil.getLong(
+			rootElement.attributeValue("group-id"));
+
+		if (groupId != 0) {
+			setSourceGroupId(groupId);
+		}
+
+		return rootElement;
 	}
 
 	@Override
@@ -943,6 +978,22 @@ public class PortletDataContextImpl implements PortletDataContext {
 	@Override
 	public Element getExportDataRootElement() {
 		return _exportDataRootElement;
+	}
+
+	@Override
+	public String getExportDataRootElementString() {
+		if (_exportDataRootElement == null) {
+			return StringPool.BLANK;
+		}
+
+		try {
+			Document document = _exportDataRootElement.getDocument();
+
+			return document.formattedString();
+		}
+		catch (IOException ioe) {
+			return StringPool.BLANK;
+		}
 	}
 
 	@Override
