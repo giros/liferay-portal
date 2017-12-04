@@ -15,6 +15,7 @@
 package com.liferay.exportimport.kernel.lar;
 
 import com.liferay.portal.kernel.model.Portlet;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringPool;
 
 import javax.portlet.PortletPreferences;
@@ -84,7 +85,9 @@ public interface PortletDataHandler {
 			PortletPreferences portletPreferences)
 		throws PortletDataException;
 
-	public DataLevel getDataLevel();
+	public default DataLevel getDataLevel() {
+		return DataLevel.SITE;
+	}
 
 	/**
 	 * Returns an array of the portlet preferences that reference data. These
@@ -94,7 +97,9 @@ public interface PortletDataHandler {
 	 */
 	public String[] getDataPortletPreferences();
 
-	public StagedModelType[] getDeletionSystemEventStagedModelTypes();
+	public default StagedModelType[] getDeletionSystemEventStagedModelTypes() {
+		return new StagedModelType[0];
+	};
 
 	public PortletDataHandlerControl[] getExportConfigurationControls(
 			long companyId, long groupId, Portlet portlet,
@@ -126,8 +131,11 @@ public interface PortletDataHandler {
 	 * @return an array of the metadata controls defined for this data handler
 	 * @throws PortletDataException if a portlet data exception occurred
 	 */
-	public PortletDataHandlerControl[] getExportMetadataControls()
-		throws PortletDataException;
+	public default PortletDataHandlerControl[] getExportMetadataControls()
+		throws PortletDataException {
+
+		return new PortletDataHandlerControl[0];
+	};
 
 	/**
 	 * Returns the number of entities defined for this data handler that are
@@ -168,18 +176,27 @@ public interface PortletDataHandler {
 	 * @return an array of the metadata controls defined for this data handler
 	 * @throws PortletDataException if a portlet data exception occurred
 	 */
-	public PortletDataHandlerControl[] getImportMetadataControls()
-		throws PortletDataException;
+	public default PortletDataHandlerControl[] getImportMetadataControls()
+		throws PortletDataException {
+
+		return getExportMetadataControls();
+	};
 
 	public default String getNamespace() {
 		return StringPool.BLANK;
 	}
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
+	@Deprecated
 	public String getPortletId();
 
 	public int getRank();
 
-	public String getSchemaVersion();
+	public default String getSchemaVersion() {
+		return "1.0.0";
+	};
 
 	public String getServiceName();
 
@@ -215,17 +232,35 @@ public interface PortletDataHandler {
 			PortletPreferences portletPreferences, String data)
 		throws PortletDataException;
 
-	public boolean isDataAlwaysStaged();
+	public default boolean isDataAlwaysStaged() {
+		return false;
+	};
 
-	public boolean isDataLocalized();
+	public default boolean isDataLocalized() {
+		return false;
+	};
 
-	public boolean isDataPortalLevel();
+	public default boolean isDataPortalLevel() {
+		return getDataLevel().equals(DataLevel.PORTAL);
+	}
 
-	public boolean isDataPortletInstanceLevel();
+	public default boolean isDataPortletInstanceLevel() {
+		return getDataLevel().equals(DataLevel.PORTLET_INSTANCE);
+	}
 
-	public boolean isDataSiteLevel();
+	public default boolean isDataSiteLevel() {
+		return getDataLevel().equals(DataLevel.SITE);
+	}
 
-	public boolean isDisplayPortlet();
+	public default boolean isDisplayPortlet() {
+		if (isDataPortletInstanceLevel() &&
+			!ArrayUtil.isEmpty(getDataPortletPreferences())) {
+
+			return true;
+		}
+
+		return false;
+	};
 
 	/**
 	 * Returns whether the data exported by this handler should be included by
@@ -238,7 +273,9 @@ public interface PortletDataHandler {
 	 *         included by default when publishing to live; <code>false</code>
 	 *         otherwise
 	 */
-	public boolean isPublishToLiveByDefault();
+	public default boolean isPublishToLiveByDefault() {
+		return false;
+	};
 
 	/**
 	 * Returns <code>true</code> if the data handler stops operations and rolls
@@ -248,7 +285,9 @@ public interface PortletDataHandler {
 	 *         back their transactions on operations throwing exceptions;
 	 *         <code>false</code> otherwise
 	 */
-	public boolean isRollbackOnException();
+	public default boolean isRollbackOnException() {
+		return true;
+	};
 
 	public default boolean isSupportsDataStrategyCopyAsNew() {
 		return true;
@@ -276,8 +315,16 @@ public interface PortletDataHandler {
 			PortletPreferences portletPreferences)
 		throws PortletDataException;
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public void setPortletId(String portletId);
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public void setRank(int rank);
 
 	public boolean validateSchemaVersion(String schemaVersion);

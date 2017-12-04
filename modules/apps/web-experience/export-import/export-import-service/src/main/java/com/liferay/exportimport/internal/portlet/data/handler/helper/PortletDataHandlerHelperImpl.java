@@ -14,11 +14,24 @@
 
 package com.liferay.exportimport.internal.portlet.data.handler.helper;
 
+import com.liferay.exportimport.kernel.lar.ManifestSummary;
+import com.liferay.exportimport.kernel.lar.PortletDataContext;
+import com.liferay.exportimport.kernel.lar.PortletDataHandlerBoolean;
+import com.liferay.exportimport.kernel.lar.PortletDataHandlerControl;
+import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.exportimport.portlet.data.handler.helper.PortletDataHandlerHelper;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.plugin.Version;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.Time;
+import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.xml.DocumentException;
+import com.liferay.portal.kernel.xml.Element;
 
 import java.util.Objects;
+
+import javax.portlet.PortletPreferences;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -27,6 +40,236 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(immediate = true, service = PortletDataHandlerHelper.class)
 public class PortletDataHandlerHelperImpl implements PortletDataHandlerHelper {
+
+	@Override
+	public void addUncheckedModelAdditionCount(
+		PortletDataContext portletDataContext,
+		PortletDataHandlerControl portletDataHandlerControl) {
+
+		if (!(portletDataHandlerControl instanceof PortletDataHandlerBoolean)) {
+			return;
+		}
+
+		PortletDataHandlerBoolean portletDataHandlerBoolean =
+			(PortletDataHandlerBoolean)portletDataHandlerControl;
+
+		PortletDataHandlerControl[] childPortletDataHandlerControls =
+			portletDataHandlerBoolean.getChildren();
+
+		if (childPortletDataHandlerControls != null) {
+			for (PortletDataHandlerControl childPortletDataHandlerControl :
+					childPortletDataHandlerControls) {
+
+				addUncheckedModelAdditionCount(
+					portletDataContext, childPortletDataHandlerControl);
+			}
+		}
+
+		if (Validator.isNull(portletDataHandlerControl.getClassName())) {
+			return;
+		}
+
+		boolean checkedControl = GetterUtil.getBoolean(
+			portletDataContext.getBooleanParameter(
+				portletDataHandlerControl.getNamespace(),
+				portletDataHandlerControl.getControlName(), false));
+
+		if (!checkedControl) {
+			ManifestSummary manifestSummary =
+				portletDataContext.getManifestSummary();
+
+			StagedModelType stagedModelType = new StagedModelType(
+				portletDataHandlerControl.getClassName(),
+				portletDataHandlerBoolean.getReferrerClassName());
+
+			String manifestSummaryKey = ManifestSummary.getManifestSummaryKey(
+				stagedModelType);
+
+			manifestSummary.addModelAdditionCount(manifestSummaryKey, 0);
+		}
+	}
+
+	@Override
+	public void doAfterAddDefaultData(String portletId, long startTime) {
+		if (_log.isInfoEnabled()) {
+			long duration = System.currentTimeMillis() - startTime;
+
+			_log.info(
+				"Added default data to portlet in " +
+					Time.getDuration(duration));
+		}
+	}
+
+	@Override
+	public void doAfterDelete(String portletId, long startTime) {
+		if (_log.isInfoEnabled()) {
+			long duration = System.currentTimeMillis() - startTime;
+
+			_log.info("Deleted portlet in " + Time.getDuration(duration));
+		}
+	}
+
+	@Override
+	public void doAfterExport(
+		PortletDataContext portletDataContext, Element rootElement,
+		long startTime) {
+
+		portletDataContext.setExportDataRootElement(rootElement);
+
+		if (_log.isInfoEnabled()) {
+			long duration = System.currentTimeMillis() - startTime;
+
+			_log.info("Exported portlet in " + Time.getDuration(duration));
+		}
+	}
+
+	@Override
+	public void doAfterImport(
+		PortletDataContext portletDataContext, Element rootElement,
+		long startTime) {
+
+		long sourceGroupId = portletDataContext.getSourceGroupId();
+
+		portletDataContext.setImportDataRootElement(rootElement);
+		portletDataContext.setSourceGroupId(sourceGroupId);
+
+		if (_log.isInfoEnabled()) {
+			long duration = System.currentTimeMillis() - startTime;
+
+			_log.info("Imported portlet in " + Time.getDuration(duration));
+		}
+	}
+
+	@Override
+	public long doBeforeAddDefaultData(String portletId) {
+		long startTime = 0;
+
+		if (_log.isInfoEnabled()) {
+			_log.info("Adding default data to portlet " + portletId);
+
+			startTime = System.currentTimeMillis();
+		}
+
+		return startTime;
+	}
+
+	@Override
+	public long doBeforeDelete(String portletId) {
+		long startTime = 0;
+
+		if (_log.isInfoEnabled()) {
+			_log.info("Deleting portlet " + portletId);
+
+			startTime = System.currentTimeMillis();
+		}
+
+		return startTime;
+	}
+
+	@Override
+	public long doBeforeExport(
+		PortletDataContext portletDataContext, String portletId,
+		Element rootElement, StagedModelType[] deletionSystemEvents,
+		PortletDataHandlerControl[] exportControls,
+		PortletPreferences portletPreferences) {
+
+		long startTime = 0;
+
+		if (_log.isInfoEnabled()) {
+			_log.info("Exporting portlet " + portletId);
+
+			startTime = System.currentTimeMillis();
+		}
+
+		rootElement = portletDataContext.getExportDataRootElement();
+
+		portletDataContext.addDeletionSystemEventStagedModelTypes(
+			deletionSystemEvents);
+
+		for (PortletDataHandlerControl portletDataHandlerControl :
+				exportControls) {
+
+			addUncheckedModelAdditionCount(
+				portletDataContext, portletDataHandlerControl);
+		}
+
+		return startTime;
+	}
+
+	@Override
+	public void doBeforeImport(
+			PortletDataContext portletDataContext, String portletId,
+			Long startTime, Element rootElement, String data)
+		throws DocumentException {
+
+		if (_log.isInfoEnabled()) {
+			_log.info("Importing portlet " + portletId);
+
+			startTime = Long.valueOf(System.currentTimeMillis());
+		}
+
+		if (Validator.isXml(data)) {
+			rootElement = portletDataContext.getImportDataRootElement();
+
+			portletDataContext.addImportDataRootElement(data);
+		}
+	}
+
+	@Override
+	public long getExportModelCount(
+		ManifestSummary manifestSummary,
+		PortletDataHandlerControl[] portletDataHandlerControls) {
+
+		long totalModelCount = -1;
+
+		for (PortletDataHandlerControl portletDataHandlerControl :
+				portletDataHandlerControls) {
+
+			StagedModelType stagedModelType = new StagedModelType(
+				portletDataHandlerControl.getClassName(),
+				portletDataHandlerControl.getReferrerClassName());
+
+			long modelAdditionCount = manifestSummary.getModelAdditionCount(
+				stagedModelType);
+
+			if (portletDataHandlerControl instanceof
+					PortletDataHandlerBoolean) {
+
+				PortletDataHandlerBoolean portletDataHandlerBoolean =
+					(PortletDataHandlerBoolean)portletDataHandlerControl;
+
+				PortletDataHandlerControl[] childPortletDataHandlerControls =
+					portletDataHandlerBoolean.getChildren();
+
+				if (childPortletDataHandlerControls != null) {
+					long childModelCount = getExportModelCount(
+						manifestSummary, childPortletDataHandlerControls);
+
+					if (childModelCount != -1) {
+						if (modelAdditionCount == -1) {
+							modelAdditionCount = childModelCount;
+						}
+						else {
+							modelAdditionCount += childModelCount;
+						}
+					}
+				}
+			}
+
+			if (modelAdditionCount == -1) {
+				continue;
+			}
+
+			if (totalModelCount == -1) {
+				totalModelCount = modelAdditionCount;
+			}
+			else {
+				totalModelCount += modelAdditionCount;
+			}
+		}
+
+		return totalModelCount;
+	}
 
 	@Override
 	public boolean validateSchemaVersion(
@@ -62,5 +305,8 @@ public class PortletDataHandlerHelperImpl implements PortletDataHandlerHelper {
 
 		return true;
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		PortletDataHandlerHelperImpl.class);
 
 }

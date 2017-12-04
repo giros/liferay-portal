@@ -16,11 +16,55 @@ package com.liferay.exportimport.portlet.data.handler.helper;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.exportimport.kernel.lar.ManifestSummary;
+import com.liferay.exportimport.kernel.lar.PortletDataContext;
+import com.liferay.exportimport.kernel.lar.PortletDataHandlerControl;
+import com.liferay.exportimport.kernel.lar.StagedModelType;
+import com.liferay.portal.kernel.xml.DocumentException;
+import com.liferay.portal.kernel.xml.Element;
+
+import javax.portlet.PortletPreferences;
+
 /**
  * @author Mate Thurzo
  */
 @ProviderType
 public interface PortletDataHandlerHelper {
+
+	public void addUncheckedModelAdditionCount(
+		PortletDataContext portletDataContext,
+		PortletDataHandlerControl portletDataHandlerControl);
+
+	public void doAfterAddDefaultData(String portletId, long startTime);
+
+	public void doAfterDelete(String portletId, long startTime);
+
+	public void doAfterExport(
+		PortletDataContext portletDataContext, Element rootElement,
+		long startTime);
+
+	public void doAfterImport(
+		PortletDataContext portletDataContext, Element rootElement,
+		long startTime);
+
+	public long doBeforeAddDefaultData(String portletId);
+
+	public long doBeforeDelete(String portletId);
+
+	public long doBeforeExport(
+		PortletDataContext portletDataContext, String portletId,
+		Element rootElement, StagedModelType[] deletionSystemEvents,
+		PortletDataHandlerControl[] exportControls,
+		PortletPreferences portletPreferences);
+
+	public void doBeforeImport(
+			PortletDataContext portletDataContext, String portletId,
+			Long startTime, Element rootElement, String data)
+		throws DocumentException;
+
+	public long getExportModelCount(
+		ManifestSummary manifestSummary,
+		PortletDataHandlerControl[] portletDataHandlerControls);
 
 	public boolean validateSchemaVersion(
 		String schemaVersion, String portletSchemaVersion);
