@@ -186,10 +186,6 @@ public interface PortletDataHandler {
 		return StringPool.BLANK;
 	}
 
-	/**
-	 * @deprecated As of 7.0.0
-	 */
-	@Deprecated
 	public String getPortletId();
 
 	public int getRank();
@@ -315,10 +311,6 @@ public interface PortletDataHandler {
 			PortletPreferences portletPreferences)
 		throws PortletDataException;
 
-	/**
-	 * @deprecated As of 7.0.0, with no direct replacement
-	 */
-	@Deprecated
 	public void setPortletId(String portletId);
 
 	/**
