@@ -57,9 +57,9 @@ public interface PortletDataHandlerHelper {
 		PortletDataHandlerControl[] exportControls,
 		PortletPreferences portletPreferences);
 
-	public void doBeforeImport(
+	public long doBeforeImport(
 			PortletDataContext portletDataContext, String portletId,
-			Long startTime, Element rootElement, String data)
+			Element rootElement, String data)
 		throws DocumentException;
 
 	public long getExportModelCount(

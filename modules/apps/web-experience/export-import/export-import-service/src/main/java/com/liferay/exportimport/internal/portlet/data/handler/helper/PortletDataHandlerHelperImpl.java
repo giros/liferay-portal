@@ -197,10 +197,12 @@ public class PortletDataHandlerHelperImpl implements PortletDataHandlerHelper {
 	}
 
 	@Override
-	public void doBeforeImport(
+	public long doBeforeImport(
 			PortletDataContext portletDataContext, String portletId,
-			Long startTime, Element rootElement, String data)
+			Element rootElement, String data)
 		throws DocumentException {
+
+		long startTime = 0;
 
 		if (_log.isInfoEnabled()) {
 			_log.info("Importing portlet " + portletId);
@@ -213,6 +215,8 @@ public class PortletDataHandlerHelperImpl implements PortletDataHandlerHelper {
 
 			portletDataContext.addImportDataRootElement(data);
 		}
+
+		return startTime;
 	}
 
 	@Override
