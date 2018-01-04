@@ -14,6 +14,8 @@
 
 package com.liferay.portal.zip;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.petra.memory.DeleteFileFinalizeAction;
 import com.liferay.petra.memory.FinalizeManager;
 import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayInputStream;
@@ -41,6 +43,7 @@ import java.io.OutputStream;
 /**
  * @author Raymond Augé
  */
+@ProviderType
 public class ZipWriterImpl implements ZipWriter {
 
 	public ZipWriterImpl() {
@@ -61,6 +64,20 @@ public class ZipWriterImpl implements ZipWriter {
 		_file = new File(file.getAbsolutePath());
 
 		_file.mkdir();
+	}
+
+	@Override
+	public OutputStream addEntry(String name) throws IOException {
+		if (name.startsWith(StringPool.SLASH)) {
+			name = name.substring(1);
+		}
+
+		if (_log.isDebugEnabled()) {
+			_log.debug("Opening output stream for " + name);
+		}
+
+		return new FileOutputStream(
+			new File(getPath() + StringPool.SLASH + name));
 	}
 
 	@Override
