@@ -580,21 +580,9 @@ public class PortletExportController implements ExportController {
 			portletDataContext.setStartDate(originalStartDate);
 		}
 
-		if (Validator.isNull(data)) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(
-					"Not exporting data for " + portletId +
-						" because null data was returned");
-			}
-
-			return;
-		}
-
 		Element portletDataElement = parentElement.addElement("portlet-data");
 
 		portletDataElement.addAttribute("path", path);
-
-		portletDataContext.addZipEntry(path, data);
 
 		boolean updateLastPublishDate = MapUtil.getBoolean(
 			portletDataContext.getParameterMap(),
