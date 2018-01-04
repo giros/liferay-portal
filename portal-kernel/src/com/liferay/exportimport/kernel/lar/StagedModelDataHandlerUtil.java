@@ -64,6 +64,28 @@ public class StagedModelDataHandlerUtil {
 		}
 	}
 
+	public static <T extends StagedModel, U extends StagedModel> void
+			exportReference(
+				PortletDataContext portletDataContext, T referrerStagedModel,
+				U stagedModel, String referenceType)
+		throws PortletDataException {
+
+		if (!ExportImportHelperUtil.isAlwaysIncludeReference(
+				portletDataContext, stagedModel) ||
+			!ExportImportHelperUtil.isReferenceWithinExportScope(
+				portletDataContext, stagedModel)) {
+
+			portletDataContext.addReferenceElement(
+				referrerStagedModel, null, stagedModel,
+				PortletDataContext.REFERENCE_TYPE_DEPENDENCY, true);
+		}
+
+		exportStagedModel(portletDataContext, stagedModel);
+
+		portletDataContext.addReferenceElement(
+			referrerStagedModel, null, stagedModel, referenceType, false);
+	}
+
 	public static <T extends StagedModel> Element exportReferenceStagedModel(
 			PortletDataContext portletDataContext, String referrerPortletId,
 			T stagedModel)
@@ -150,6 +172,42 @@ public class StagedModelDataHandlerUtil {
 		return portletDataContext.addReferenceElement(
 			referrerStagedModel, referrerStagedModelElement, stagedModel,
 			referenceType, false);
+	}
+
+	public static <T extends StagedModel, U extends StagedModel> void
+			exportReferenceStagedModelStream(
+				PortletDataContext portletDataContext, T referrerStagedModel,
+				U stagedModel, String referenceType)
+		throws PortletDataException {
+
+		exportReferenceStagedModelStream(
+			portletDataContext, referrerStagedModel, stagedModel, referenceType,
+			null);
+	}
+
+	public static <T extends StagedModel, U extends StagedModel> void
+			exportReferenceStagedModelStream(
+				PortletDataContext portletDataContext, T referrerStagedModel,
+				U stagedModel, String referenceType,
+				Map<String, String> properties)
+		throws PortletDataException {
+
+		if (!ExportImportHelperUtil.isAlwaysIncludeReference(
+				portletDataContext, stagedModel) ||
+			!ExportImportHelperUtil.isReferenceWithinExportScope(
+				portletDataContext, stagedModel)) {
+
+			portletDataContext.addExportReference(
+				referrerStagedModel, stagedModel, referenceType, true,
+				properties);
+
+			return;
+		}
+
+		exportStagedModel(portletDataContext, stagedModel);
+
+		portletDataContext.addExportReference(
+			referrerStagedModel, stagedModel, referenceType, false, properties);
 	}
 
 	public static <T extends StagedModel> void exportStagedModel(
