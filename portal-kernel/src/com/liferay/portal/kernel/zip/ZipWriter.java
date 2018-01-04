@@ -14,15 +14,21 @@
 
 package com.liferay.portal.kernel.zip;
 
+import aQute.bnd.annotation.ProviderType;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author Brian Wing Shun Chan
  * @author Raymond Augé
  */
+@ProviderType
 public interface ZipWriter {
+
+	public OutputStream addEntry(String name) throws IOException;
 
 	public void addEntry(String name, byte[] bytes) throws IOException;
 
