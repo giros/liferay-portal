@@ -28,6 +28,8 @@ import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactoryUtil;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
 import com.liferay.journal.configuration.JournalServiceConfiguration;
 import com.liferay.journal.internal.exportimport.creation.strategy.JournalCreationStrategy;
@@ -263,11 +265,12 @@ public class JournalArticleStagedModelDataHandler
 			PortletDataContext portletDataContext, JournalArticle article)
 		throws Exception {
 
-		Element articleElement = portletDataContext.getExportDataElement(
-			article);
+		Map<String, String> attributes = new HashMap<>();
 
-		articleElement.addAttribute(
+		attributes.put(
 			"article-resource-uuid", article.getArticleResourceUuid());
+//		larFile.writeStagedModelAttribute(
+//			"article-resource-uuid", article.getArticleResourceUuid());
 
 		JournalArticle latestArticle =
 			_journalArticleLocalService.fetchLatestArticle(
@@ -276,13 +279,14 @@ public class JournalArticleStagedModelDataHandler
 		if ((latestArticle != null) &&
 			(latestArticle.getId() == article.getId())) {
 
-			articleElement.addAttribute("latest", String.valueOf(true));
+			attributes.put("latest", String.valueOf(true));
+//			larFile.writeStagedModelAttribute("latest", String.valueOf(true));
 		}
 
 		if (article.getFolderId() !=
 				JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, article, article.getFolder(),
 				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
@@ -291,7 +295,7 @@ public class JournalArticleStagedModelDataHandler
 			article.getGroupId(), _portal.getClassNameId(JournalArticle.class),
 			article.getDDMStructureKey(), true);
 
-		StagedModelDataHandlerUtil.exportReferenceStagedModel(
+		StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 			portletDataContext, article, ddmStructure,
 			PortletDataContext.REFERENCE_TYPE_STRONG);
 
@@ -303,7 +307,7 @@ public class JournalArticleStagedModelDataHandler
 				_portal.getClassNameId(DDMStructure.class),
 				article.getDDMTemplateKey(), true);
 
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, article, ddmTemplate,
 				PortletDataContext.REFERENCE_TYPE_STRONG);
 		}
@@ -311,9 +315,9 @@ public class JournalArticleStagedModelDataHandler
 		Layout layout = article.getLayout();
 
 		if (layout != null) {
-			portletDataContext.addReferenceElement(
-				article, articleElement, layout,
-				PortletDataContext.REFERENCE_TYPE_DEPENDENCY, true);
+			portletDataContext.addReference(
+				article, layout, PortletDataContext.REFERENCE_TYPE_DEPENDENCY,
+				true);
 		}
 
 		if (article.isSmallImage()) {
@@ -337,8 +341,11 @@ public class JournalArticleStagedModelDataHandler
 						smallImage.getImageId() + StringPool.PERIOD +
 							smallImage.getType());
 
-					articleElement.addAttribute(
-						"small-image-path", smallImagePath);
+					attributes.put("small-image-path", smallImagePath);
+//					larFile.writeStagedModelAttribute(
+//						"small-image-path", smallImagePath);
+//					articleElement.addAttribute(
+//						"small-image-path", smallImagePath);
 
 					article.setSmallImageType(smallImage.getType());
 
@@ -367,7 +374,7 @@ public class JournalArticleStagedModelDataHandler
 			(latestArticle.getId() == article.getId())) {
 
 			for (FileEntry fileEntry : article.getImagesFileEntries()) {
-				StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 					portletDataContext, article, fileEntry,
 					PortletDataContext.REFERENCE_TYPE_WEAK);
 			}
@@ -389,12 +396,29 @@ public class JournalArticleStagedModelDataHandler
 			article.getCompanyId());
 
 		if (isPreloadedArticle(defaultUserId, article)) {
-			articleElement.addAttribute("preloaded", "true");
+			attributes.put("preloaded", "true");
+//			larFile.writeStagedModelAttribute("preloaded", "true");
+//			articleElement.addAttribute("preloaded", "true");
 		}
 
-		portletDataContext.addClassedModel(
-			articleElement, ExportImportPathUtil.getModelPath(article),
-			article);
+//		portletDataContext.addClassedModel(
+//			articleElement, ExportImportPathUtil.getModelPath(article),
+//			article);
+
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
+
+		larFile.startWriteStagedModel(article);
+
+		portletDataContext.addStagedModel(article);
+
+		for (Map.Entry<String, String> attribute : attributes.entrySet()) {
+			larFile.writeStagedModelAttribute(
+				attribute.getKey(), attribute.getValue());
+		}
+
+		portletDataContext.addReferences(article);
+
+		larFile.endWriteStagedModel();
 	}
 
 	@Override

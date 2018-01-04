@@ -18,11 +18,12 @@ import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalService;
-import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactoryUtil;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
 import com.liferay.journal.exception.FeedTargetLayoutFriendlyUrlException;
 import com.liferay.journal.internal.exportimport.content.processor.JournalFeedExportImportContentProcessor;
@@ -40,7 +41,6 @@ import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.kernel.xml.Element;
 
 import java.util.List;
 import java.util.Map;
@@ -101,14 +101,19 @@ public class JournalFeedStagedModelDataHandler
 			PortletDataContext portletDataContext, JournalFeed feed)
 		throws Exception {
 
-		Element feedElement = portletDataContext.getExportDataElement(feed);
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
+
+		larFile.startWriteStagedModel(feed);
+
+		portletDataContext.addStagedModel(feed);
+//		Element feedElement = portletDataContext.getExportDataElement(feed);
 
 		DDMStructure ddmStructure = _ddmStructureLocalService.fetchStructure(
 			feed.getGroupId(), _portal.getClassNameId(JournalArticle.class),
 			feed.getDDMStructureKey(), true);
 
 		if (ddmStructure != null) {
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, feed, ddmStructure,
 				PortletDataContext.REFERENCE_TYPE_STRONG);
 		}
@@ -125,7 +130,7 @@ public class JournalFeedStagedModelDataHandler
 			feed.getDDMTemplateKey());
 
 		if (ddmTemplate != null) {
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, feed, ddmTemplate,
 				PortletDataContext.REFERENCE_TYPE_STRONG);
 		}
@@ -143,13 +148,13 @@ public class JournalFeedStagedModelDataHandler
 				feed.getDDMRendererTemplateKey());
 
 		if (rendererDDMTemplate != null) {
-			Element rendererDDMTemplateElement =
-				StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 					portletDataContext, feed, rendererDDMTemplate,
 					PortletDataContext.REFERENCE_TYPE_STRONG);
 
-			rendererDDMTemplateElement.addAttribute(
-				"rendererDDMTemplate", "true");
+			larFile.writeStagedModelAttribute("rendererDDMTemplate", "true");
+//			rendererDDMTemplateElement.addAttribute(
+//				"rendererDDMTemplate", "true");
 		}
 		else {
 			if (_log.isWarnEnabled()) {
@@ -162,8 +167,12 @@ public class JournalFeedStagedModelDataHandler
 		_journalFeedExportImportContentProcessor.replaceExportContentReferences(
 			portletDataContext, feed, StringPool.BLANK, true, true);
 
-		portletDataContext.addClassedModel(
-			feedElement, ExportImportPathUtil.getModelPath(feed), feed);
+//		portletDataContext.addClassedModel(
+//			feedElement, ExportImportPathUtil.getModelPath(feed), feed);
+
+		portletDataContext.addReferences(feed);
+
+		larFile.endWriteStagedModel();
 	}
 
 	@Override

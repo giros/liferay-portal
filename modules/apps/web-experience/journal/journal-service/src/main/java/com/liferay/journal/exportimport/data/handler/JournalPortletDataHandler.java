@@ -25,6 +25,8 @@ import com.liferay.exportimport.kernel.lar.PortletDataHandlerBoolean;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerControl;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactoryUtil;
 import com.liferay.journal.configuration.JournalServiceConfiguration;
 import com.liferay.journal.constants.JournalConstants;
 import com.liferay.journal.constants.JournalPortletKeys;
@@ -51,6 +53,7 @@ import com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 
@@ -213,9 +216,13 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 		portletDataContext.addPortletPermissions(
 			JournalPermission.RESOURCE_NAME);
 
-		Element rootElement = addExportDataRootElement(portletDataContext);
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
 
-		rootElement.addAttribute(
+		Class<?> clazz = getClass();
+
+		larFile.startWritePortletData(clazz.getSimpleName());
+
+		larFile.writePortletDataAttribute(
 			"group-id", String.valueOf(portletDataContext.getScopeGroupId()));
 
 		if (portletDataContext.getBooleanParameter(NAMESPACE, "feeds")) {
@@ -264,7 +271,9 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 			articleActionableDynamicQuery.performActions();
 		}
 
-		return getExportDataRootElementString(rootElement);
+		larFile.endWritePortletData();
+
+		return StringPool.BLANK;
 	}
 
 	@Override

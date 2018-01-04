@@ -16,11 +16,12 @@ package com.liferay.journal.exportimport.data.handler;
 
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
-import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactoryUtil;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
 import com.liferay.journal.model.JournalFolder;
 import com.liferay.journal.model.JournalFolderConstants;
@@ -104,17 +105,20 @@ public class JournalFolderStagedModelDataHandler
 		if (folder.getParentFolderId() !=
 				JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, folder, folder.getParentFolder(),
 				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
 
-		Element folderElement = portletDataContext.getExportDataElement(folder);
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
 
-		exportFolderDDMStructures(portletDataContext, folder);
+		larFile.startWriteStagedModel(folder);
 
-		portletDataContext.addClassedModel(
-			folderElement, ExportImportPathUtil.getModelPath(folder), folder);
+		portletDataContext.addStagedModel(folder);
+
+		portletDataContext.addReferences(folder);
+
+		larFile.endWriteStagedModel();
 	}
 
 	@Override
