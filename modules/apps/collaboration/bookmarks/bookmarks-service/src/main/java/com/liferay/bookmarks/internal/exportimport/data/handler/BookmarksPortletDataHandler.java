@@ -24,14 +24,15 @@ import com.liferay.exportimport.kernel.lar.PortletDataHandler;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerBoolean;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactoryUtil;
 import com.liferay.exportimport.portlet.data.handler.helper.PortletDataHandlerHelper;
 import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
 import com.liferay.portal.kernel.xml.Element;
-
-import java.util.List;
 
 import javax.portlet.PortletPreferences;
 
@@ -116,16 +117,20 @@ public class BookmarksPortletDataHandler extends BasePortletDataHandler {
 			PortletPreferences portletPreferences)
 		throws Exception {
 
-		Element rootElement = addExportDataRootElement(portletDataContext);
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
+
+		larFile.startWritePortletData(portletId);
 
 		if (!portletDataContext.getBooleanParameter(NAMESPACE, "entries")) {
-			return getExportDataRootElementString(rootElement);
+			larFile.endWritePortletData(portletId);
+
+			return StringPool.BLANK;
 		}
 
 		portletDataContext.addPortletPermissions(
 			BookmarksConstants.RESOURCE_NAME);
 
-		rootElement.addAttribute(
+		larFile.writePortletDataAttribute(
 			"group-id", String.valueOf(portletDataContext.getScopeGroupId()));
 
 		ExportActionableDynamicQuery folderActionableDynamicQuery =
@@ -140,7 +145,9 @@ public class BookmarksPortletDataHandler extends BasePortletDataHandler {
 
 		entryActionableDynamicQuery.performActions();
 
-		return getExportDataRootElementString(rootElement);
+		larFile.endWritePortletData(portletId);
+
+		return StringPool.BLANK;
 	}
 
 	@Override

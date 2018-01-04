@@ -18,13 +18,14 @@ import com.liferay.bookmarks.model.BookmarksEntry;
 import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.model.BookmarksFolderConstants;
 import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
-import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
+import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactoryUtil;
 import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.xml.Element;
 
 import java.util.Map;
 
@@ -56,18 +57,23 @@ public class BookmarksEntryStagedModelDataHandler
 			PortletDataContext portletDataContext, BookmarksEntry entry)
 		throws Exception {
 
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
+
+		larFile.startWriteStagedModel(entry);
+
 		if (entry.getFolderId() !=
 				BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, entry, entry.getFolder(),
 				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
 
-		Element entryElement = portletDataContext.getExportDataElement(entry);
+		portletDataContext.addStagedModel(entry);
 
-		portletDataContext.addClassedModel(
-			entryElement, ExportImportPathUtil.getModelPath(entry), entry);
+		portletDataContext.addReferences(entry);
+
+		larFile.endWriteStagedModel(entry);
 	}
 
 	@Override
@@ -127,8 +133,50 @@ public class BookmarksEntryStagedModelDataHandler
 	}
 
 	@Override
+	protected void exportAssetCategories(
+			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
+		throws PortletDataException {
+	}
+
+	@Override
+	protected void exportAssetTags(
+			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
+		throws PortletDataException {
+	}
+
+	@Override
+	protected void exportComments(
+			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
+		throws PortletDataException {
+	}
+
+	@Override
+	protected void exportRatings(
+			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
+		throws PortletDataException {
+	}
+
+	@Override
 	protected StagedModelRepository<BookmarksEntry> getStagedModelRepository() {
 		return _stagedModelRepository;
+	}
+
+	@Override
+	protected void importAssetCategories(
+			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
+		throws PortletDataException {
+	}
+
+	@Override
+	protected void importAssetTags(
+			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
+		throws PortletDataException {
+	}
+
+	@Override
+	protected void importReferenceStagedModels(
+			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
+		throws PortletDataException {
 	}
 
 	@Reference(
