@@ -37,8 +37,9 @@ import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactoryUtil;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -51,6 +52,7 @@ import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.xml.Element;
 
@@ -194,8 +196,8 @@ public class DDMStructureStagedModelDataHandler
 			PortletDataContext portletDataContext, DDMStructure structure)
 		throws Exception {
 
-		Element structureElement = portletDataContext.getExportDataElement(
-			structure);
+//		Element structureElement = portletDataContext.getExportDataElement(
+//			structure);
 
 		if (structure.getParentStructureId() !=
 				DDMStructureConstants.DEFAULT_PARENT_STRUCTURE_ID) {
@@ -204,28 +206,38 @@ public class DDMStructureStagedModelDataHandler
 				_ddmStructureLocalService.getStructure(
 					structure.getParentStructureId());
 
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, structure, parentStructure,
 				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
+
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
+
+		larFile.startWriteStagedModel(structure);
+
+		portletDataContext.addStagedModel(structure);
 
 		long defaultUserId = _userLocalService.getDefaultUserId(
 			structure.getCompanyId());
 
 		if (defaultUserId == structure.getUserId()) {
-			structureElement.addAttribute("preloaded", "true");
+//			structureElement.addAttribute("preloaded", "true");
+			larFile.writeStagedModelAttribute("preloaded", "true");
 		}
 
-		exportDDMForm(portletDataContext, structure, structureElement);
+		exportDDMForm(portletDataContext, structure);
 
-		exportDDMDataProviderInstances(
-			portletDataContext, structure, structureElement);
+		exportDDMDataProviderInstances(portletDataContext, structure);
 
-		exportDDMFormLayout(portletDataContext, structure, structureElement);
+		exportDDMFormLayout(portletDataContext, structure);
 
-		portletDataContext.addClassedModel(
-			structureElement, ExportImportPathUtil.getModelPath(structure),
-			structure);
+//		portletDataContext.addClassedModel(
+//			structureElement, ExportImportPathUtil.getModelPath(structure),
+//			structure);
+
+		portletDataContext.addReferences(structure);
+
+		larFile.endWriteStagedModel();
 	}
 
 	@Override
@@ -391,9 +403,10 @@ public class DDMStructureStagedModelDataHandler
 	}
 
 	protected void exportDDMDataProviderInstances(
-			PortletDataContext portletDataContext, DDMStructure structure,
-			Element structureElement)
+			PortletDataContext portletDataContext, DDMStructure structure)
 		throws PortalException {
+
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
 
 		Set<Long> ddmDataProviderInstanceIdsSet = new HashSet<>();
 
@@ -411,7 +424,7 @@ public class DDMStructureStagedModelDataHandler
 				_ddmDataProviderInstanceLocalService.getDDMDataProviderInstance(
 					ddmDataProviderInstanceId);
 
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, structure, ddmDataProviderInstance,
 				PortletDataContext.REFERENCE_TYPE_STRONG);
 
@@ -424,26 +437,31 @@ public class DDMStructureStagedModelDataHandler
 				new Long[ddmDataProviderInstanceIdsSet.size()]),
 			StringPool.BLANK);
 
-		structureElement.addAttribute(
+		larFile.writeStagedModelAttribute(
 			_DDM_DATA_PROVIDER_INSTANCE_IDS, ddmDataProviderInstanceIds);
+//		structureElement.addAttribute(
+//			_DDM_DATA_PROVIDER_INSTANCE_IDS, ddmDataProviderInstanceIds);
 	}
 
 	protected void exportDDMForm(
-		PortletDataContext portletDataContext, DDMStructure structure,
-		Element structureElement) {
+		PortletDataContext portletDataContext, DDMStructure structure) {
+
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
 
 		String ddmFormPath = ExportImportPathUtil.getModelPath(
 			structure, "ddm-form.json");
 
-		structureElement.addAttribute("ddm-form-path", ddmFormPath);
+//		structureElement.addAttribute("ddm-form-path", ddmFormPath);
+		larFile.writeStagedModelAttribute("ddm-form-path", ddmFormPath);
 
 		portletDataContext.addZipEntry(ddmFormPath, structure.getDefinition());
 	}
 
 	protected void exportDDMFormLayout(
-			PortletDataContext portletDataContext, DDMStructure structure,
-			Element structureElement)
+			PortletDataContext portletDataContext, DDMStructure structure)
 		throws PortalException {
+
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
 
 		DDMStructureVersion structureVersion = structure.getStructureVersion();
 
@@ -455,8 +473,10 @@ public class DDMStructureStagedModelDataHandler
 		String ddmFormLayoutPath = ExportImportPathUtil.getModelPath(
 			structure, "ddm-form-layout.json");
 
-		structureElement.addAttribute(
+		larFile.writeStagedModelAttribute(
 			"ddm-form-layout-path", ddmFormLayoutPath);
+//		structureElement.addAttribute(
+//			"ddm-form-layout-path", ddmFormLayoutPath);
 
 		portletDataContext.addZipEntry(
 			ddmFormLayoutPath, structureLayout.getDefinition());

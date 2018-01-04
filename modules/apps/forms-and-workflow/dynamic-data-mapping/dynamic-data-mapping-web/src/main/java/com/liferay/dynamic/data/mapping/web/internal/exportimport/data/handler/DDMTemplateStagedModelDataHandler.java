@@ -26,8 +26,9 @@ import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactoryUtil;
 import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -42,6 +43,7 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 
@@ -182,14 +184,19 @@ public class DDMTemplateStagedModelDataHandler
 			PortletDataContext portletDataContext, DDMTemplate template)
 		throws Exception {
 
-		Element templateElement = portletDataContext.getExportDataElement(
-			template);
+//		Element templateElement = portletDataContext.getExportDataElement(
+//			template);
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
+
+		larFile.startWriteStagedModel(template);
+
+		portletDataContext.addStagedModel(template);
 
 		DDMStructure structure = _ddmStructureLocalService.fetchStructure(
 			template.getClassPK());
 
 		if (structure != null) {
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, template, structure,
 				PortletDataContext.REFERENCE_TYPE_STRONG);
 		}
@@ -215,8 +222,10 @@ public class DDMTemplateStagedModelDataHandler
 						smallImage.getImageId() + StringPool.PERIOD +
 							template.getSmallImageType());
 
-					templateElement.addAttribute(
+					larFile.writeStagedModelAttribute(
 						"small-image-path", smallImagePath);
+//					templateElement.addAttribute(
+//						"small-image-path", smallImagePath);
 
 					template.setSmallImageType(smallImage.getType());
 
@@ -255,18 +264,25 @@ public class DDMTemplateStagedModelDataHandler
 			template.getCompanyId());
 
 		if (defaultUserId == template.getUserId()) {
-			templateElement.addAttribute("preloaded", "true");
+			larFile.writeStagedModelAttribute("preloaded", "true");
+//			templateElement.addAttribute("preloaded", "true");
 		}
 
 		if (template.getResourceClassNameId() > 0) {
-			templateElement.addAttribute(
+			larFile.writeStagedModelAttribute(
 				"resource-class-name",
 				_portal.getClassName(template.getResourceClassNameId()));
+//			templateElement.addAttribute(
+//				"resource-class-name",
+//				_portal.getClassName(template.getResourceClassNameId()));
 		}
 
-		portletDataContext.addClassedModel(
-			templateElement, ExportImportPathUtil.getModelPath(template),
-			template);
+//		portletDataContext.addClassedModel(
+//			templateElement, ExportImportPathUtil.getModelPath(template),
+//			template);
+		portletDataContext.addReferences(template);
+
+		larFile.endWriteStagedModel();
 	}
 
 	@Override
