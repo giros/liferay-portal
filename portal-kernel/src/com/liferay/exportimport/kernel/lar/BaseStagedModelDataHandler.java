@@ -102,12 +102,12 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 			PortletDataHandlerStatusMessageSenderUtil.sendStatusMessage(
 				"stagedModel", stagedModel, manifestSummary);
 
-			doExportStagedModel(portletDataContext, (T)stagedModel.clone());
-
 			exportAssetCategories(portletDataContext, stagedModel);
 			exportAssetTags(portletDataContext, stagedModel);
 			exportComments(portletDataContext, stagedModel);
 			exportRatings(portletDataContext, stagedModel);
+
+			doExportStagedModel(portletDataContext, (T)stagedModel.clone());
 
 			if (countStagedModel(portletDataContext, stagedModel)) {
 				manifestSummary.incrementModelAdditionCount(
@@ -534,10 +534,19 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 				ExportImportClassedModelUtil.getClassNameId(stagedModel),
 				ExportImportClassedModelUtil.getClassPK(stagedModel));
 
-		for (AssetCategory assetCategory : assetCategories) {
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
-				portletDataContext, stagedModel, assetCategory,
-				PortletDataContext.REFERENCE_TYPE_WEAK);
+		if (portletDataContext.isStreamProcessSupport()) {
+			for (AssetCategory assetCategory : assetCategories) {
+				StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
+					portletDataContext, stagedModel, assetCategory,
+					PortletDataContext.REFERENCE_TYPE_WEAK);
+			}
+		}
+		else {
+			for (AssetCategory assetCategory : assetCategories) {
+				StagedModelDataHandlerUtil.exportReferenceStagedModel(
+					portletDataContext, stagedModel, assetCategory,
+					PortletDataContext.REFERENCE_TYPE_WEAK);
+			}
 		}
 	}
 
@@ -546,13 +555,22 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 		throws PortletDataException {
 
 		List<AssetTag> assetTags = AssetTagLocalServiceUtil.getTags(
-			ExportImportClassedModelUtil.getClassNameId(stagedModel),
+			ExportImportClassedModelUtil.getClassName(stagedModel),
 			ExportImportClassedModelUtil.getClassPK(stagedModel));
 
-		for (AssetTag assetTag : assetTags) {
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
-				portletDataContext, stagedModel, assetTag,
-				PortletDataContext.REFERENCE_TYPE_WEAK);
+		if (portletDataContext.isStreamProcessSupport()) {
+			for (AssetTag assetTag : assetTags) {
+				StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
+					portletDataContext, stagedModel, assetTag,
+					PortletDataContext.REFERENCE_TYPE_WEAK);
+			}
+		}
+		else {
+			for (AssetTag assetTag : assetTags) {
+				StagedModelDataHandlerUtil.exportReferenceStagedModel(
+					portletDataContext, stagedModel, assetTag,
+					PortletDataContext.REFERENCE_TYPE_WEAK);
+			}
 		}
 	}
 
@@ -602,10 +620,19 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 			return;
 		}
 
-		for (RatingsEntry ratingsEntry : ratingsEntries) {
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
-				portletDataContext, stagedModel, ratingsEntry,
-				PortletDataContext.REFERENCE_TYPE_WEAK);
+		if (portletDataContext.isStreamProcessSupport()) {
+				for (RatingsEntry ratingsEntry : ratingsEntries) {
+				StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
+					portletDataContext, stagedModel, ratingsEntry,
+					PortletDataContext.REFERENCE_TYPE_WEAK);
+			}
+		}
+		else {
+			for (RatingsEntry ratingsEntry : ratingsEntries) {
+				StagedModelDataHandlerUtil.exportReferenceStagedModel(
+					portletDataContext, stagedModel, ratingsEntry,
+					PortletDataContext.REFERENCE_TYPE_WEAK);
+			}
 		}
 	}
 
