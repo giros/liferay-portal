@@ -22,7 +22,6 @@ import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.document.library.kernel.service.DLFileShortcutLocalService;
 import com.liferay.document.library.kernel.service.DLFolderLocalService;
 import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
-import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
@@ -38,7 +37,6 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.repository.liferayrepository.model.LiferayFileShortcut;
 
 import java.util.ArrayList;
@@ -137,7 +135,7 @@ public class FileShortcutStagedModelDataHandler
 		if (fileShortcut.getFolderId() !=
 				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, fileShortcut, fileShortcut.getFolder(),
 				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
@@ -145,17 +143,15 @@ public class FileShortcutStagedModelDataHandler
 		FileEntry fileEntry = _dlAppLocalService.getFileEntry(
 			fileShortcut.getToFileEntryId());
 
-		StagedModelDataHandlerUtil.exportReferenceStagedModel(
+		StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 			portletDataContext, fileShortcut, fileEntry,
 			PortletDataContext.REFERENCE_TYPE_STRONG);
 
-		Element fileShortcutElement = portletDataContext.getExportDataElement(
-			fileShortcut);
+		portletDataContext.startStagedModelExport(fileShortcut);
 
-		portletDataContext.addClassedModel(
-			fileShortcutElement,
-			ExportImportPathUtil.getModelPath(fileShortcut), fileShortcut,
-			DLFileShortcut.class);
+		portletDataContext.addStagedModel(fileShortcut);
+
+		portletDataContext.endStagedModelExport(fileShortcut);
 	}
 
 	@Override

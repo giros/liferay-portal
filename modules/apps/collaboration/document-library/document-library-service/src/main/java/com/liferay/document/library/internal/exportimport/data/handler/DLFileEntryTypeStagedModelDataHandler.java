@@ -21,7 +21,6 @@ import com.liferay.document.library.kernel.util.DLUtil;
 import com.liferay.dynamic.data.mapping.kernel.DDMStructure;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
 import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
-import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
@@ -167,9 +166,6 @@ public class DLFileEntryTypeStagedModelDataHandler
 			DLFileEntryType fileEntryType)
 		throws Exception {
 
-		Element fileEntryTypeElement = portletDataContext.getExportDataElement(
-			fileEntryType);
-
 		List<DDMStructure> ddmStructures = fileEntryType.getDDMStructures();
 
 		for (DDMStructure ddmStructure : ddmStructures) {
@@ -177,25 +173,28 @@ public class DLFileEntryTypeStagedModelDataHandler
 				_ddmStructureLocalService.getStructure(
 					ddmStructure.getStructureId());
 
-			Element referenceElement =
-				StagedModelDataHandlerUtil.exportReferenceStagedModel(
-					portletDataContext, fileEntryType, structure,
-					PortletDataContext.REFERENCE_TYPE_STRONG);
+			Map<String, String> properties = new HashMap<>();
 
-			referenceElement.addAttribute(
+			properties.put(
 				"structure-id", String.valueOf(ddmStructure.getStructureId()));
+
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
+				portletDataContext, fileEntryType, structure,
+				PortletDataContext.REFERENCE_TYPE_STRONG, properties);
 		}
+
+		portletDataContext.startStagedModelExport(fileEntryType);
 
 		long defaultUserId = _userLocalService.getDefaultUserId(
 			fileEntryType.getCompanyId());
 
 		if (defaultUserId == fileEntryType.getUserId()) {
-			fileEntryTypeElement.addAttribute("preloaded", "true");
+			portletDataContext.addStagedModelAttribute("preloaded", "true");
 		}
 
-		portletDataContext.addClassedModel(
-			fileEntryTypeElement,
-			ExportImportPathUtil.getModelPath(fileEntryType), fileEntryType);
+		portletDataContext.addStagedModel(fileEntryType);
+
+		portletDataContext.endStagedModelExport(fileEntryType);
 	}
 
 	@Override
