@@ -129,6 +129,16 @@ public interface PortletDataContext extends Serializable {
 			Element element, String path, ClassedModel classedModel)
 		throws PortalException;
 
+	public void addExportDataElementAttribute(String name, String value);
+
+	public void addExportReference(
+		StagedModel referrerStagedModel, StagedModel stagedModel,
+		String referenceType, boolean missing);
+
+	public void addExportReference(
+		StagedModel referrerStagedModel, StagedModel stagedModel,
+		String referenceType, boolean missing, Map<String, String> properties);
+
 	public void addLocks(Class<?> clazz, String key) throws PortalException;
 
 	public void addLocks(String className, String key, Lock lock);
@@ -174,6 +184,14 @@ public interface PortletDataContext extends Serializable {
 	public void addRatingsEntries(
 		String className, long classPK, List<RatingsEntry> ratingsEntries);
 
+	public void addReference(
+		StagedModel referrerClassedModel, StagedModel classedModel,
+		String referenceType, boolean missing);
+
+	public void addReference(
+		StagedModel referrerClassedModel, StagedModel classedModel,
+		String referenceType, boolean missing, Map<String, String> properties);
+
 	/**
 	 * @deprecated As of 7.0.0, with no direct replacement
 	 */
@@ -197,7 +215,11 @@ public interface PortletDataContext extends Serializable {
 		ClassedModel classedModel, String className, String binPath,
 		String referenceType, boolean missing);
 
+	public void addReferences(StagedModel stagedModel);
+
 	public boolean addScopedPrimaryKey(Class<?> clazz, String primaryKey);
+
+	public void addStagedModel(StagedModel stagedModel);
 
 	public void addZipEntry(String path, byte[] bytes);
 
@@ -208,6 +230,8 @@ public interface PortletDataContext extends Serializable {
 	public void addZipEntry(String path, String s);
 
 	public void addZipEntry(String name, StringBuilder sb);
+
+	public void addZipPortletDataXml(String path);
 
 	public void cleanUpMissingReferences(ClassedModel classedModel);
 
@@ -223,6 +247,10 @@ public interface PortletDataContext extends Serializable {
 
 	public ServiceContext createServiceContext(
 		String path, ClassedModel classedModel);
+
+	public void endExportDataElement();
+
+	public void endPortletDataXml();
 
 	public Object fromXML(byte[] bytes);
 
@@ -325,6 +353,9 @@ public interface PortletDataContext extends Serializable {
 	public Element getExportDataRootElement();
 
 	public String getExportImportProcessId();
+
+	public Set<ReferenceDTO> getExportReference(
+		StagedModel referrerStagedModel);
 
 	public long getGroupId();
 
@@ -622,9 +653,14 @@ public interface PortletDataContext extends Serializable {
 
 	public boolean isStagedModelCounted(StagedModel stagedModel);
 
+	public boolean isStreamProcessSupport();
+
 	public boolean isWithinDateRange(Date modifiedDate);
 
 	public void putNotUniquePerLayout(String dataKey);
+
+	public Set<ReferenceDTO> removeExportReference(
+		StagedModel referrerStagedModel);
 
 	public void setClassLoader(ClassLoader classLoader);
 
@@ -688,6 +724,8 @@ public interface PortletDataContext extends Serializable {
 
 	public void setStartDate(Date startDate);
 
+	public void setStreamProcessSupport(boolean streamProcessSupport);
+
 	public void setType(String type);
 
 	public void setUserIdStrategy(UserIdStrategy userIdStrategy);
@@ -698,6 +736,52 @@ public interface PortletDataContext extends Serializable {
 
 	public void setZipWriter(ZipWriter zipWriter);
 
+	public void startExportDataElement(ClassedModel classedModel);
+
+	public void startPortletDataXml(String className);
+
 	public String toXML(Object object);
+
+	public class ReferenceDTO {
+
+		public ReferenceDTO(
+			StagedModel referrerStagedModel, StagedModel stagedModel,
+			String referenceType, boolean missing,
+			Map<String, String> properties) {
+
+			_referrerStagedModel = referrerStagedModel;
+			_stagedModel = stagedModel;
+			_referenceType = referenceType;
+			_missing = missing;
+			_properties = properties;
+		}
+
+		public Map<String, String> getProperties() {
+			return _properties;
+		}
+
+		public String getReferenceType() {
+			return _referenceType;
+		}
+
+		public StagedModel getReferrerStagedModel() {
+			return _referrerStagedModel;
+		}
+
+		public StagedModel getStagedModel() {
+			return _stagedModel;
+		}
+
+		public boolean isMissing() {
+			return _missing;
+		}
+
+		private final boolean _missing;
+		private final Map<String, String> _properties;
+		private final String _referenceType;
+		private final StagedModel _referrerStagedModel;
+		private final StagedModel _stagedModel;
+
+	}
 
 }
