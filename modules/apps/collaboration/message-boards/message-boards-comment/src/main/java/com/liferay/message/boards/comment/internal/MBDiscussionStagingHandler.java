@@ -82,10 +82,19 @@ public class MBDiscussionStagingHandler implements DiscussionStagingHandler {
 			return;
 		}
 
-		for (MBMessage mbMessage : mbMessages) {
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
-				portletDataContext, stagedModel, mbMessage,
-				PortletDataContext.REFERENCE_TYPE_WEAK);
+		if (portletDataContext.isStreamProcessSupport()) {
+			for (MBMessage mbMessage : mbMessages) {
+				StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
+					portletDataContext, stagedModel, mbMessage,
+					PortletDataContext.REFERENCE_TYPE_WEAK);
+			}
+		}
+		else {
+			for (MBMessage mbMessage : mbMessages) {
+				StagedModelDataHandlerUtil.exportReferenceStagedModel(
+					portletDataContext, stagedModel, mbMessage,
+					PortletDataContext.REFERENCE_TYPE_WEAK);
+			}
 		}
 	}
 
