@@ -21,12 +21,13 @@ import com.liferay.document.library.kernel.util.DLUtil;
 import com.liferay.dynamic.data.mapping.kernel.DDMStructure;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
 import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
-import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
@@ -167,8 +168,9 @@ public class DLFileEntryTypeStagedModelDataHandler
 			DLFileEntryType fileEntryType)
 		throws Exception {
 
-		Element fileEntryTypeElement = portletDataContext.getExportDataElement(
-			fileEntryType);
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
+
+		larFile.startWriteStagedModel(fileEntryType);
 
 		List<DDMStructure> ddmStructures = fileEntryType.getDDMStructures();
 
@@ -177,25 +179,26 @@ public class DLFileEntryTypeStagedModelDataHandler
 				_ddmStructureLocalService.getStructure(
 					ddmStructure.getStructureId());
 
-			Element referenceElement =
-				StagedModelDataHandlerUtil.exportReferenceStagedModel(
-					portletDataContext, fileEntryType, structure,
-					PortletDataContext.REFERENCE_TYPE_STRONG);
+			Map<String, String> properties = new HashMap<>();
 
-			referenceElement.addAttribute(
+			properties.put(
 				"structure-id", String.valueOf(ddmStructure.getStructureId()));
+
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
+				portletDataContext, fileEntryType, structure,
+				PortletDataContext.REFERENCE_TYPE_STRONG, properties);
 		}
 
 		long defaultUserId = _userLocalService.getDefaultUserId(
 			fileEntryType.getCompanyId());
 
 		if (defaultUserId == fileEntryType.getUserId()) {
-			fileEntryTypeElement.addAttribute("preloaded", "true");
+			larFile.writeStagedModelAttribute("preloaded", "true");
 		}
 
-		portletDataContext.addClassedModel(
-			fileEntryTypeElement,
-			ExportImportPathUtil.getModelPath(fileEntryType), fileEntryType);
+		portletDataContext.addStagedModel(fileEntryType);
+
+		larFile.endWriteStagedModel(fileEntryType);
 	}
 
 	@Override

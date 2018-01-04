@@ -37,6 +37,8 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerRegistryUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Conjunction;
 import com.liferay.portal.kernel.dao.orm.Criterion;
@@ -179,9 +181,11 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 
 		portletDataContext.addPortletPermissions(DLPermission.RESOURCE_NAME);
 
-		Element rootElement = addExportDataRootElement(portletDataContext);
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
 
-		rootElement.addAttribute(
+		larFile.startWritePortletData(portletId);
+
+		larFile.writePortletDataAttribute(
 			"group-id", String.valueOf(portletDataContext.getScopeGroupId()));
 
 		if (portletDataContext.getBooleanParameter(NAMESPACE, "folders")) {
@@ -221,7 +225,9 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 			fileShortcutActionableDynamicQuery.performActions();
 		}
 
-		return getExportDataRootElementString(rootElement);
+		larFile.endWritePortletData(portletId);
+
+		return StringPool.BLANK;
 	}
 
 	@Override
