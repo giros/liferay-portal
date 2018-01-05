@@ -158,6 +158,10 @@ public class BookmarksPortletDataHandler extends BasePortletDataHandler {
 			PortletPreferences portletPreferences, String data)
 		throws Exception {
 
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
+
+		larFile.startReadPortletData(data);
+
 		if (!portletDataContext.getBooleanParameter(NAMESPACE, "entries")) {
 			return null;
 		}
@@ -165,25 +169,7 @@ public class BookmarksPortletDataHandler extends BasePortletDataHandler {
 		portletDataContext.importPortletPermissions(
 			BookmarksConstants.RESOURCE_NAME);
 
-		Element foldersElement = portletDataContext.getImportDataGroupElement(
-			BookmarksFolder.class);
-
-		List<Element> folderElements = foldersElement.elements();
-
-		for (Element folderElement : folderElements) {
-			StagedModelDataHandlerUtil.importStagedModel(
-				portletDataContext, folderElement);
-		}
-
-		Element entriesElement = portletDataContext.getImportDataGroupElement(
-			BookmarksEntry.class);
-
-		List<Element> entryElements = entriesElement.elements();
-
-		for (Element entryElement : entryElements) {
-			StagedModelDataHandlerUtil.importStagedModel(
-				portletDataContext, entryElement);
-		}
+		larFile.readStagedModels();
 
 		return null;
 	}
