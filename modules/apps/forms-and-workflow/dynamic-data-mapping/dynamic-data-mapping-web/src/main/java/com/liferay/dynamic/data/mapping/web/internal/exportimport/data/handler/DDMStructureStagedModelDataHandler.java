@@ -237,7 +237,7 @@ public class DDMStructureStagedModelDataHandler
 
 		portletDataContext.addReferences(structure);
 
-		larFile.endWriteStagedModel();
+		larFile.endWriteStagedModel(structure);
 	}
 
 	@Override

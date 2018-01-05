@@ -271,7 +271,7 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 			articleActionableDynamicQuery.performActions();
 		}
 
-		larFile.endWritePortletData();
+		larFile.endWritePortletData(clazz.getSimpleName());
 
 		return StringPool.BLANK;
 	}

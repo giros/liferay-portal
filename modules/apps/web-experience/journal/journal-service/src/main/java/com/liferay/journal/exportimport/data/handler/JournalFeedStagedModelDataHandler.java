@@ -172,7 +172,7 @@ public class JournalFeedStagedModelDataHandler
 
 		portletDataContext.addReferences(feed);
 
-		larFile.endWriteStagedModel();
+		larFile.endWriteStagedModel(feed);
 	}
 
 	@Override

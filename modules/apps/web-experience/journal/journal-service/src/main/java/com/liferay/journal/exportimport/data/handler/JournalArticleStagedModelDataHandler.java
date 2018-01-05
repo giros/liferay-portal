@@ -418,7 +418,7 @@ public class JournalArticleStagedModelDataHandler
 
 		portletDataContext.addReferences(article);
 
-		larFile.endWriteStagedModel();
+		larFile.endWriteStagedModel(article);
 	}
 
 	@Override

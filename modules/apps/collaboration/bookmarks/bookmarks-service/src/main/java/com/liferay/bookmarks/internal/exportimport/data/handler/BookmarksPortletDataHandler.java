@@ -34,6 +34,8 @@ import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
 import com.liferay.portal.kernel.xml.Element;
 
+import java.util.List;
+
 import javax.portlet.PortletPreferences;
 
 import org.osgi.service.component.annotations.Activate;

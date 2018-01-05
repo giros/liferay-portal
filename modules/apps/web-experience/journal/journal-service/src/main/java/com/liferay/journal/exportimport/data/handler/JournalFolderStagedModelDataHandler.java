@@ -118,7 +118,7 @@ public class JournalFolderStagedModelDataHandler
 
 		portletDataContext.addReferences(folder);
 
-		larFile.endWriteStagedModel();
+		larFile.endWriteStagedModel(folder);
 	}
 
 	@Override

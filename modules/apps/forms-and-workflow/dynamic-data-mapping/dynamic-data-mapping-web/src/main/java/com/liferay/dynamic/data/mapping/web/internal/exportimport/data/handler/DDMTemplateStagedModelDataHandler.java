@@ -282,7 +282,7 @@ public class DDMTemplateStagedModelDataHandler
 //			template);
 		portletDataContext.addReferences(template);
 
-		larFile.endWriteStagedModel();
+		larFile.endWriteStagedModel(template);
 	}
 
 	@Override
