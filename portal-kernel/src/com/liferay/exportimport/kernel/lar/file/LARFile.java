@@ -65,7 +65,7 @@ public interface LARFile {
 	public void registerStagedModelPreAction(
 		String className, Function<?, ?> action);
 
-	public void startReadPortletData();
+	public void startReadPortletData(String data);
 
 	public void startWriteCustom(String name);
 

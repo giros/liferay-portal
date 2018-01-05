@@ -31,10 +31,12 @@ import com.liferay.portal.kernel.model.StagedGroupedModel;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.zip.ZipWriter;
 
 import java.io.OutputStream;
+import java.io.StringReader;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -43,7 +45,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import jodd.bean.BeanUtil;
@@ -164,6 +169,45 @@ public class LARFileImpl implements LARFile {
 
 	@Override
 	public void readStagedModels() {
+		try {
+			while (_xmlStreamReader.hasNext()) {
+				_xmlStreamReader.next();
+
+				int eventType = _xmlStreamReader.getEventType();
+
+				if (eventType == XMLStreamConstants.START_ELEMENT) {
+					if ("staged-model".equals(
+						_xmlStreamReader.getLocalName())) {
+
+						String path = _xmlStreamReader.getAttributeValue(
+							null, "path");
+
+						StagedModel stagedModel =
+							(StagedModel)
+								_portletDataContext.getZipEntryAsObject(
+									path);
+
+						String classNameAttribute =
+							_xmlStreamReader.getAttributeValue(
+								null, "attached-class-name");
+
+						if (Validator.isNotNull(classNameAttribute)) {
+							BeanPropertiesUtil.setProperty(
+								stagedModel, "className", classNameAttribute);
+							BeanPropertiesUtil.setProperty(
+								stagedModel, "classNameId",
+								PortalUtil.getClassNameId(classNameAttribute));
+						}
+
+						StagedModelDataHandlerUtil.importStagedModel(
+							_portletDataContext, stagedModel);
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -187,7 +231,16 @@ public class LARFileImpl implements LARFile {
 	}
 
 	@Override
-	public void startReadPortletData() {
+	public void startReadPortletData(String data) {
+		try {
+			XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+
+			_xmlStreamReader = xmlInputFactory.createXMLStreamReader(
+				new StringReader(data));
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -564,6 +617,7 @@ public class LARFileImpl implements LARFile {
 	private OutputStream _referenceOutputStream;
 	private XMLStreamWriter _referenceXmlStreamWriter;
 	private boolean[] _writeEventArray = new boolean[6];
+	private XMLStreamReader _xmlStreamReader;
 	private XMLStreamWriter _xmlStreamWriter;
 
 	private class LAREvent {
