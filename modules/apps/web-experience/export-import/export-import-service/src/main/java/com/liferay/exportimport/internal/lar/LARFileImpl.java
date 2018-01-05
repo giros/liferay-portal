@@ -590,7 +590,6 @@ public class LARFileImpl implements LARFile {
 	}
 
 	private void _writeEventReset(int event) {
-		_writeEventArray[event] = false;
 	}
 
 	private static final int _LAR_EVENT_CUSTOM_END = 2;
