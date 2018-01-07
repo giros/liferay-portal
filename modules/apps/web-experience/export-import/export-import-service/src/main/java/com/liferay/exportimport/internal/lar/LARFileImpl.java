@@ -102,20 +102,11 @@ public class LARFileImpl implements LARFile {
 
 	@Override
 	public void endWriteReference() {
-		if (_isWriteEventCompleted(_LAR_EVENT_REFERENCE_START)) {
-			try {
-				_xmlStreamWriter.writeEndElement();
-
-				//closeReferenceXMLWriter();
-
-				_eventCompleted(_LAR_EVENT_REFERENCE_END, "ref");
-				_writeEventReset(_LAR_EVENT_REFERENCE_START);
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-
-				_writeEventReset(_LAR_EVENT_REFERENCE_END);
-			}
+		try {
+			_xmlStreamWriter.writeEndElement();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -231,22 +222,11 @@ public class LARFileImpl implements LARFile {
 
 	@Override
 	public void startWriteReference() {
-		if (!_isWriteEventCompleted(_LAR_EVENT_STAGED_MODEL_START)) {
-			return;
+		try {
+			_xmlStreamWriter.writeStartElement("references");
 		}
-
-		if (!_isWriteEventCompleted(_LAR_EVENT_REFERENCE_START)) {
-			try {
-				_xmlStreamWriter.writeStartElement("references");
-
-				_eventCompleted(_LAR_EVENT_REFERENCE_START, "ref");
-				_writeEventReset(_LAR_EVENT_REFERENCE_END);
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-
-				_writeEventReset(_LAR_EVENT_REFERENCE_START);
-			}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -274,6 +254,13 @@ public class LARFileImpl implements LARFile {
 				_LAR_EVENT_STAGED_MODEL_START, stagedModel.getUuid());
 		}
 		catch (Exception e) {
+			try {
+				_xmlStreamWriter.flush();
+				_xmlStreamWriter.close();
+			}
+			catch (Exception e1) {
+			}
+
 			e.printStackTrace();
 
 			_writeEventReset(_LAR_EVENT_STAGED_MODEL_START);
@@ -344,10 +331,6 @@ public class LARFileImpl implements LARFile {
 	public void writeReferenceStagedModel(
 		StagedModel referrerStagedModel, StagedModel stagedModel,
 		String referenceType, boolean missing) {
-
-		if (!_isWriteEventCompleted(_LAR_EVENT_REFERENCE_START)) {
-			return;
-		}
 
 		try {
 			_xmlStreamWriter.writeStartElement("reference");
@@ -537,7 +520,6 @@ public class LARFileImpl implements LARFile {
 	}
 
 	private void _writeEventReset(int event) {
-		_writeEventArray[event] = false;
 	}
 
 	private static final int _LAR_EVENT_CUSTOM_END = 2;
