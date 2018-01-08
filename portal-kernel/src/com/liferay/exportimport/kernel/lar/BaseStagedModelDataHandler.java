@@ -25,6 +25,7 @@ import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.service.AssetCategoryLocalServiceUtil;
 import com.liferay.asset.kernel.service.AssetTagLocalServiceUtil;
+import com.liferay.exportimport.kernel.lar.PortletDataContext.ReferenceDTO;
 import com.liferay.exportimport.kernel.lifecycle.ExportImportLifecycleConstants;
 import com.liferay.exportimport.kernel.lifecycle.ExportImportLifecycleManagerUtil;
 import com.liferay.portal.kernel.comment.CommentManagerUtil;
@@ -832,7 +833,7 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 			PortletDataContext portletDataContext, T stagedModel)
 		throws PortletDataException {
 
-		Element stagedModelElement =
+		/*Element stagedModelElement =
 			portletDataContext.getImportDataStagedModelElement(stagedModel);
 
 		Element referencesElement = stagedModelElement.element("references");
@@ -864,6 +865,38 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 
 			Long classPK = GetterUtil.getLong(
 				referenceElement.attributeValue("class-pk"));
+
+			StagedModelDataHandlerUtil.importReferenceStagedModel(
+				portletDataContext, stagedModel, className, classPK);
+		}*/
+
+		DiscussionStagingHandler discussionStagingHandler =
+			CommentManagerUtil.getDiscussionStagingHandler();
+
+		String stagedModelClassName = null;
+
+		if (discussionStagingHandler != null) {
+			stagedModelClassName = discussionStagingHandler.getClassName();
+		}
+
+		Set<ReferenceDTO> references = portletDataContext.getExportReference(
+			stagedModel);
+
+		for (ReferenceDTO reference : references) {
+			StagedModel referenceStagedModel = reference.getStagedModel();
+
+			String className = ExportImportClassedModelUtil.getClassName(
+				referenceStagedModel);
+
+			if (className.equals(AssetCategory.class.getName()) ||
+				className.equals(RatingsEntry.class.getName()) ||
+				className.equals(stagedModelClassName)) {
+
+				continue;
+			}
+
+			Long classPK = ExportImportClassedModelUtil.getClassPK(
+				referenceStagedModel);
 
 			StagedModelDataHandlerUtil.importReferenceStagedModel(
 				portletDataContext, stagedModel, className, classPK);

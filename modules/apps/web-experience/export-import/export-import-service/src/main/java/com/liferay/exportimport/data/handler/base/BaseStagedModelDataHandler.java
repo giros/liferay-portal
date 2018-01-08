@@ -168,47 +168,4 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 		return null;
 	}
 
-	@Override
-	protected void importReferenceStagedModels(
-			PortletDataContext portletDataContext, T stagedModel)
-		throws PortletDataException {
-
-		Element stagedModelElement =
-			portletDataContext.getImportDataStagedModelElement(stagedModel);
-
-		Element referencesElement = stagedModelElement.element("references");
-
-		if (referencesElement == null) {
-			return;
-		}
-
-		DiscussionStagingHandler discussionStagingHandler =
-			CommentManagerUtil.getDiscussionStagingHandler();
-
-		String stagedModelClassName = null;
-
-		if (discussionStagingHandler != null) {
-			stagedModelClassName = discussionStagingHandler.getClassName();
-		}
-
-		List<Element> referenceElements = referencesElement.elements();
-
-		for (Element referenceElement : referenceElements) {
-			String className = referenceElement.attributeValue("class-name");
-
-			if (className.equals(AssetCategory.class.getName()) ||
-				className.equals(RatingsEntry.class.getName()) ||
-				className.equals(stagedModelClassName)) {
-
-				continue;
-			}
-
-			Long classPK = GetterUtil.getLong(
-				referenceElement.attributeValue("class-pk"));
-
-			StagedModelDataHandlerUtil.importReferenceStagedModel(
-				portletDataContext, stagedModel, className, classPK);
-		}
-	}
-
 }
