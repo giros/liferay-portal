@@ -127,50 +127,8 @@ public class BookmarksEntryStagedModelDataHandler
 	}
 
 	@Override
-	protected void exportAssetCategories(
-			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
-		throws PortletDataException {
-	}
-
-	@Override
-	protected void exportAssetTags(
-			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
-		throws PortletDataException {
-	}
-
-	@Override
-	protected void exportComments(
-			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
-		throws PortletDataException {
-	}
-
-	@Override
-	protected void exportRatings(
-			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
-		throws PortletDataException {
-	}
-
-	@Override
 	protected StagedModelRepository<BookmarksEntry> getStagedModelRepository() {
 		return _stagedModelRepository;
-	}
-
-	@Override
-	protected void importAssetCategories(
-			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
-		throws PortletDataException {
-	}
-
-	@Override
-	protected void importAssetTags(
-			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
-		throws PortletDataException {
-	}
-
-	@Override
-	protected void importReferenceStagedModels(
-			PortletDataContext portletDataContext, BookmarksEntry stagedModel)
-		throws PortletDataException {
 	}
 
 	@Reference(
