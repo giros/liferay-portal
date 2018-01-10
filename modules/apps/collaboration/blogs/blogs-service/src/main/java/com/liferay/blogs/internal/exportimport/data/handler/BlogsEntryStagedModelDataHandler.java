@@ -134,7 +134,7 @@ public class BlogsEntryStagedModelDataHandler
 					PortletFileRepositoryUtil.getPortletFileEntry(
 						entry.getSmallImageFileEntryId());
 
-				StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 					portletDataContext, entry, fileEntry,
 					PortletDataContext.REFERENCE_TYPE_WEAK);
 			}
@@ -148,7 +148,7 @@ public class BlogsEntryStagedModelDataHandler
 						smallImage.getImageId() + StringPool.PERIOD +
 							smallImage.getType());
 
-					entryElement.addAttribute(
+					portletDataContext.addStagedModelAttribute(
 						"small-image-path", smallImagePath);
 
 					entry.setSmallImageType(smallImage.getType());
@@ -194,8 +194,11 @@ public class BlogsEntryStagedModelDataHandler
 
 		entry.setContent(content);
 
-		portletDataContext.addClassedModel(
-			entryElement, ExportImportPathUtil.getModelPath(entry), entry);
+		portletDataContext.startStagedModelExport(entry);
+
+		portletDataContext.addStagedModel(entry);
+
+		portletDataContext.endStagedModelExport(entry);
 	}
 
 	@Override
