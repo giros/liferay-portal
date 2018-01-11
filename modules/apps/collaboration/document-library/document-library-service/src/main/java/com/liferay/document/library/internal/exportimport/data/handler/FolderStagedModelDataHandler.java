@@ -22,7 +22,6 @@ import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalService;
 import com.liferay.document.library.kernel.service.DLFolderLocalService;
 import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
-import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
@@ -146,20 +145,17 @@ public class FolderStagedModelDataHandler
 			PortletDataContext portletDataContext, Folder folder)
 		throws Exception {
 
-		Element folderElement = portletDataContext.getExportDataElement(folder);
-
-		String folderPath = ExportImportPathUtil.getModelPath(folder);
-
 		if (!folder.isDefaultRepository()) {
 			Repository repository = _repositoryLocalService.getRepository(
 				folder.getRepositoryId());
 
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, folder, repository,
 				PortletDataContext.REFERENCE_TYPE_STRONG);
 
-			portletDataContext.addClassedModel(
-				folderElement, folderPath, folder);
+			portletDataContext.startStagedModelExport(folder);
+
+			portletDataContext.addStagedModel(folder);
 
 			boolean rootFolder = false;
 
@@ -167,13 +163,15 @@ public class FolderStagedModelDataHandler
 				rootFolder = true;
 			}
 
-			folderElement.addAttribute(
+			portletDataContext.addStagedModelAttribute(
 				"rootFolder", String.valueOf(rootFolder));
 
 			long portletRepositoryClassNameId = _portal.getClassNameId(
 				PortletRepository.class.getName());
 
 			if (repository.getClassNameId() != portletRepositoryClassNameId) {
+				portletDataContext.endStagedModelExport(folder);
+
 				return;
 			}
 		}
@@ -181,15 +179,18 @@ public class FolderStagedModelDataHandler
 		if (folder.getParentFolderId() !=
 				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, folder, folder.getParentFolder(),
 				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
 
-		exportFolderFileEntryTypes(portletDataContext, folderElement, folder);
+		exportFolderFileEntryTypes(portletDataContext, folder);
 
-		portletDataContext.addClassedModel(
-			folderElement, folderPath, folder, DLFolder.class);
+		portletDataContext.startStagedModelExport(folder);
+
+		portletDataContext.addStagedModel(folder);
+
+		portletDataContext.endStagedModelExport(folder);
 	}
 
 	@Override
@@ -345,8 +346,7 @@ public class FolderStagedModelDataHandler
 	}
 
 	protected void exportFolderFileEntryTypes(
-			PortletDataContext portletDataContext, Element folderElement,
-			Folder folder)
+			PortletDataContext portletDataContext, Folder folder)
 		throws Exception {
 
 		if (!folder.isDefaultRepository()) {
@@ -367,12 +367,14 @@ public class FolderStagedModelDataHandler
 
 		String defaultFileEntryTypeUuid = StringPool.BLANK;
 
+		boolean basicDocument = false;
+
 		for (DLFileEntryType dlFileEntryType : dlFileEntryTypes) {
 			if (dlFileEntryType.getFileEntryTypeId() ==
 					DLFileEntryTypeConstants.
 						FILE_ENTRY_TYPE_ID_BASIC_DOCUMENT) {
 
-				folderElement.addAttribute("basic-document", "true");
+				basicDocument = true;
 
 				continue;
 			}
@@ -384,13 +386,18 @@ public class FolderStagedModelDataHandler
 			}
 
 			if (dlFileEntryType.isExportable()) {
-				StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 					portletDataContext, folder, dlFileEntryType,
 					PortletDataContext.REFERENCE_TYPE_STRONG);
 			}
 		}
 
-		folderElement.addAttribute(
+		if (basicDocument) {
+			portletDataContext.addStagedModelAttribute(
+				"basic-document", "true");
+		}
+
+		portletDataContext.addStagedModelAttribute(
 			"defaultFileEntryTypeUuid", defaultFileEntryTypeUuid);
 	}
 

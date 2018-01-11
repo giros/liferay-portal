@@ -18,7 +18,6 @@ import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
-import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
@@ -104,8 +103,17 @@ public class RepositoryStagedModelDataHandler
 			PortletDataContext portletDataContext, Repository repository)
 		throws Exception {
 
-		Element repositoryElement = portletDataContext.getExportDataElement(
-			repository);
+		List<RepositoryEntry> repositoryEntries =
+			_repositoryEntryLocalService.getRepositoryEntries(
+				repository.getRepositoryId());
+
+		for (RepositoryEntry repositoryEntry : repositoryEntries) {
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
+				portletDataContext, repository, repositoryEntry,
+				PortletDataContext.REFERENCE_TYPE_CHILD);
+		}
+
+		portletDataContext.startStagedModelExport(repository);
 
 		Folder folder = _dlAppLocalService.getFolder(
 			repository.getDlFolderId());
@@ -113,26 +121,16 @@ public class RepositoryStagedModelDataHandler
 		if (folder.getModel() instanceof DLFolder) {
 			DLFolder dlFolder = (DLFolder)folder.getModel();
 
-			repositoryElement.addAttribute(
+			portletDataContext.addStagedModelAttribute(
 				"hidden", String.valueOf(dlFolder.isHidden()));
 		}
 
-		repositoryElement.addAttribute(
+		portletDataContext.addStagedModelAttribute(
 			"repositoryClassName", repository.getClassName());
 
-		portletDataContext.addClassedModel(
-			repositoryElement, ExportImportPathUtil.getModelPath(repository),
-			repository);
+		portletDataContext.addStagedModel(repository);
 
-		List<RepositoryEntry> repositoryEntries =
-			_repositoryEntryLocalService.getRepositoryEntries(
-				repository.getRepositoryId());
-
-		for (RepositoryEntry repositoryEntry : repositoryEntries) {
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
-				portletDataContext, repository, repositoryEntry,
-				PortletDataContext.REFERENCE_TYPE_CHILD);
-		}
+		portletDataContext.endStagedModelExport(repository);
 	}
 
 	@Override

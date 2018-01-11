@@ -26,6 +26,9 @@ import com.liferay.exportimport.kernel.lar.PortletDataHandlerBoolean;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerControl;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactoryUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.util.PropsValues;
@@ -109,15 +112,19 @@ public class BlogsPortletDataHandler extends BasePortletDataHandler {
 			PortletPreferences portletPreferences)
 		throws Exception {
 
-		Element rootElement = addExportDataRootElement(portletDataContext);
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
+
+		larFile.startWritePortletData(portletId);
 
 		if (!portletDataContext.getBooleanParameter(NAMESPACE, "entries")) {
-			return getExportDataRootElementString(rootElement);
+			larFile.endWritePortletData(portletId);
+
+			return StringPool.BLANK;
 		}
 
 		portletDataContext.addPortletPermissions(BlogsConstants.RESOURCE_NAME);
 
-		rootElement.addAttribute(
+		larFile.writePortletDataAttribute(
 			"group-id", String.valueOf(portletDataContext.getScopeGroupId()));
 
 		ActionableDynamicQuery actionableDynamicQuery =
@@ -126,7 +133,9 @@ public class BlogsPortletDataHandler extends BasePortletDataHandler {
 
 		actionableDynamicQuery.performActions();
 
-		return getExportDataRootElementString(rootElement);
+		larFile.endWritePortletData(portletId);
+
+		return StringPool.BLANK;
 	}
 
 	@Override

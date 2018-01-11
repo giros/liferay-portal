@@ -35,6 +35,8 @@ import com.liferay.exportimport.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.exportimport.kernel.lar.UserIdStrategy;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactoryUtil;
 import com.liferay.exportimport.kernel.xstream.XStreamAlias;
 import com.liferay.exportimport.kernel.xstream.XStreamConverter;
 import com.liferay.exportimport.kernel.xstream.XStreamType;
@@ -80,6 +82,7 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.TeamLocalServiceUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.DateRange;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.KeyValuePair;
@@ -109,6 +112,8 @@ import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.security.NoTypePermission;
 import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -124,6 +129,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
 
 import jodd.bean.BeanUtil;
 
@@ -275,6 +283,21 @@ public class PortletDataContextImpl implements PortletDataContext {
 		String className, long classPK, List<MBMessage> messages) {
 	}
 
+	@Override
+	public void addCustomData(
+		StagedModel stagedModel, String dataGroupName, String dataName,
+		String dataValue) {
+
+		Set<CustomDataDTO> customDataSet = _customData.get(stagedModel);
+
+		if (customDataSet == null) {
+			customDataSet = new HashSet<>();
+		}
+
+		customDataSet.add(
+			new CustomDataDTO(dataGroupName, dataName, dataValue));
+	}
+
 	/**
 	 * @see #isWithinDateRange(Date)
 	 */
@@ -305,6 +328,16 @@ public class PortletDataContextImpl implements PortletDataContext {
 		Element element, String path, ClassedModel classedModel) {
 
 		addExpando(element, path, classedModel, classedModel.getModelClass());
+	}
+
+	@Override
+	public void addExportDataElementAttribute(String name, String value) {
+		try {
+			_xmlStreamWriter.writeAttribute(name, value);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -455,6 +488,34 @@ public class PortletDataContextImpl implements PortletDataContext {
 		String className, long classPK, List<RatingsEntry> ratingsEntries) {
 	}
 
+	@Override
+	public void addReference(
+		StagedModel referrerStagedModel, StagedModel stagedModel,
+		String referenceType, boolean missing) {
+
+		addReference(
+			referrerStagedModel, stagedModel, referenceType, missing, null);
+	}
+
+	@Override
+	public void addReference(
+		StagedModel referrerStagedModel, StagedModel stagedModel,
+		String referenceType, boolean missing, Map<String, String> properties) {
+
+		Set<ReferenceDTO> references = _referenceMap.get(referrerStagedModel);
+
+		if (references == null) {
+			references = new HashSet<>();
+
+			_referenceMap.put(referrerStagedModel, references);
+		}
+
+		references.add(
+			new ReferenceDTO(
+				referrerStagedModel, stagedModel, referenceType, missing,
+				properties));
+	}
+
 	/**
 	 * @deprecated As of 3.0.0, with no direct replacement
 	 */
@@ -540,6 +601,65 @@ public class PortletDataContextImpl implements PortletDataContext {
 		}
 
 		return value;
+	}
+
+	@Override
+	public void addStagedModel(StagedModel stagedModel) {
+		String path = ExportImportPathUtil.getModelPath(stagedModel);
+
+		_larFile.writeStagedModelAttribute("path", path);
+
+		_populateClassNameAttribute(stagedModel);
+
+		if (!hasPrimaryKey(String.class, path)) {
+			if (stagedModel instanceof AuditedModel) {
+				AuditedModel auditedModel = (AuditedModel)stagedModel;
+
+				auditedModel.setUserUuid(auditedModel.getUserUuid());
+			}
+
+			if (isResourceMain(stagedModel)) {
+				Serializable classPK =
+					ExportImportClassedModelUtil.getPrimaryKeyObj(stagedModel);
+
+				long classNameId = ExportImportClassedModelUtil.getClassNameId(
+					stagedModel);
+
+				_addAssetLinks(classNameId, GetterUtil.getLong(classPK));
+				_addAssetPriority(classNameId, GetterUtil.getLong(classPK));
+
+				_addExpando(path, stagedModel);
+
+				Class<? extends StagedModel> clazz = stagedModel.getClass();
+
+				try {
+					addLocks(clazz, String.valueOf(classPK));
+				}
+				catch (PortalException pe) {
+					if (_log.isWarnEnabled()) {
+						StringBundler sb = new StringBundler(4);
+
+						sb.append("Unable to process locks for staged model ");
+						sb.append(stagedModel.getModelClassName());
+						sb.append(StringPool.SPACE);
+						sb.append(stagedModel.getUuid());
+
+						_log.warn(sb.toString(), pe);
+					}
+				}
+
+				addPermissions(clazz, classPK);
+			}
+
+			_references.add(getReferenceKey(stagedModel));
+		}
+
+		addZipEntry(path, stagedModel);
+	}
+
+	@Override
+	public void addStagedModelAttribute(String name, String value) {
+		_stagedModelAttributes.put(name, value);
 	}
 
 	@Override
@@ -661,6 +781,50 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 		return createServiceContext(
 			null, path, classedModel, classedModel.getModelClass());
+	}
+
+	@Override
+	public void endExportDataElement() {
+		try {
+			_xmlStreamWriter.writeEndElement();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void endPortletDataXml() {
+		try {
+			_xmlStreamWriter.writeEndElement();
+
+			_xmlStreamWriter.flush();
+			_xmlStreamWriter.close();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void endStagedModelExport(StagedModel stagedModel) {
+		for (Map.Entry<String, String> stagedModelAttribute :
+				_stagedModelAttributes.entrySet()) {
+
+			_larFile.writeStagedModelAttribute(
+				stagedModelAttribute.getKey(), stagedModelAttribute.getValue());
+		}
+
+		_stagedModelAttributes = new HashMap<>();
+
+		processReferences(stagedModel);
+
+		_processCustomData(stagedModel);
+
+		_larFile.endWriteStagedModel(stagedModel);
+
+		_referenceMap = new HashMap<>();
+		_customData = new HashMap<>();
 	}
 
 	@Override
@@ -1883,6 +2047,11 @@ public class PortletDataContextImpl implements PortletDataContext {
 			ExportImportClassedModelUtil.getPrimaryKeyObj(stagedModel));
 	}
 
+	@Override
+	public boolean isStreamProcessSupport() {
+		return _streamProcessSupport;
+	}
+
 	/**
 	 * @see #addDateRangeCriteria(DynamicQuery, String)
 	 */
@@ -1899,6 +2068,23 @@ public class PortletDataContextImpl implements PortletDataContext {
 		else {
 			return false;
 		}
+	}
+
+	@Override
+	public void processReferences(StagedModel stagedModel) {
+		if (MapUtil.isEmpty(_referenceMap)) {
+			return;
+		}
+
+		_larFile.startWriteReference();
+
+		for (ReferenceDTO reference : _popReferences(stagedModel)) {
+			_processReference(
+				reference.getReferrerStagedModel(), reference.getStagedModel(),
+				reference.getReferenceType(), reference.isMissing(), null);
+		}
+
+		_larFile.endWriteReference();
 	}
 
 	@Override
@@ -2061,6 +2247,11 @@ public class PortletDataContextImpl implements PortletDataContext {
 	}
 
 	@Override
+	public void setStreamProcessSupport(boolean streamProcessSupport) {
+		_streamProcessSupport = streamProcessSupport;
+	}
+
+	@Override
 	public void setType(String type) {
 		_type = type;
 	}
@@ -2083,6 +2274,57 @@ public class PortletDataContextImpl implements PortletDataContext {
 	@Override
 	public void setZipWriter(ZipWriter zipWriter) {
 		_zipWriter = zipWriter;
+	}
+
+	@Override
+	public void startExportDataElement(ClassedModel classedModel) {
+		try {
+			_xmlStreamWriter.writeStartElement("staged-model");
+
+			if (classedModel instanceof StagedGroupedModel) {
+				StagedGroupedModel stagedGroupedModel =
+					(StagedGroupedModel)classedModel;
+
+				_xmlStreamWriter.writeAttribute(
+					"group-id",
+					String.valueOf(stagedGroupedModel.getGroupId()));
+				_xmlStreamWriter.writeAttribute(
+					"uuid", stagedGroupedModel.getUuid());
+			}
+			else if (classedModel instanceof StagedModel) {
+				StagedModel stagedModel = (StagedModel)classedModel;
+
+				_xmlStreamWriter.writeAttribute("uuid", stagedModel.getUuid());
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void startPortletDataXml(String className) {
+		try {
+			XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
+
+			_portletDataXml = FileUtil.createTempFile();
+
+			_xmlStreamWriter = xmlOutputFactory.createXMLStreamWriter(
+				new FileWriter(_portletDataXml));
+
+			_xmlStreamWriter.writeStartDocument();
+			_xmlStreamWriter.writeStartElement(className);
+			_xmlStreamWriter.writeAttribute(
+				"group-id", String.valueOf(getScopeGroupId()));
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void startStagedModelExport(StagedModel stagedModel) {
+		_larFile.startWriteStagedModel(stagedModel);
 	}
 
 	@Override
@@ -2833,6 +3075,181 @@ public class PortletDataContextImpl implements PortletDataContext {
 			"asset-entry-priority", String.valueOf(assetEntryPriority));
 	}
 
+	private void _addAssetPriority(long classNameId, long classPK) {
+		double assetEntryPriority = AssetEntryLocalServiceUtil.getEntryPriority(
+			classNameId, classPK);
+
+		_larFile.writeStagedModelAttribute(
+			"asset-entry-priority", String.valueOf(assetEntryPriority));
+	}
+
+	private void _addExpando(String path, StagedModel stagedModel) {
+		String className = ExportImportClassedModelUtil.getClassName(
+			stagedModel);
+
+		if (!_expandoColumnsMap.containsKey(className)) {
+			List<ExpandoColumn> expandoColumns =
+				ExpandoColumnLocalServiceUtil.getDefaultTableColumns(
+					_companyId, className);
+
+			for (ExpandoColumn expandoColumn : expandoColumns) {
+				addPermissions(
+					ExpandoColumn.class,
+					Long.valueOf(expandoColumn.getColumnId()));
+			}
+
+			_expandoColumnsMap.put(className, expandoColumns);
+		}
+
+		ExpandoBridge expandoBridge = stagedModel.getExpandoBridge();
+
+		if (expandoBridge == null) {
+			return;
+		}
+
+		Map<String, Serializable> expandoBridgeAttributes =
+			expandoBridge.getAttributes();
+
+		if (!expandoBridgeAttributes.isEmpty()) {
+			String expandoPath = ExportImportPathUtil.getExpandoPath(path);
+
+			_larFile.writeStagedModelAttribute("expando-path", expandoPath);
+
+			addZipEntry(expandoPath, expandoBridgeAttributes);
+		}
+	}
+
+	private boolean _containsEntityMap(ClassedModel classedModel) {
+		long classNameId = ExportImportClassedModelUtil.getClassNameId(
+			classedModel);
+		long classPK = ExportImportClassedModelUtil.getClassPK(classedModel);
+
+		Map<Long, Boolean> classPKMap = _entities.get(classNameId);
+
+		if (classPKMap == null) {
+			return false;
+		}
+
+		Boolean missing = classPKMap.get(classPK);
+
+		if (missing == null) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+
+	private boolean _isMissingEntity(ClassedModel classedModel) {
+		long classNameId = ExportImportClassedModelUtil.getClassNameId(
+			classedModel);
+		long classPK = ExportImportClassedModelUtil.getClassPK(classedModel);
+
+		Map<Long, Boolean> classPKMap = _entities.get(classNameId);
+
+		if (classPKMap == null) {
+			return false;
+		}
+
+		Boolean missing = classPKMap.get(classPK);
+
+		if (missing == null) {
+			return false;
+		}
+		else {
+			return missing;
+		}
+	}
+
+	private Set<ReferenceDTO> _popReferences(StagedModel referrerStagedModel) {
+		Set<ReferenceDTO> references = _referenceMap.remove(
+			referrerStagedModel);
+
+		if (references == null) {
+			return Collections.emptySet();
+		}
+
+		return references;
+	}
+
+	private void _populateClassNameAttribute(StagedModel stagedModel) {
+		String attachedClassName = null;
+
+		if (stagedModel instanceof AttachedModel) {
+			AttachedModel attachedModel = (AttachedModel)stagedModel;
+
+			attachedClassName = attachedModel.getClassName();
+		}
+		else if (BeanUtil.hasProperty(stagedModel, "className")) {
+			attachedClassName = BeanPropertiesUtil.getStringSilent(
+				stagedModel, "className");
+		}
+
+		if (Validator.isNotNull(attachedClassName)) {
+			try {
+				_larFile.writeStagedModelAttribute(
+					"attached-class-name", attachedClassName);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void _processCustomData(StagedModel stagedModel) {
+	}
+
+	private void _processReference(
+		StagedModel referrerStagedModel, StagedModel stagedModel,
+		String referenceType, boolean missing, Map<String, String> properties) {
+
+		String referenceKey = getReferenceKey(stagedModel);
+
+		_larFile.writeReferenceStagedModel(
+			referrerStagedModel, stagedModel, referenceType, missing);
+
+		if (properties != null) {
+			for (Map.Entry<String, String> property : properties.entrySet()) {
+				_larFile.writeReferenceAttribute(
+					property.getKey(), property.getValue());
+			}
+		}
+
+		if (missing) {
+			if (!_missingReferences.contains(referenceKey)) {
+				_missingReferences.add(referenceKey);
+			}
+		}
+		else {
+			_references.add(referenceKey);
+
+			cleanUpMissingReferences(stagedModel);
+		}
+	}
+
+	private void _updateEntityMap(ClassedModel classedModel, boolean missing) {
+		long classNameId = ExportImportClassedModelUtil.getClassNameId(
+			classedModel);
+		long classPK = ExportImportClassedModelUtil.getClassPK(classedModel);
+
+		Map<Long, Boolean> classPKMap = _entities.get(classNameId);
+
+		if (classPKMap == null) {
+			classPKMap = new HashMap<>();
+		}
+
+		if (classPKMap.containsKey(classPK)) {
+			boolean previousMissing = classPKMap.get(classPK);
+
+			classPKMap.put(classPK, previousMissing | missing);
+		}
+		else {
+			classPKMap.put(classPK, missing);
+		}
+
+		_entities.put(classNameId, classPKMap);
+	}
+
 	private static final Class<?>[] _XSTREAM_DEFAULT_ALLOWED_TYPES = {
 		boolean[].class, byte[].class, Date.class, Date[].class, double[].class,
 		float[].class, int[].class, Locale.class, long[].class, Number.class,
@@ -2851,16 +3268,20 @@ public class PortletDataContextImpl implements PortletDataContext {
 	private final Map<String, String[]> _assetTagNamesMap = new HashMap<>();
 	private long _companyGroupId;
 	private long _companyId;
+	private transient Map<StagedModel, Set<CustomDataDTO>> _customData =
+		new HashMap<>();
 	private String _dataStrategy;
 	private final Set<StagedModelType> _deletionSystemEventModelTypes =
 		new HashSet<>();
 	private Date _endDate;
+	private transient Map<Long, Map<Long, Boolean>> _entities = new HashMap<>();
 	private final Map<String, List<ExpandoColumn>> _expandoColumnsMap =
 		new HashMap<>();
 	private transient Element _exportDataRootElement;
 	private String _exportImportProcessId;
 	private long _groupId;
 	private transient Element _importDataRootElement;
+	private transient LARFile _larFile = LARFileFactoryUtil.getLARFile(this);
 	private transient long[] _layoutIds;
 	private String _layoutSetPrototypeUuid;
 	private final transient LockManager _lockManager;
@@ -2876,9 +3297,12 @@ public class PortletDataContextImpl implements PortletDataContext {
 	private final Map<String, List<KeyValuePair>> _permissionsMap =
 		new HashMap<>();
 	private long _plid;
+	private File _portletDataXml;
 	private String _portletId;
 	private final Set<String> _primaryKeys = new HashSet<>();
 	private boolean _privateLayout;
+	private transient Map<StagedModel, Set<ReferenceDTO>> _referenceMap =
+		new HashMap<>();
 	private final Set<String> _references = new HashSet<>();
 	private String _rootPortletId;
 	private final Set<String> _scopedPrimaryKeys = new HashSet<>();
@@ -2889,11 +3313,69 @@ public class PortletDataContextImpl implements PortletDataContext {
 	private long _sourceCompanyId;
 	private long _sourceGroupId;
 	private long _sourceUserPersonalSiteGroupId;
+	private transient Map<String, String> _stagedModelAttributes =
+		new HashMap<>();
 	private Date _startDate;
+	private boolean _streamProcessSupport;
 	private String _type;
 	private transient UserIdStrategy _userIdStrategy;
 	private long _userPersonalSiteGroupId;
+	private XMLStreamWriter _xmlStreamWriter;
 	private transient ZipReader _zipReader;
 	private transient ZipWriter _zipWriter;
+
+	private class CustomDataDTO {
+
+		public CustomDataDTO(
+			String dataGroupName, String dataName, String dataValue) {
+		}
+
+		private String _dataGroupName;
+		private String _dataName;
+		private String _dataValue;
+
+	}
+
+	private class ReferenceDTO {
+
+		public ReferenceDTO(
+			StagedModel referrerStagedModel, StagedModel stagedModel,
+			String referenceType, boolean missing,
+			Map<String, String> properties) {
+
+			_referrerStagedModel = referrerStagedModel;
+			_stagedModel = stagedModel;
+			_referenceType = referenceType;
+			_missing = missing;
+			_properties = properties;
+		}
+
+		public Map<String, String> getProperties() {
+			return _properties;
+		}
+
+		public String getReferenceType() {
+			return _referenceType;
+		}
+
+		public StagedModel getReferrerStagedModel() {
+			return _referrerStagedModel;
+		}
+
+		public StagedModel getStagedModel() {
+			return _stagedModel;
+		}
+
+		public boolean isMissing() {
+			return _missing;
+		}
+
+		private final boolean _missing;
+		private final Map<String, String> _properties;
+		private final String _referenceType;
+		private final StagedModel _referrerStagedModel;
+		private final StagedModel _stagedModel;
+
+	}
 
 }

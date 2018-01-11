@@ -12,20 +12,18 @@
  * details.
  */
 
-package com.liferay.portal.kernel.zip;
+package com.liferay.exportimport.kernel.lar.file;
 
 import aQute.bnd.annotation.ProviderType;
 
-import java.io.File;
+import com.liferay.exportimport.kernel.lar.PortletDataContext;
 
 /**
- * @author Raymond Augé
+ * @author Zoltan Csaszi
  */
 @ProviderType
-public interface ZipWriterFactory {
+public interface LARFileFactory {
 
-	public ZipWriter getZipWriter();
-
-	public ZipWriter getZipWriter(File file);
+	public LARFile getLARFile(PortletDataContext portletDataContext);
 
 }

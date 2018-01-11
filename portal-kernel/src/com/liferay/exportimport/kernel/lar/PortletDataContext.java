@@ -119,6 +119,10 @@ public interface PortletDataContext extends Serializable {
 	public void addComments(
 		String className, long classPK, List<MBMessage> messages);
 
+	public void addCustomData(
+		StagedModel stagedModel, String dataGroupName, String dataName,
+		String dataValue);
+
 	public void addDateRangeCriteria(
 		DynamicQuery dynamicQuery, String propertyName);
 
@@ -128,6 +132,8 @@ public interface PortletDataContext extends Serializable {
 	public void addExpando(
 			Element element, String path, ClassedModel classedModel)
 		throws PortalException;
+
+	public void addExportDataElementAttribute(String name, String value);
 
 	public void addLocks(Class<?> clazz, String key) throws PortalException;
 
@@ -174,6 +180,14 @@ public interface PortletDataContext extends Serializable {
 	public void addRatingsEntries(
 		String className, long classPK, List<RatingsEntry> ratingsEntries);
 
+	public void addReference(
+		StagedModel referrerStagedModel, StagedModel stagedModel,
+		String referenceType, boolean missing);
+
+	public void addReference(
+		StagedModel referrerStagedModel, StagedModel stagedModel,
+		String referenceType, boolean missing, Map<String, String> properties);
+
 	/**
 	 * @deprecated As of 7.0.0, with no direct replacement
 	 */
@@ -199,6 +213,10 @@ public interface PortletDataContext extends Serializable {
 
 	public boolean addScopedPrimaryKey(Class<?> clazz, String primaryKey);
 
+	public void addStagedModel(StagedModel stagedModel);
+
+	public void addStagedModelAttribute(String name, String value);
+
 	public void addZipEntry(String path, byte[] bytes);
 
 	public void addZipEntry(String path, InputStream is);
@@ -223,6 +241,12 @@ public interface PortletDataContext extends Serializable {
 
 	public ServiceContext createServiceContext(
 		String path, ClassedModel classedModel);
+
+	public void endExportDataElement();
+
+	public void endPortletDataXml();
+
+	public void endStagedModelExport(StagedModel stagedModel);
 
 	public Object fromXML(byte[] bytes);
 
@@ -622,7 +646,11 @@ public interface PortletDataContext extends Serializable {
 
 	public boolean isStagedModelCounted(StagedModel stagedModel);
 
+	public boolean isStreamProcessSupport();
+
 	public boolean isWithinDateRange(Date modifiedDate);
+
+	public void processReferences(StagedModel stagedModel);
 
 	public void putNotUniquePerLayout(String dataKey);
 
@@ -688,6 +716,8 @@ public interface PortletDataContext extends Serializable {
 
 	public void setStartDate(Date startDate);
 
+	public void setStreamProcessSupport(boolean streamProcessSupport);
+
 	public void setType(String type);
 
 	public void setUserIdStrategy(UserIdStrategy userIdStrategy);
@@ -697,6 +727,12 @@ public interface PortletDataContext extends Serializable {
 	public void setZipReader(ZipReader zipReader);
 
 	public void setZipWriter(ZipWriter zipWriter);
+
+	public void startExportDataElement(ClassedModel classedModel);
+
+	public void startPortletDataXml(String className);
+
+	public void startStagedModelExport(StagedModel stagedModel);
 
 	public String toXML(Object object);
 

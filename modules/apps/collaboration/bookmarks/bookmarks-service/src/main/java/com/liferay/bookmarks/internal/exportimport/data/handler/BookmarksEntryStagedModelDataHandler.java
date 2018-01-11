@@ -18,13 +18,12 @@ import com.liferay.bookmarks.model.BookmarksEntry;
 import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.model.BookmarksFolderConstants;
 import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
-import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
+import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.xml.Element;
 
 import java.util.Map;
 
@@ -59,15 +58,16 @@ public class BookmarksEntryStagedModelDataHandler
 		if (entry.getFolderId() !=
 				BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, entry, entry.getFolder(),
 				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
 
-		Element entryElement = portletDataContext.getExportDataElement(entry);
+		portletDataContext.startStagedModelExport(entry);
 
-		portletDataContext.addClassedModel(
-			entryElement, ExportImportPathUtil.getModelPath(entry), entry);
+		portletDataContext.addStagedModel(entry);
+
+		portletDataContext.endStagedModelExport(entry);
 	}
 
 	@Override

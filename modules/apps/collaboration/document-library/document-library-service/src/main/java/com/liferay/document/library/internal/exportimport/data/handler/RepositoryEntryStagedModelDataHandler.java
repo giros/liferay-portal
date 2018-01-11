@@ -15,7 +15,6 @@
 package com.liferay.document.library.internal.exportimport.data.handler;
 
 import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
-import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
@@ -25,7 +24,6 @@ import com.liferay.portal.kernel.model.RepositoryEntry;
 import com.liferay.portal.kernel.service.RepositoryEntryLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.xml.Element;
 
 import java.util.List;
 import java.util.Map;
@@ -89,13 +87,11 @@ public class RepositoryEntryStagedModelDataHandler
 			RepositoryEntry repositoryEntry)
 		throws Exception {
 
-		Element repositoryEntryElement =
-			portletDataContext.getExportDataElement(repositoryEntry);
+		portletDataContext.startStagedModelExport(repositoryEntry);
 
-		portletDataContext.addClassedModel(
-			repositoryEntryElement,
-			ExportImportPathUtil.getModelPath(repositoryEntry),
-			repositoryEntry);
+		portletDataContext.addStagedModel(repositoryEntry);
+
+		portletDataContext.endStagedModelExport(repositoryEntry);
 	}
 
 	@Override

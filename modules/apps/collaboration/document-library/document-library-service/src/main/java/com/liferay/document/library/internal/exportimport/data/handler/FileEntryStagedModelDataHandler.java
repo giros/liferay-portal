@@ -220,21 +220,13 @@ public class FileEntryStagedModelDataHandler
 			PortletDataContext portletDataContext, FileEntry fileEntry)
 		throws Exception {
 
-		Element fileEntryElement = portletDataContext.getExportDataElement(
-			fileEntry);
-
-		String fileEntryPath = ExportImportPathUtil.getModelPath(fileEntry);
-
 		if (!fileEntry.isDefaultRepository()) {
 			Repository repository = _repositoryLocalService.getRepository(
 				fileEntry.getRepositoryId());
 
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, fileEntry, repository,
 				PortletDataContext.REFERENCE_TYPE_STRONG);
-
-			portletDataContext.addClassedModel(
-				fileEntryElement, fileEntryPath, fileEntry);
 
 			long portletRepositoryClassNameId = _portal.getClassNameId(
 				PortletRepository.class.getName());
@@ -247,16 +239,22 @@ public class FileEntryStagedModelDataHandler
 		if (fileEntry.getFolderId() !=
 				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 				portletDataContext, fileEntry, fileEntry.getFolder(),
 				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
 
+		exportMetaData(portletDataContext, fileEntry);
+
+		portletDataContext.startStagedModelExport(fileEntry);
+
 		FileVersion fileVersion = fileEntry.getFileVersion();
 
-		fileEntryElement.addAttribute("fileVersionUuid", fileVersion.getUuid());
+		portletDataContext.addStagedModelAttribute(
+			"fileVersionUuid", fileVersion.getUuid());
 
-		fileEntryElement.addAttribute("version", fileEntry.getVersion());
+		portletDataContext.addStagedModelAttribute(
+			"version", fileEntry.getVersion());
 
 		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)fileEntry;
 
@@ -278,8 +276,6 @@ public class FileEntryStagedModelDataHandler
 			}
 
 			if (is == null) {
-				fileEntryElement.detach();
-
 				return;
 			}
 
@@ -289,7 +285,7 @@ public class FileEntryStagedModelDataHandler
 
 				portletDataContext.addZipEntry(binPath, is);
 
-				fileEntryElement.addAttribute("bin-path", binPath);
+				portletDataContext.addStagedModelAttribute("bin-path", binPath);
 			}
 			finally {
 				try {
@@ -305,14 +301,12 @@ public class FileEntryStagedModelDataHandler
 				_serviceTrackerList) {
 
 			dlPluggableContentDataHandler.exportContent(
-				portletDataContext, fileEntryElement, fileEntry);
+				portletDataContext, null, fileEntry);
 		}
 
-		exportMetaData(portletDataContext, fileEntryElement, fileEntry);
+		portletDataContext.addStagedModel(fileEntry);
 
-		portletDataContext.addClassedModel(
-			fileEntryElement, fileEntryPath, liferayFileEntry,
-			DLFileEntry.class);
+		portletDataContext.endStagedModelExport(fileEntry);
 	}
 
 	@Override
@@ -665,7 +659,7 @@ public class FileEntryStagedModelDataHandler
 
 	protected void exportDDMFormValues(
 			PortletDataContext portletDataContext, DDMStructure ddmStructure,
-			FileEntry fileEntry, Element fileEntryElement)
+			FileEntry fileEntry)
 		throws Exception {
 
 		FileVersion fileVersion = fileEntry.getFileVersion();
@@ -678,16 +672,17 @@ public class FileEntryStagedModelDataHandler
 			return;
 		}
 
-		Element structureFields = fileEntryElement.addElement(
-			"structure-fields");
-
 		String ddmFormValuesPath = ExportImportPathUtil.getModelPath(
 			ddmStructure,
 			String.valueOf(dlFileEntryMetadata.getDDMStorageId()));
 
-		structureFields.addAttribute("ddm-form-values-path", ddmFormValuesPath);
+		portletDataContext.addCustomData(
+			fileEntry, "structure-fields", "ddm-form-values-path",
+			ddmFormValuesPath);
 
-		structureFields.addAttribute("structureUuid", ddmStructure.getUuid());
+		portletDataContext.addCustomData(
+			fileEntry, "structure-fields", "structure-uuid",
+			ddmStructure.getUuid());
 
 		com.liferay.dynamic.data.mapping.storage.DDMFormValues ddmFormValues =
 			_storageEngine.getDDMFormValues(
@@ -704,8 +699,7 @@ public class FileEntryStagedModelDataHandler
 	}
 
 	protected void exportMetaData(
-			PortletDataContext portletDataContext, Element fileEntryElement,
-			FileEntry fileEntry)
+			PortletDataContext portletDataContext, FileEntry fileEntry)
 		throws Exception {
 
 		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)fileEntry;
@@ -721,15 +715,14 @@ public class FileEntryStagedModelDataHandler
 			return;
 		}
 
-		StagedModelDataHandlerUtil.exportReferenceStagedModel(
+		StagedModelDataHandlerUtil.exportReferenceStagedModelStream(
 			portletDataContext, fileEntry, dlFileEntryType,
 			PortletDataContext.REFERENCE_TYPE_STRONG);
 
 		List<DDMStructure> ddmStructures = dlFileEntryType.getDDMStructures();
 
 		for (DDMStructure ddmStructure : ddmStructures) {
-			exportDDMFormValues(
-				portletDataContext, ddmStructure, fileEntry, fileEntryElement);
+			exportDDMFormValues(portletDataContext, ddmStructure, fileEntry);
 		}
 	}
 

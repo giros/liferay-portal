@@ -12,20 +12,27 @@
  * details.
  */
 
-package com.liferay.portal.kernel.zip;
+package com.liferay.exportimport.internal.lar;
 
 import aQute.bnd.annotation.ProviderType;
 
-import java.io.File;
+import com.liferay.exportimport.kernel.lar.PortletDataContext;
+import com.liferay.exportimport.kernel.lar.file.LARFile;
+import com.liferay.exportimport.kernel.lar.file.LARFileFactory;
+
+import org.osgi.service.component.annotations.Component;
 
 /**
- * @author Raymond Augé
+ * @author Zoltan Csaszi
  */
+@Component(immediate = true, service = LARFileFactory.class)
 @ProviderType
-public interface ZipWriterFactory {
+public class LARFileFactoryImpl implements LARFileFactory {
 
-	public ZipWriter getZipWriter();
+	public LARFile getLARFile(PortletDataContext portletDataContext) {
+		LARFile larFile = new LARFileImpl(portletDataContext);
 
-	public ZipWriter getZipWriter(File file);
+		return larFile;
+	}
 
 }
