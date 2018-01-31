@@ -82,6 +82,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -372,13 +373,10 @@ public class FileEntryStagedModelDataHandler
 			"sourceFileName", "A." + fileEntry.getExtension());
 		serviceContext.setUserId(userId);
 
-		Element fileEntryElement = portletDataContext.getImportDataElement(
-			fileEntry);
-
-		String binPath = fileEntryElement.attributeValue("bin-path");
-		String fileVersionUuid = fileEntryElement.attributeValue(
+		String binPath = portletDataContext.getStagedModelAttribute("bin-path");
+		String fileVersionUuid = portletDataContext.getStagedModelAttribute(
 			"fileVersionUuid");
-		String version = fileEntryElement.attributeValue("version");
+		String version = portletDataContext.getStagedModelAttribute("version");
 
 		InputStream is = null;
 
@@ -414,9 +412,7 @@ public class FileEntryStagedModelDataHandler
 				return;
 			}
 
-			importMetaData(
-				portletDataContext, fileEntryElement, fileEntry,
-				serviceContext);
+			importMetaData(portletDataContext, fileEntry, serviceContext);
 
 			FileEntry importedFileEntry = null;
 
@@ -680,13 +676,14 @@ public class FileEntryStagedModelDataHandler
 			ddmStructure,
 			String.valueOf(dlFileEntryMetadata.getDDMStorageId()));
 
-		portletDataContext.addCustomData(
-			fileEntry, "structure-fields", "ddm-form-values-path",
-			ddmFormValuesPath);
+		Map<String, String> customDataGroup = new HashMap<>();
+
+		customDataGroup.put("ddm-form-values-path", ddmFormValuesPath);
+
+		customDataGroup.put("structure-uuid", ddmStructure.getUuid());
 
 		portletDataContext.addCustomData(
-			fileEntry, "structure-fields", "structure-uuid",
-			ddmStructure.getUuid());
+			fileEntry, "structure-fields", customDataGroup);
 
 		com.liferay.dynamic.data.mapping.storage.DDMFormValues ddmFormValues =
 			_storageEngine.getDDMFormValues(
@@ -732,11 +729,10 @@ public class FileEntryStagedModelDataHandler
 
 	protected DDMFormValues getImportDDMFormValues(
 			PortletDataContext portletDataContext,
-			Element structureFieldsElement, DDMStructure ddmStructure)
+			Map<String, String> customDataGroup, DDMStructure ddmStructure)
 		throws Exception {
 
-		String ddmFormValuesPath = structureFieldsElement.attributeValue(
-			"ddm-form-values-path");
+		String ddmFormValuesPath = customDataGroup.get("ddm-form-values-path");
 
 		String serializedDDMFormValues = portletDataContext.getZipEntryAsString(
 			ddmFormValuesPath);
@@ -755,8 +751,8 @@ public class FileEntryStagedModelDataHandler
 	}
 
 	protected void importMetaData(
-			PortletDataContext portletDataContext, Element fileEntryElement,
-			FileEntry fileEntry, ServiceContext serviceContext)
+			PortletDataContext portletDataContext, FileEntry fileEntry,
+			ServiceContext serviceContext)
 		throws Exception {
 
 		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)fileEntry;
@@ -788,17 +784,17 @@ public class FileEntryStagedModelDataHandler
 			existingDLFileEntryType.getDDMStructures();
 
 		for (DDMStructure ddmStructure : ddmStructures) {
-			Element structureFieldsElement =
-				(Element)fileEntryElement.selectSingleNode(
-					"structure-fields[@structureUuid='".concat(
-						ddmStructure.getUuid()).concat("']"));
+			Map<String, String> customDataGroup =
+				portletDataContext.getCustomData(
+					fileEntry, "structure-fields", "structure-uuid",
+					ddmStructure.getUuid());
 
-			if (structureFieldsElement == null) {
+			if (customDataGroup == null) {
 				continue;
 			}
 
 			DDMFormValues ddmFormValues = getImportDDMFormValues(
-				portletDataContext, structureFieldsElement, ddmStructure);
+				portletDataContext, customDataGroup, ddmStructure);
 
 			serviceContext.setAttribute(
 				DDMFormValues.class.getName() + StringPool.POUND +
