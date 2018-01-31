@@ -251,13 +251,11 @@ public class FolderStagedModelDataHandler
 
 		serviceContext.setUserId(userId);
 
-		Element folderElement = portletDataContext.getImportDataElement(folder);
-
 		Folder importedFolder = null;
 
 		if (portletDataContext.isDataStrategyMirror()) {
 			boolean rootFolder = GetterUtil.getBoolean(
-				folderElement.attributeValue("rootFolder"));
+				portletDataContext.getStagedModelAttribute("rootFolder"));
 
 			if (rootFolder) {
 				Repository repository = _repositoryLocalService.getRepository(
@@ -303,8 +301,7 @@ public class FolderStagedModelDataHandler
 		}
 
 		importFolderFileEntryTypes(
-			portletDataContext, folderElement, folder, importedFolder,
-			serviceContext);
+			portletDataContext, null, folder, importedFolder, serviceContext);
 
 		portletDataContext.importClassedModel(
 			folder, importedFolder, DLFolder.class);
@@ -438,7 +435,8 @@ public class FolderStagedModelDataHandler
 		List<Long> currentFolderFileEntryTypeIds = new ArrayList<>();
 
 		String defaultFileEntryTypeUuid = GetterUtil.getString(
-			folderElement.attributeValue("defaultFileEntryTypeUuid"));
+			portletDataContext.getStagedModelAttribute(
+				"defaultFileEntryTypeUuid"));
 
 		long defaultFileEntryTypeId = 0;
 
@@ -478,7 +476,7 @@ public class FolderStagedModelDataHandler
 		}
 
 		if (GetterUtil.getBoolean(
-				folderElement.attributeValue("basic-document"))) {
+				portletDataContext.getStagedModelAttribute("basic-document"))) {
 
 			currentFolderFileEntryTypeIds.add(
 				DLFileEntryTypeConstants.FILE_ENTRY_TYPE_ID_BASIC_DOCUMENT);

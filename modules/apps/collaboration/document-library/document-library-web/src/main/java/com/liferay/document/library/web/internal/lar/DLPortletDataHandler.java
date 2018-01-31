@@ -236,73 +236,13 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 			PortletPreferences portletPreferences, String data)
 		throws Exception {
 
+		LARFile larFile = LARFileFactoryUtil.getLARFile(portletDataContext);
+
+		larFile.startReadPortletData(data);
+
 		portletDataContext.importPortletPermissions(DLPermission.RESOURCE_NAME);
 
-		if (portletDataContext.getBooleanParameter(NAMESPACE, "folders")) {
-			Element foldersElement =
-				portletDataContext.getImportDataGroupElement(DLFolder.class);
-
-			List<Element> folderElements = foldersElement.elements();
-
-			for (Element folderElement : folderElements) {
-				StagedModelDataHandlerUtil.importStagedModel(
-					portletDataContext, folderElement);
-			}
-		}
-
-		if (portletDataContext.getBooleanParameter(NAMESPACE, "documents")) {
-			Element fileEntriesElement =
-				portletDataContext.getImportDataGroupElement(DLFileEntry.class);
-
-			List<Element> fileEntryElements = fileEntriesElement.elements();
-
-			for (Element fileEntryElement : fileEntryElements) {
-				StagedModelDataHandlerUtil.importStagedModel(
-					portletDataContext, fileEntryElement);
-			}
-		}
-
-		if (portletDataContext.getBooleanParameter(
-				NAMESPACE, "document-types")) {
-
-			Element fileEntryTypesElement =
-				portletDataContext.getImportDataGroupElement(
-					DLFileEntryType.class);
-
-			List<Element> fileEntryTypeElements =
-				fileEntryTypesElement.elements();
-
-			for (Element fileEntryTypeElement : fileEntryTypeElements) {
-				StagedModelDataHandlerUtil.importStagedModel(
-					portletDataContext, fileEntryTypeElement);
-			}
-		}
-
-		if (portletDataContext.getBooleanParameter(NAMESPACE, "repositories")) {
-			Element repositoriesElement =
-				portletDataContext.getImportDataGroupElement(Repository.class);
-
-			List<Element> repositoryElements = repositoriesElement.elements();
-
-			for (Element repositoryElement : repositoryElements) {
-				StagedModelDataHandlerUtil.importStagedModel(
-					portletDataContext, repositoryElement);
-			}
-		}
-
-		if (portletDataContext.getBooleanParameter(NAMESPACE, "shortcuts")) {
-			Element fileShortcutsElement =
-				portletDataContext.getImportDataGroupElement(
-					DLFileShortcut.class);
-
-			List<Element> fileShortcutElements =
-				fileShortcutsElement.elements();
-
-			for (Element fileShortcutElement : fileShortcutElements) {
-				StagedModelDataHandlerUtil.importStagedModel(
-					portletDataContext, fileShortcutElement);
-			}
-		}
+		larFile.readStagedModels();
 
 		return portletPreferences;
 	}

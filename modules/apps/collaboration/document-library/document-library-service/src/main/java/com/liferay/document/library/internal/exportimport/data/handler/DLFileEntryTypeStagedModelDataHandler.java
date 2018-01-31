@@ -29,16 +29,19 @@ import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.xml.Element;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -244,24 +247,24 @@ public class DLFileEntryTypeStagedModelDataHandler
 
 		long userId = portletDataContext.getUserId(fileEntryType.getUserUuid());
 
-		List<Element> ddmStructureReferenceElements =
-			portletDataContext.getReferenceElements(
+		List<StagedModel> ddmStructureReferences =
+			ListUtil.fromCollection(portletDataContext.getReferenceStagedModels(
 				fileEntryType,
-				com.liferay.dynamic.data.mapping.model.DDMStructure.class);
+				com.liferay.dynamic.data.mapping.model.DDMStructure.class));
 
 		long[] ddmStructureIdsArray =
-			new long[ddmStructureReferenceElements.size()];
+			new long[ddmStructureReferences.size()];
 
 		Map<Long, Long> ddmStructureIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
 				com.liferay.dynamic.data.mapping.model.DDMStructure.class);
 
-		for (int i = 0; i < ddmStructureReferenceElements.size(); i++) {
-			Element ddmStructureReferenceElement =
-				ddmStructureReferenceElements.get(i);
+		for (int i = 0; i < ddmStructureReferences.size(); i++) {
+			StagedModel ddmStructureReference = ddmStructureReferences.get(i);
 
 			long ddmStructureId = GetterUtil.getLong(
-				ddmStructureReferenceElement.attributeValue("class-pk"));
+				portletDataContext.getReferenceStagedModelAttribute(
+					fileEntryType, ddmStructureReference, "class-pk"));
 
 			ddmStructureIdsArray[i] = MapUtil.getLong(
 				ddmStructureIds, ddmStructureId);
@@ -272,11 +275,8 @@ public class DLFileEntryTypeStagedModelDataHandler
 
 		DLFileEntryType importedDLFileEntryType = null;
 
-		Element element = portletDataContext.getImportDataStagedModelElement(
-			fileEntryType);
-
 		boolean preloaded = GetterUtil.getBoolean(
-			element.attributeValue("preloaded"));
+			portletDataContext.getStagedModelAttribute("preloaded"));
 
 		if (portletDataContext.isDataStrategyMirror()) {
 			DLFileEntryType existingDLFileEntryType =
