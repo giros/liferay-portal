@@ -120,8 +120,8 @@ public interface PortletDataContext extends Serializable {
 		String className, long classPK, List<MBMessage> messages);
 
 	public void addCustomData(
-		StagedModel stagedModel, String dataGroupName, String dataName,
-		String dataValue);
+		StagedModel stagedModel, String dataGroupName,
+		Map<String, String> dataGroup);
 
 	public void addDateRangeCriteria(
 		DynamicQuery dynamicQuery, String propertyName);
@@ -317,6 +317,10 @@ public interface PortletDataContext extends Serializable {
 	public long getCompanyGroupId();
 
 	public long getCompanyId();
+
+	public Map<String, String> getCustomData(
+		StagedModel stagedModel, String dataGroupName, String dataName,
+		String dataValue);
 
 	public String getDataStrategy();
 

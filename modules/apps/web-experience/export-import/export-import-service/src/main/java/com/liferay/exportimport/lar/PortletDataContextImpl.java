@@ -288,8 +288,8 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 	@Override
 	public void addCustomData(
-		StagedModel stagedModel, String dataGroupName, String dataName,
-		String dataValue) {
+		StagedModel stagedModel, String dataGroupName,
+		Map<String, String> dataGroup) {
 
 		Set<CustomDataDTO> customDataSet = _customData.get(stagedModel);
 
@@ -298,7 +298,7 @@ public class PortletDataContextImpl implements PortletDataContext {
 		}
 
 		customDataSet.add(
-			new CustomDataDTO(dataGroupName, dataName, dataValue));
+			new CustomDataDTO(dataGroupName, dataGroup));
 	}
 
 	/**
@@ -985,6 +985,34 @@ public class PortletDataContextImpl implements PortletDataContext {
 	@Override
 	public long getCompanyId() {
 		return _companyId;
+	}
+
+	@Override
+	public Map<String, String> getCustomData(
+		StagedModel stagedModel, String dataGroupName, String dataName,
+		String dataValue) {
+
+		Set<CustomDataDTO> customDataSet = _customData.get(stagedModel);
+
+		if (customDataSet == null) {
+			return null;
+		}
+
+		for (CustomDataDTO customData : customDataSet) {
+			if (!dataGroupName.equals(customData.getDataGroupName())) {
+				continue;
+			}
+
+			Map<String, String> dataGroup = customData.getDataGroup();
+
+			if (!dataValue.equals(dataGroup.get(dataName))) {
+				continue;
+			}
+
+			return dataGroup;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -3477,12 +3505,19 @@ public class PortletDataContextImpl implements PortletDataContext {
 	private class CustomDataDTO {
 
 		public CustomDataDTO(
-			String dataGroupName, String dataName, String dataValue) {
+			String dataGroupName, Map<String, String> dataGroup) {
+
+			_dataGroup = dataGroup;
+			_dataGroupName = dataGroupName;
 		}
 
+		public Map<String, String> getDataGroup() {return _dataGroup;}
+
+		public String getDataGroupName() {return _dataGroupName;}
+
+		private Map<String, String> _dataGroup;
+
 		private String _dataGroupName;
-		private String _dataName;
-		private String _dataValue;
 
 	}
 
