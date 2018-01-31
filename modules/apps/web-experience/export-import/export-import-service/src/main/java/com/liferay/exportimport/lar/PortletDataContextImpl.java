@@ -93,6 +93,7 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
+import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -1478,6 +1479,83 @@ public class PortletDataContextImpl implements PortletDataContext {
 	}
 
 	@Override
+	public StagedModel getReferenceStagedModel(
+		StagedModel referrerStagedModel, String stagedModelClassName,
+		Serializable classPK) {
+
+		Set<ReferenceDTO> references = _referenceMap.get(referrerStagedModel);
+
+		for (ReferenceDTO reference : references) {
+			StagedModel stagedModel = reference.getStagedModel();
+
+			if (stagedModelClassName.equals(
+				ExportImportClassedModelUtil.getClassName(stagedModel)) &&
+				classPK.equals(
+					ExportImportClassedModelUtil.getPrimaryKeyObj(
+						stagedModel))) {
+
+				return stagedModel;
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public String getReferenceStagedModelAttribute(
+		StagedModel referrerStagedModel, StagedModel stagedModel,
+		String attributeName) {
+
+		Set<ReferenceDTO> references = _referenceMap.get(referrerStagedModel);
+
+		if (SetUtil.isEmpty(references)) {
+			return null;
+		}
+
+		for (ReferenceDTO reference : references) {
+			if (stagedModel.equals(reference.getStagedModel())) {
+				Map<String, String> properties = reference.getProperties();
+
+				if (properties != null) {
+					return properties.get(attributeName);
+				}
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public Set<StagedModel> getReferenceStagedModels(
+		StagedModel referrerStagedModel) {
+
+		return getReferenceStagedModels(referrerStagedModel, null);
+	}
+
+	@Override
+	public Set<StagedModel> getReferenceStagedModels(
+		StagedModel referrerStagedModel, Class<?> clazz) {
+
+		Set<ReferenceDTO> references = _referenceMap.get(referrerStagedModel);
+
+		if (SetUtil.isEmpty(references)) {
+			return Collections.emptySet();
+		}
+
+		Set<StagedModel> stagedModels = new HashSet<>();
+
+		for (ReferenceDTO reference : references) {
+			StagedModel stagedModel = reference.getStagedModel();
+
+			if ((clazz == null) || (clazz == stagedModel.getClass())) {
+				stagedModels.add(stagedModel);
+			}
+		}
+
+		return stagedModels;
+	}
+
+	@Override
 	public String getRootPortletId() {
 		return _rootPortletId;
 	}
@@ -1524,6 +1602,11 @@ public class PortletDataContextImpl implements PortletDataContext {
 	@Override
 	public long getSourceUserPersonalSiteGroupId() {
 		return _sourceUserPersonalSiteGroupId;
+	}
+
+	@Override
+	public String getStagedModelAttribute(String name) {
+		return _stagedModelAttributes.get(name);
 	}
 
 	@Override
@@ -1942,6 +2025,54 @@ public class PortletDataContextImpl implements PortletDataContext {
 		}
 
 		return false;
+	}
+
+	@Override
+	public boolean isMissingReference(
+		StagedModel referrerStagedModel, StagedModel stagedModel) {
+
+		String missingAttribute = GetterUtil.getString(
+			getReferenceStagedModelAttribute(
+				referrerStagedModel, stagedModel, "missing"));
+
+		if (!GetterUtil.getBoolean(missingAttribute)) {
+			return false;
+		}
+
+		if (_missingReferences.isEmpty()) {
+			List<Element> missingReferenceElements =
+				_missingReferencesElement.elements();
+
+			for (Element missingReferenceElement : missingReferenceElements) {
+				if (Validator.isNotNull(
+					missingReferenceElement.attributeValue(
+						"element-path"))) {
+
+					continue;
+				}
+
+				String missingReferenceClassName =
+					missingReferenceElement.attributeValue("class-name");
+				String missingReferenceClassPK =
+					missingReferenceElement.attributeValue("class-pk");
+
+				String missingReferenceKey = getReferenceKey(
+					missingReferenceClassName, missingReferenceClassPK);
+
+				_missingReferences.add(missingReferenceKey);
+			}
+		}
+
+		String className = GetterUtil.getString(
+			getReferenceStagedModelAttribute(
+				referrerStagedModel, stagedModel, "class-name"));
+		String classPK = GetterUtil.getString(
+			getReferenceStagedModelAttribute(
+				referrerStagedModel, stagedModel, "class-pk"));
+
+		String referenceKey = getReferenceKey(className, classPK);
+
+		return _missingReferences.contains(referenceKey);
 	}
 
 	@Override

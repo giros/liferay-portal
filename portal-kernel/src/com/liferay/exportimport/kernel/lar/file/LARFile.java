@@ -47,9 +47,17 @@ public interface LARFile {
 
 	public String readPortletDataAttribute(String name);
 
+	public String readReferenceAttribute(String name);
+
+	public Map<String, String> readReferenceAttributes();
+
+	public StagedModel readReferenceStagedModel();
+
 	public String readStagedModelAttribute(String name);
 
 	public Map<String, String> readStagedModelAttributes();
+
+	public StagedModel readStagedModel();
 
 	public void readStagedModels();
 
@@ -65,7 +73,7 @@ public interface LARFile {
 	public void registerStagedModelPreAction(
 		String className, Function<?, ?> action);
 
-	public void startReadPortletData();
+	public void startReadPortletData(String data);
 
 	public void startWriteCustom(String name);
 

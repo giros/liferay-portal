@@ -188,8 +188,14 @@ public class MBDiscussionStagingHandler implements DiscussionStagingHandler {
 			PortletDataContext portletDataContext, T stagedModel)
 		throws PortletDataException {
 
-		StagedModelDataHandlerUtil.importReferenceStagedModels(
-			portletDataContext, stagedModel, MBMessage.class);
+		if (portletDataContext.isStreamProcessSupport()) {
+			StagedModelDataHandlerUtil.importReferenceStagedModelsStream(
+				portletDataContext, stagedModel, MBMessage.class);
+		}
+		else {
+			StagedModelDataHandlerUtil.importReferenceStagedModels(
+				portletDataContext, stagedModel, MBMessage.class);
+		}
 	}
 
 }

@@ -19,11 +19,13 @@ import aQute.bnd.annotation.ProviderType;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
 import com.liferay.portal.kernel.spring.orm.LastSessionRecorderHelperUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Attribute;
@@ -37,6 +39,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Brian Wing Shun Chan
@@ -376,6 +379,16 @@ public class StagedModelDataHandlerUtil {
 			classPK);
 	}
 
+	public static <T extends StagedModel> void importReferenceStagedModelStream(
+			PortletDataContext portletDataContext, T referrerStagedModel,
+			Class<?> stagedModelClass, Serializable classPK)
+		throws PortletDataException {
+
+		importReferenceStagedModelStream(
+			portletDataContext, referrerStagedModel, stagedModelClass.getName(),
+			classPK);
+	}
+
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link
 	 *             #importReferenceStagedModel(PortletDataContext, StagedModel,
@@ -417,6 +430,19 @@ public class StagedModelDataHandlerUtil {
 
 		doImportReferenceStagedModel(
 			portletDataContext, referenceElement, stagedModelClassName);
+	}
+
+	public static <T extends StagedModel> void importReferenceStagedModelStream(
+			PortletDataContext portletDataContext, T referrerStagedModel,
+			String stagedModelClassName, Serializable classPK)
+		throws PortletDataException {
+
+		StagedModel stagedModel = portletDataContext.getReferenceStagedModel(
+			referrerStagedModel, stagedModelClassName, classPK);
+
+		doImportReferenceStagedModelStream(
+			portletDataContext, referrerStagedModel, stagedModel,
+			stagedModelClassName);
 	}
 
 	public static void importReferenceStagedModels(
@@ -478,6 +504,27 @@ public class StagedModelDataHandlerUtil {
 				referenceElement.attributeValue("class-pk"));
 
 			importReferenceStagedModel(
+				portletDataContext, referrerStagedModel, stagedModelClass,
+				classPK);
+		}
+	}
+
+	public static <T extends StagedModel> void
+		importReferenceStagedModelsStream(
+				PortletDataContext portletDataContext, T referrerStagedModel,
+				Class<?> stagedModelClass)
+			throws PortletDataException {
+
+		Set<StagedModel> referenceStagedModels =
+			portletDataContext.getReferenceStagedModels(
+				referrerStagedModel, stagedModelClass);
+
+		for (StagedModel stagedModel : referenceStagedModels) {
+			Serializable classPK = GetterUtil.getString(
+				portletDataContext.getReferenceStagedModelAttribute(
+					referrerStagedModel, stagedModel, "class-pk"));
+
+			importReferenceStagedModelStream(
 				portletDataContext, referrerStagedModel, stagedModelClass,
 				classPK);
 		}
@@ -579,6 +626,58 @@ public class StagedModelDataHandlerUtil {
 		}
 
 		importStagedModel(portletDataContext, referenceElement);
+	}
+
+	protected static void doImportReferenceStagedModelStream(
+			PortletDataContext portletDataContext,
+			StagedModel referrerStagedModel, StagedModel stagedModel,
+			String stagedModelClassName)
+		throws PortletDataException {
+
+		boolean missing = portletDataContext.isMissingReference(
+			referrerStagedModel, stagedModel);
+
+		StagedModelDataHandler<?> stagedModelDataHandler =
+			StagedModelDataHandlerRegistryUtil.getStagedModelDataHandler(
+				stagedModelClassName);
+
+		if (stagedModelDataHandler == null) {
+			return;
+		}
+
+		if (missing) {
+			String uuid = GetterUtil.getString(
+				portletDataContext.getReferenceStagedModelAttribute(
+					referrerStagedModel, stagedModel, "uuid"));
+
+			long groupId = GetterUtil.getLong(
+				portletDataContext.getReferenceStagedModelAttribute(
+					referrerStagedModel, stagedModel, "group-id"));
+
+			long classPK = GetterUtil.getLong(
+				portletDataContext.getReferenceStagedModelAttribute(
+					referrerStagedModel, stagedModel, "class-pk"));
+
+			StagedModelDataHandler<?> stagedGroupStagedModelDataHandler =
+				StagedModelDataHandlerRegistryUtil.getStagedModelDataHandler(
+					"com.liferay.site.model.adapter.StagedGroup");
+
+			stagedGroupStagedModelDataHandler.importMissingReference(
+				portletDataContext, uuid, groupId, classPK);
+
+			Map<Long, Long> groupIds =
+				(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+					Group.class);
+
+			groupId = MapUtil.getLong(groupIds, groupId);
+
+			stagedModelDataHandler.importMissingReference(
+				portletDataContext, uuid, groupId, classPK);
+
+			return;
+		}
+
+		importStagedModel(portletDataContext, stagedModel);
 	}
 
 	private static StagedModel _getReferenceStagedModel(

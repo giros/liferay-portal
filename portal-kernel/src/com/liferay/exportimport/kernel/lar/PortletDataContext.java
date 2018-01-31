@@ -487,6 +487,20 @@ public interface PortletDataContext extends Serializable {
 	public List<Element> getReferenceElements(
 		StagedModel parentStagedModel, Class<?> clazz);
 
+	public StagedModel getReferenceStagedModel(
+		StagedModel referrerStagedModel, String stagedModelClassName,
+		Serializable classPK);
+
+	public String getReferenceStagedModelAttribute(
+		StagedModel referrerStagedModel, StagedModel stagedModel,
+		String attributeName);
+
+	public Set<StagedModel> getReferenceStagedModels(
+		StagedModel referrerStagedModel);
+
+	public Set<StagedModel> getReferenceStagedModels(
+		StagedModel referrerStagedModel, Class<?> clazz);
+
 	public String getRootPortletId();
 
 	/**
@@ -508,6 +522,8 @@ public interface PortletDataContext extends Serializable {
 	public long getSourceGroupId();
 
 	public long getSourceUserPersonalSiteGroupId();
+
+	public String getStagedModelAttribute(String name);
 
 	public Date getStartDate();
 
@@ -618,6 +634,9 @@ public interface PortletDataContext extends Serializable {
 	public boolean isInitialPublication();
 
 	public boolean isMissingReference(Element referenceElement);
+
+	public boolean isMissingReference(
+		StagedModel referrerStagedModel, StagedModel stagedModel);
 
 	/**
 	 * @deprecated As of 3.0.0, replaced by {@link #isModelCounted(String,

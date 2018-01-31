@@ -44,6 +44,7 @@ import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TransientValue;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -672,24 +673,49 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 			PortletDataContext portletDataContext, T stagedModel)
 		throws PortletDataException {
 
-		List<Element> referenceElements =
-			portletDataContext.getReferenceElements(
-				stagedModel, AssetCategory.class);
+		List<Long> assetCategoryIds = new ArrayList<>();
 
-		if (referenceElements.isEmpty()) {
-			return;
+		if (portletDataContext.isStreamProcessSupport()) {
+			Set<StagedModel> referenceStagedModels =
+				portletDataContext.getReferenceStagedModels(
+					stagedModel, AssetCategory.class);
+
+			if (referenceStagedModels.isEmpty()) {
+				return;
+			}
+
+			for (StagedModel referenceStagedModel : referenceStagedModels) {
+				Long classPK =
+					GetterUtil.getLong(
+						portletDataContext.getReferenceStagedModelAttribute(
+							stagedModel, referenceStagedModel, "class-pk"));
+
+				StagedModelDataHandlerUtil.importReferenceStagedModelStream(
+					portletDataContext, stagedModel, AssetCategory.class,
+					classPK);
+
+				assetCategoryIds.add(classPK);
+			}
 		}
+		else {
+			List<Element> referenceElements =
+				portletDataContext.getReferenceElements(
+					stagedModel, AssetCategory.class);
 
-		List<Long> assetCategoryIds = new ArrayList<>(referenceElements.size());
+			if (referenceElements.isEmpty()) {
+				return;
+			}
 
-		for (Element referenceElement : referenceElements) {
-			Long classPK = GetterUtil.getLong(
-				referenceElement.attributeValue("class-pk"));
+			for (Element referenceElement : referenceElements) {
+				Long classPK = GetterUtil.getLong(
+					referenceElement.attributeValue("class-pk"));
 
-			StagedModelDataHandlerUtil.importReferenceStagedModel(
-				portletDataContext, stagedModel, AssetCategory.class, classPK);
+				StagedModelDataHandlerUtil.importReferenceStagedModel(
+					portletDataContext, stagedModel, AssetCategory.class,
+					classPK);
 
-			assetCategoryIds.add(classPK);
+				assetCategoryIds.add(classPK);
+			}
 		}
 
 		Map<Long, Long> assetCategoryIdsMap =
@@ -715,20 +741,39 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 			PortletDataContext portletDataContext, T stagedModel)
 		throws PortletDataException {
 
-		List<Element> referenceElements =
-			portletDataContext.getReferenceElements(
-				stagedModel, AssetTag.class);
+		List<Long> assetTagIds = new ArrayList<>();
 
-		List<Long> assetTagIds = new ArrayList<>(referenceElements.size());
+		if (portletDataContext.isStreamProcessSupport()) {
+			Set<StagedModel> referenceStagedModels =
+				portletDataContext.getReferenceStagedModels(
+					stagedModel, AssetTag.class);
 
-		for (Element referenceElement : referenceElements) {
-			Long classPK = GetterUtil.getLong(
-				referenceElement.attributeValue("class-pk"));
+			for (StagedModel referenceStagedModel : referenceStagedModels) {
+				Long classPK =
+					GetterUtil.getLong(
+						portletDataContext.getReferenceStagedModelAttribute(
+							stagedModel, referenceStagedModel, "class-pk"));
 
-			StagedModelDataHandlerUtil.importReferenceStagedModel(
-				portletDataContext, stagedModel, AssetTag.class, classPK);
+				StagedModelDataHandlerUtil.importReferenceStagedModelStream(
+					portletDataContext, stagedModel, AssetTag.class, classPK);
 
-			assetTagIds.add(classPK);
+				assetTagIds.add(classPK);
+			}
+		}
+		else {
+			List<Element> referenceElements =
+				portletDataContext.getReferenceElements(
+					stagedModel, AssetTag.class);
+
+			for (Element referenceElement : referenceElements) {
+				Long classPK = GetterUtil.getLong(
+					referenceElement.attributeValue("class-pk"));
+
+				StagedModelDataHandlerUtil.importReferenceStagedModel(
+					portletDataContext, stagedModel, AssetTag.class, classPK);
+
+				assetTagIds.add(classPK);
+			}
 		}
 
 		Map<Long, Long> assetTagIdsMap =
@@ -824,22 +869,19 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 			return;
 		}
 
-		StagedModelDataHandlerUtil.importReferenceStagedModels(
-			portletDataContext, stagedModel, RatingsEntry.class);
+		if (portletDataContext.isStreamProcessSupport()) {
+			StagedModelDataHandlerUtil.importReferenceStagedModelsStream(
+				portletDataContext, stagedModel, RatingsEntry.class);
+		}
+		else {
+			StagedModelDataHandlerUtil.importReferenceStagedModels(
+				portletDataContext, stagedModel, RatingsEntry.class);
+		}
 	}
 
 	protected void importReferenceStagedModels(
-			PortletDataContext portletDataContext, T stagedModel)
+		PortletDataContext portletDataContext, T stagedModel)
 		throws PortletDataException {
-
-		Element stagedModelElement =
-			portletDataContext.getImportDataStagedModelElement(stagedModel);
-
-		Element referencesElement = stagedModelElement.element("references");
-
-		if (referencesElement == null) {
-			return;
-		}
 
 		DiscussionStagingHandler discussionStagingHandler =
 			CommentManagerUtil.getDiscussionStagingHandler();
@@ -850,23 +892,64 @@ public abstract class BaseStagedModelDataHandler<T extends StagedModel>
 			stagedModelClassName = discussionStagingHandler.getClassName();
 		}
 
-		List<Element> referenceElements = referencesElement.elements();
+		if (portletDataContext.isStreamProcessSupport()) {
+			Set<StagedModel> referenceStagedModels =
+				portletDataContext.getReferenceStagedModels(stagedModel);
 
-		for (Element referenceElement : referenceElements) {
-			String className = referenceElement.attributeValue("class-name");
-
-			if (className.equals(AssetCategory.class.getName()) ||
-				className.equals(RatingsEntry.class.getName()) ||
-				className.equals(stagedModelClassName)) {
-
-				continue;
+			if (SetUtil.isEmpty(referenceStagedModels)) {
+				return;
 			}
 
-			Long classPK = GetterUtil.getLong(
-				referenceElement.attributeValue("class-pk"));
+			for (StagedModel referenceStagedModel : referenceStagedModels) {
+				String className = GetterUtil.getString(
+					portletDataContext.getReferenceStagedModelAttribute(
+						stagedModel, referenceStagedModel, "class-name"));
 
-			StagedModelDataHandlerUtil.importReferenceStagedModel(
-				portletDataContext, stagedModel, className, classPK);
+				if (className.equals(AssetCategory.class.getName()) ||
+					className.equals(RatingsEntry.class.getName()) ||
+					className.equals(stagedModelClassName)) {
+
+					continue;
+				}
+
+				Long classPK = GetterUtil.getLong(
+					portletDataContext.getReferenceStagedModelAttribute(
+						stagedModel, referenceStagedModel, "class-pk"));
+
+				StagedModelDataHandlerUtil.importReferenceStagedModelStream(
+					portletDataContext, stagedModel, className, classPK);
+			}
+		}
+		else {
+			Element stagedModelElement =
+				portletDataContext.getImportDataStagedModelElement(stagedModel);
+
+			Element referencesElement =
+				stagedModelElement.element("references");
+
+			if (referencesElement == null) {
+				return;
+			}
+
+			List<Element> referenceElements = referencesElement.elements();
+
+			for (Element referenceElement : referenceElements) {
+				String className =
+					referenceElement.attributeValue("class-name");
+
+				if (className.equals(AssetCategory.class.getName()) ||
+					className.equals(RatingsEntry.class.getName()) ||
+					className.equals(stagedModelClassName)) {
+
+					continue;
+				}
+
+				Long classPK = GetterUtil.getLong(
+					referenceElement.attributeValue("class-pk"));
+
+				StagedModelDataHandlerUtil.importReferenceStagedModel(
+					portletDataContext, stagedModel, className, classPK);
+			}
 		}
 	}
 

@@ -31,19 +31,27 @@ import com.liferay.portal.kernel.model.StagedGroupedModel;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.zip.ZipWriter;
 
 import java.io.OutputStream;
+import java.io.Serializable;
+import java.io.StringReader;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import jodd.bean.BeanUtil;
@@ -59,6 +67,14 @@ public class LARFileImpl implements LARFile {
 
 	@Override
 	public void endReadPortletData() {
+		try {
+			_xmlStreamReader.close();
+
+			_portletDataContext.setStreamProcessSupport(false);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -144,17 +160,164 @@ public class LARFileImpl implements LARFile {
 	}
 
 	@Override
+	public String readReferenceAttribute(String name) {
+		try {
+			String attributeValue = _xmlStreamReader.getAttributeValue(
+				null, name);
+
+			return attributeValue;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	@Override
+	public Map<String, String> readReferenceAttributes() {
+		try {
+			Map<String, String> attributes = new HashMap<>();
+
+			for (int i = 0; i < _xmlStreamReader.getAttributeCount(); i++) {
+				attributes.put(
+					_xmlStreamReader.getAttributeLocalName(i),
+					_xmlStreamReader.getAttributeValue(i));
+			}
+
+			return attributes;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	@Override
+	public StagedModel readReferenceStagedModel() {
+		long groupId = GetterUtil.getLong(readReferenceAttribute("group-id"));
+		String className = readReferenceAttribute("class-name");
+		Serializable classPK =
+			GetterUtil.getString(readReferenceAttribute("class-pk"));
+
+		String path = ExportImportPathUtil.getModelPath(
+			groupId, className, classPK);
+
+		StagedModel referenceStagedModel =
+			(StagedModel)_portletDataContext.getZipEntryAsObject(path);
+
+		if (referenceStagedModel != null) {
+			return referenceStagedModel;
+		}
+
+		path = ExportImportPathUtil.getCompanyModelPath(
+			_portletDataContext.getSourceCompanyId(), className, classPK);
+
+		return (StagedModel)_portletDataContext.getZipEntryAsObject(path);
+	}
+
+	@Override
 	public String readStagedModelAttribute(String name) {
+		try {
+			String attributeValue = _xmlStreamReader.getAttributeValue(
+				null, name);
+
+			return attributeValue;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		return null;
 	}
 
 	@Override
 	public Map<String, String> readStagedModelAttributes() {
+		try {
+			Map<String, String> attributes = new HashMap<>();
+
+			for (int i = 0; i < _xmlStreamReader.getAttributeCount(); i++) {
+				attributes.put(
+					_xmlStreamReader.getAttributeLocalName(i),
+					_xmlStreamReader.getAttributeValue(i));
+			}
+
+			return attributes;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		return null;
 	}
 
 	@Override
+	public StagedModel readStagedModel() {
+		String path = readStagedModelAttribute("path");
+
+		StagedModel stagedModel =
+			(StagedModel)_portletDataContext.getZipEntryAsObject(path);
+
+		String classNameAttribute = readStagedModelAttribute(
+			"attached-class-name");
+
+		if (Validator.isNotNull(classNameAttribute)) {
+			BeanPropertiesUtil.setProperty(
+				stagedModel, "className", classNameAttribute);
+			BeanPropertiesUtil.setProperty(
+				stagedModel, "classNameId",
+				PortalUtil.getClassNameId(classNameAttribute));
+		}
+
+		return stagedModel;
+	}
+
+	@Override
 	public void readStagedModels() {
+		try {
+			StagedModel stagedModel = null;
+
+			while (_xmlStreamReader.hasNext()) {
+				_xmlStreamReader.next();
+
+				int eventType = _xmlStreamReader.getEventType();
+
+				if (eventType == XMLStreamConstants.START_ELEMENT) {
+					if ("staged-model".equals(
+						_xmlStreamReader.getLocalName())) {
+
+						stagedModel = readStagedModel();
+					}
+
+					if ("reference".equals(_xmlStreamReader.getLocalName())) {
+						StagedModel referenceStagedModel =
+							readReferenceStagedModel();
+
+						String referenceType = readReferenceAttribute("type");
+						boolean missing =
+							GetterUtil.getBoolean(
+								readReferenceAttribute("missing"));
+
+						_portletDataContext.addReference(
+							stagedModel, referenceStagedModel, referenceType,
+							missing, readReferenceAttributes());
+					}
+				}
+
+				if (eventType == XMLStreamConstants.END_ELEMENT) {
+					if ("staged-model".equals(
+						_xmlStreamReader.getLocalName())) {
+
+						StagedModelDataHandlerUtil.importStagedModel(
+							_portletDataContext, stagedModel);
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -178,7 +341,18 @@ public class LARFileImpl implements LARFile {
 	}
 
 	@Override
-	public void startReadPortletData() {
+	public void startReadPortletData(String data) {
+		try {
+			XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+
+			_xmlStreamReader = xmlInputFactory.createXMLStreamReader(
+				new StringReader(data));
+
+			_portletDataContext.setStreamProcessSupport(true);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -546,6 +720,7 @@ public class LARFileImpl implements LARFile {
 	private OutputStream _referenceOutputStream;
 	private XMLStreamWriter _referenceXmlStreamWriter;
 	private boolean[] _writeEventArray = new boolean[6];
+	private XMLStreamReader _xmlStreamReader;
 	private XMLStreamWriter _xmlStreamWriter;
 
 	private class LAREvent {
