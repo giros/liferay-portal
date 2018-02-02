@@ -367,7 +367,8 @@ public class JournalArticleLocalServiceImpl
 		catch (IOException ioe) {
 		}
 
-		boolean validate = !ExportImportThreadLocal.isImportInProcess();
+		//boolean validate = !ExportImportThreadLocal.isImportInProcess();
+		boolean validate = true;
 
 		if (validate) {
 			validateDDMStructureId(groupId, folderId, ddmStructureKey);
@@ -5496,7 +5497,8 @@ public class JournalArticleLocalServiceImpl
 			user.getCompanyId(), groupId, userId, article.getClassPK(),
 			descriptionMap);
 
-		boolean validate = !ExportImportThreadLocal.isImportInProcess();
+		//boolean validate = !ExportImportThreadLocal.isImportInProcess();
+		boolean validate = true;
 
 		if (validate) {
 			validate(
@@ -8439,10 +8441,10 @@ public class JournalArticleLocalServiceImpl
 			classNameLocalService.getClassNameId(JournalArticle.class),
 			ddmStructureKey, true);
 
-		if (!ExportImportThreadLocal.isImportInProcess()) {
+		//if (!ExportImportThreadLocal.isImportInProcess()) {
 			validateDDMStructureFields(
 				ddmStructure, classNameId, content, articleDefaultLocale);
-		}
+		//}
 
 		if (Validator.isNotNull(ddmTemplateKey)) {
 			DDMTemplate ddmTemplate = ddmTemplateLocalService.getTemplate(
