@@ -33,6 +33,7 @@ import com.liferay.exportimport.kernel.exception.MissingReferenceException;
 import com.liferay.exportimport.kernel.exception.RemoteExportException;
 import com.liferay.exportimport.kernel.lar.ExportImportDateUtil;
 import com.liferay.exportimport.kernel.lar.ExportImportHelper;
+import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
 import com.liferay.exportimport.kernel.lar.MissingReference;
 import com.liferay.exportimport.kernel.lar.MissingReferences;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
@@ -140,10 +141,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -165,6 +168,20 @@ import org.osgi.service.component.annotations.Reference;
 @DoPrivileged
 @ProviderType
 public class StagingImpl implements Staging {
+
+	@Override
+	public void addWarningMessage(String warningMessage) {
+		Queue<String> warningMessages =
+			ExportImportThreadLocal.getWarningMessages();
+
+		if (warningMessages == null) {
+			warningMessages = new LinkedList<>();
+		}
+
+		warningMessages.offer(warningMessage);
+
+		ExportImportThreadLocal.setWarningMessages(warningMessages);
+	}
 
 	@Override
 	public String buildRemoteURL(
@@ -1403,10 +1420,39 @@ public class StagingImpl implements Staging {
 	}
 
 	@Override
+	public String getWarningMessage() {
+		Queue<String> warningMessages =
+			ExportImportThreadLocal.getWarningMessages();
+
+		if (warningMessages == null) {
+			return null;
+		}
+
+		return warningMessages.poll();
+	}
+
+	public JSONArray getWarningMessagesJSONArray() {
+		JSONArray warningMessagesJSONArray = JSONFactoryUtil.createJSONArray();
+
+		String warningMessage = null;
+
+		while ((warningMessage = getWarningMessage()) != null) {
+			JSONObject warningMessageJSONObject =
+				JSONFactoryUtil.createJSONObject();
+
+			warningMessageJSONObject.put("info", warningMessage);
+
+			warningMessagesJSONArray.put(warningMessageJSONObject);
+		}
+
+		return warningMessagesJSONArray;
+	}
+
+	@Override
 	public JSONArray getWarningMessagesJSONArray(
 		Locale locale, Map<String, MissingReference> missingReferences) {
 
-		JSONArray warningMessagesJSONArray = JSONFactoryUtil.createJSONArray();
+		JSONArray warningMessagesJSONArray = getWarningMessagesJSONArray();
 
 		for (Map.Entry<String, MissingReference> entry :
 				missingReferences.entrySet()) {

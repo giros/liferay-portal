@@ -50,6 +50,8 @@ import javax.servlet.http.HttpServletRequest;
 @ProviderType
 public interface Staging {
 
+	public void addWarningMessage(String warningMessage);
+
 	public String buildRemoteURL(
 		ExportImportConfiguration exportImportConfiguration);
 
@@ -236,6 +238,10 @@ public interface Staging {
 	@Deprecated
 	public Map<String, String[]> getStagingParameters(
 		PortletRequest portletRequest);
+
+	public String getWarningMessage();
+
+	public JSONArray getWarningMessagesJSONArray();
 
 	public JSONArray getWarningMessagesJSONArray(
 		Locale locale, Map<String, MissingReference> missingReferences);

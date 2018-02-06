@@ -157,6 +157,13 @@ public abstract class BaseStagingBackgroundTaskExecutor
 
 			backgroundTaskResult.setStatusMessage(jsonArray.toString());
 		}
+		else {
+			JSONArray jsonArray = StagingUtil.getWarningMessagesJSONArray();
+
+			if (jsonArray.length() > 0) {
+				backgroundTaskResult.setStatusMessage(jsonArray.toString());
+			}
+		}
 
 		return backgroundTaskResult;
 	}

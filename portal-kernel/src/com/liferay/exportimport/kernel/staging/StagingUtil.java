@@ -51,6 +51,10 @@ import javax.servlet.http.HttpServletRequest;
 @ProviderType
 public class StagingUtil {
 
+	public static void addWarningMessage(String warningMessage) {
+		_staging.addWarningMessage(warningMessage);
+	}
+
 	public static String buildRemoteURL(
 		ExportImportConfiguration exportImportConfiguration) {
 
@@ -365,6 +369,14 @@ public class StagingUtil {
 		PortletRequest portletRequest) {
 
 		return _staging.getStagingParameters(portletRequest);
+	}
+
+	public static String getWarningMessage() {
+		return _staging.getWarningMessage();
+	}
+
+	public static JSONArray getWarningMessagesJSONArray() {
+		return _staging.getWarningMessagesJSONArray();
 	}
 
 	public static JSONArray getWarningMessagesJSONArray(
