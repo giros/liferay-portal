@@ -23,6 +23,7 @@ import com.liferay.exportimport.content.processor.ExportImportContentProcessor;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.exportimport.kernel.staging.Staging;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -260,6 +261,8 @@ public class DLReferencesExportImportContentProcessor
 			else if (_log.isWarnEnabled()) {
 				_log.warn(e.getMessage());
 			}
+
+			_staging.addWarningMessage(e.getMessage());
 		}
 
 		return fileEntry;
@@ -625,5 +628,8 @@ public class DLReferencesExportImportContentProcessor
 
 	@Reference
 	private Portal _portal;
+
+	@Reference
+	private Staging _staging;
 
 }
