@@ -18,11 +18,17 @@ import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.petra.lang.CentralizedThreadLocal;
 
+import java.util.Queue;
+
 /**
  * @author Michael C. Han
  */
 @ProviderType
 public class ExportImportThreadLocal {
+
+	public static Queue<String> getWarningMessages() {
+		return _warningMessages.get();
+	}
 
 	public static boolean isDataDeletionImportInProcess() {
 		if (isLayoutDataDeletionImportInProcess() ||
@@ -169,6 +175,10 @@ public class ExportImportThreadLocal {
 		_portletValidationInProcess.set(portletValidationInProcess);
 	}
 
+	public static void setWarningMessages(Queue<String> warningMessages) {
+		_warningMessages.set(warningMessages);
+	}
+
 	private static final ThreadLocal<Boolean> _initialLayoutStagingInProcess =
 		new CentralizedThreadLocal<>(
 			ExportImportThreadLocal.class + "._initialLayoutStagingInProcess",
@@ -215,5 +225,8 @@ public class ExportImportThreadLocal {
 		new CentralizedThreadLocal<>(
 			ExportImportThreadLocal.class + "._portletValidationInProcess",
 			() -> Boolean.FALSE);
+	private static final ThreadLocal<Queue<String>> _warningMessages =
+		new CentralizedThreadLocal<>(
+			ExportImportThreadLocal.class + "._warningMessages", () -> null);
 
 }
