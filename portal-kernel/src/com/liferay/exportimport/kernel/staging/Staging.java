@@ -237,6 +237,12 @@ public interface Staging {
 	public Map<String, String[]> getStagingParameters(
 		PortletRequest portletRequest);
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.exportimport.warning.message.ExportImportWarningMessage#getMissingReferenceWarningMessagesJSONArray(
+	 *             Locale, Map<String, MissingReference>)}
+	 */
+	@Deprecated
 	public JSONArray getWarningMessagesJSONArray(
 		Locale locale, Map<String, MissingReference> missingReferences);
 

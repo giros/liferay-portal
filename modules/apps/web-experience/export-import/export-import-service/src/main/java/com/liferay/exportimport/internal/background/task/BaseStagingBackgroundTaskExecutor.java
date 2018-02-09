@@ -16,7 +16,8 @@ package com.liferay.exportimport.internal.background.task;
 
 import com.liferay.exportimport.kernel.lar.MissingReference;
 import com.liferay.exportimport.kernel.lar.MissingReferences;
-import com.liferay.exportimport.kernel.staging.StagingUtil;
+import com.liferay.exportimport.warning.message.ExportImportWarningMessage;
+import com.liferay.exportimport.warning.message.ExportImportWarningMessageUtil;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskConstants;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManagerUtil;
@@ -152,8 +153,13 @@ public abstract class BaseStagingBackgroundTaskExecutor
 			BackgroundTask backgroundTask =
 				BackgroundTaskManagerUtil.fetchBackgroundTask(backgroundTaskId);
 
-			JSONArray jsonArray = StagingUtil.getWarningMessagesJSONArray(
-				getLocale(backgroundTask), weakMissingReferences);
+			ExportImportWarningMessage exportImportWarningMessage =
+				ExportImportWarningMessageUtil.getExportImportWarningMessage();
+
+			JSONArray jsonArray =
+				exportImportWarningMessage.
+					getMissingReferenceWarningMessagesJSONArray(
+						getLocale(backgroundTask), weakMissingReferences);
 
 			backgroundTaskResult.setStatusMessage(jsonArray.toString());
 		}

@@ -44,6 +44,7 @@ import com.liferay.exportimport.kernel.service.StagingLocalService;
 import com.liferay.exportimport.kernel.staging.LayoutStagingUtil;
 import com.liferay.exportimport.kernel.staging.Staging;
 import com.liferay.exportimport.kernel.staging.StagingConstants;
+import com.liferay.exportimport.warning.message.ExportImportWarningMessage;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
@@ -928,8 +929,10 @@ public class StagingImpl implements Staging {
 				locale, missingReferences.getDependencyMissingReferences());
 
 			errorType = ServletResponseConstants.SC_FILE_CUSTOM_EXCEPTION;
-			warningMessagesJSONArray = getWarningMessagesJSONArray(
-				locale, missingReferences.getWeakMissingReferences());
+			warningMessagesJSONArray =
+				_exportImportWarningMessage.
+					getMissingReferenceWarningMessagesJSONArray(
+						locale, missingReferences.getWeakMissingReferences());
 		}
 		else if (e instanceof PortletDataException) {
 			PortletDataException pde = (PortletDataException)e;
@@ -1402,43 +1405,19 @@ public class StagingImpl implements Staging {
 			portletRequest);
 	}
 
+	/**
+	 * @deprecated As of 4.0.0, replaced by {@link
+	 *             _exportImportWarningMessage#getMissingReferenceWarningMessagesJSONArray(
+	 *             Locale, Map<String, MissingReference>)}
+	 */
+	@Deprecated
 	@Override
 	public JSONArray getWarningMessagesJSONArray(
 		Locale locale, Map<String, MissingReference> missingReferences) {
 
-		JSONArray warningMessagesJSONArray = JSONFactoryUtil.createJSONArray();
-
-		for (Map.Entry<String, MissingReference> entry :
-				missingReferences.entrySet()) {
-
-			MissingReference missingReference = entry.getValue();
-
-			Map<String, String> referrers = missingReference.getReferrers();
-
-			JSONObject errorMessageJSONObject =
-				JSONFactoryUtil.createJSONObject();
-
-			if (Validator.isNotNull(missingReference.getClassName())) {
-				errorMessageJSONObject.put(
-					"info",
-					LanguageUtil.format(
-						locale,
-						"the-original-x-does-not-exist-in-the-current-" +
-							"environment",
-						ResourceActionsUtil.getModelResource(
-							locale, missingReference.getClassName()),
-						false));
-			}
-
-			errorMessageJSONObject.put("size", referrers.size());
-			errorMessageJSONObject.put(
-				"type",
-				ResourceActionsUtil.getModelResource(locale, entry.getKey()));
-
-			warningMessagesJSONArray.put(errorMessageJSONObject);
-		}
-
-		return warningMessagesJSONArray;
+		return _exportImportWarningMessage.
+			getMissingReferenceWarningMessagesJSONArray(
+				locale, missingReferences);
 	}
 
 	/**
@@ -1452,7 +1431,9 @@ public class StagingImpl implements Staging {
 		Locale locale, Map<String, MissingReference> missingReferences,
 		Map<String, Serializable> contextMap) {
 
-		return getWarningMessagesJSONArray(locale, missingReferences);
+		return _exportImportWarningMessage.
+			getMissingReferenceWarningMessagesJSONArray(
+				locale, missingReferences);
 	}
 
 	@Override
@@ -3370,6 +3351,9 @@ public class StagingImpl implements Staging {
 
 	@Reference
 	private ExportImportHelper _exportImportHelper;
+
+	@Reference
+	private ExportImportWarningMessage _exportImportWarningMessage;
 
 	@Reference
 	private GroupLocalService _groupLocalService;
