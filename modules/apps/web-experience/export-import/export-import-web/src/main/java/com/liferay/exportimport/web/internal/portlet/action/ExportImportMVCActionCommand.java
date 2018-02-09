@@ -29,7 +29,7 @@ import com.liferay.exportimport.kernel.lar.MissingReferences;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
 import com.liferay.exportimport.kernel.service.ExportImportService;
-import com.liferay.exportimport.kernel.staging.Staging;
+import com.liferay.exportimport.warning.message.ExportImportWarningMessage;
 import com.liferay.portal.kernel.exception.LocaleException;
 import com.liferay.portal.kernel.exception.NoSuchLayoutException;
 import com.liferay.portal.kernel.exception.PortletIdException;
@@ -348,8 +348,9 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 
 				jsonObject.put(
 					"warningMessages",
-					_staging.getWarningMessagesJSONArray(
-						themeDisplay.getLocale(), weakMissingReferences));
+					_exportImportWarningMessage.
+						getMissingReferenceWarningMessagesJSONArray(
+							themeDisplay.getLocale(), weakMissingReferences));
 			}
 
 			JSONPortletResponseUtil.writeJSON(
@@ -398,12 +399,13 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 	private ExportImportHelper _exportImportHelper;
 
 	private ExportImportService _exportImportService;
+
+	@Reference
+	private ExportImportWarningMessage _exportImportWarningMessage;
+
 	private ImportLayoutsMVCActionCommand _importLayoutsMVCActionCommand;
 
 	@Reference
 	private Portal _portal;
-
-	@Reference
-	private Staging _staging;
 
 }

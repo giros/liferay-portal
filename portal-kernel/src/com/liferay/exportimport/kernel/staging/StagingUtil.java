@@ -369,6 +369,12 @@ public class StagingUtil {
 		return _staging.getStagingParameters(portletRequest);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.exportimport.warning.message.ExportImportWarningMessage#getMissingReferenceWarningMessagesJSONArray(
+	 *             Locale, Map<String, MissingReference>)}
+	 */
+	@Deprecated
 	public static JSONArray getWarningMessagesJSONArray(
 		Locale locale, Map<String, MissingReference> missingReferences) {
 
