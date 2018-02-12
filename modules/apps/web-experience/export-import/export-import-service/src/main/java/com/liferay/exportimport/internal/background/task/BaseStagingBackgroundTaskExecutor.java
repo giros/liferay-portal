@@ -26,6 +26,8 @@ import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatus;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusRegistryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.LayoutSet;
@@ -83,6 +85,45 @@ public abstract class BaseStagingBackgroundTaskExecutor
 		else if ((file != null) && _log.isDebugEnabled()) {
 			_log.debug("Kept temporary LAR file " + file.getAbsolutePath());
 		}
+	}
+
+	protected BackgroundTaskResult getBackgroundTaskResult(
+		long backgroundTaskId, MissingReferences missingReferences) {
+
+		BackgroundTaskResult backgroundTaskResult = new BackgroundTaskResult(
+			BackgroundTaskConstants.STATUS_SUCCESSFUL);
+
+		JSONArray warningMessagesJSONArray;
+
+		ExportImportWarningMessage exportImportWarningMessage =
+			ExportImportWarningMessageUtil.getExportImportWarningMessage();
+
+		if (missingReferences == null) {
+			warningMessagesJSONArray =
+				exportImportWarningMessage.getRegularWarningMessagesJSONArray();
+		}
+		else {
+			BackgroundTask backgroundTask =
+				BackgroundTaskManagerUtil.fetchBackgroundTask(backgroundTaskId);
+
+			warningMessagesJSONArray =
+				exportImportWarningMessage.getWarningMessagesJSONArray(
+					getLocale(backgroundTask),
+					missingReferences.getWeakMissingReferences());
+		}
+
+		if (warningMessagesJSONArray.length() > 0) {
+			JSONObject statusMessageJSONObject =
+				JSONFactoryUtil.createJSONObject();
+
+			statusMessageJSONObject.put(
+				"warningMessages", warningMessagesJSONArray);
+
+			backgroundTaskResult.setStatusMessage(
+				statusMessageJSONObject.toString());
+		}
+
+		return backgroundTaskResult;
 	}
 
 	protected void initThreadLocals(long groupId, boolean privateLayout)
