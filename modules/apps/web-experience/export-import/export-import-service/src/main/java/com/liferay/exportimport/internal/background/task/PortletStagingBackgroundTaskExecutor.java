@@ -132,7 +132,7 @@ public class PortletStagingBackgroundTaskExecutor
 
 		deleteTempLarOnSuccess(file);
 
-		return processMissingReferences(
+		return getBackgroundTaskResult(
 			backgroundTask.getBackgroundTaskId(), missingReferences);
 	}
 

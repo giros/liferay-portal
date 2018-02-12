@@ -210,7 +210,7 @@ public class LayoutStagingBackgroundTaskExecutor
 
 		deleteTempLarOnSuccess(file);
 
-		return processMissingReferences(
+		return getBackgroundTaskResult(
 			backgroundTask.getBackgroundTaskId(), missingReferences);
 	}
 

@@ -14,7 +14,6 @@
 
 package com.liferay.exportimport.internal.background.task;
 
-import com.liferay.exportimport.kernel.lar.MissingReference;
 import com.liferay.exportimport.kernel.lar.MissingReferences;
 import com.liferay.exportimport.warning.message.ExportImportWarningMessage;
 import com.liferay.exportimport.warning.message.ExportImportWarningMessageUtil;
@@ -36,7 +35,6 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.FileUtil;
-import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.util.PropsValues;
 
@@ -177,35 +175,15 @@ public abstract class BaseStagingBackgroundTaskExecutor
 			backgroundTask.getStatus(), new ServiceContext());
 	}
 
+	/**
+	 * @deprecated As of 4.0.0, moved to {@link
+	 *             #getBackgroundTaskResult(long, MissingReferences)
+	 */
+	@Deprecated
 	protected BackgroundTaskResult processMissingReferences(
 		long backgroundTaskId, MissingReferences missingReferences) {
 
-		BackgroundTaskResult backgroundTaskResult = new BackgroundTaskResult(
-			BackgroundTaskConstants.STATUS_SUCCESSFUL);
-
-		if (missingReferences == null) {
-			return backgroundTaskResult;
-		}
-
-		Map<String, MissingReference> weakMissingReferences =
-			missingReferences.getWeakMissingReferences();
-
-		if (MapUtil.isNotEmpty(weakMissingReferences)) {
-			BackgroundTask backgroundTask =
-				BackgroundTaskManagerUtil.fetchBackgroundTask(backgroundTaskId);
-
-			ExportImportWarningMessage exportImportWarningMessage =
-				ExportImportWarningMessageUtil.getExportImportWarningMessage();
-
-			JSONArray jsonArray =
-				exportImportWarningMessage.
-					getMissingReferenceWarningMessagesJSONArray(
-						getLocale(backgroundTask), weakMissingReferences);
-
-			backgroundTaskResult.setStatusMessage(jsonArray.toString());
-		}
-
-		return backgroundTaskResult;
+		return getBackgroundTaskResult(backgroundTaskId, missingReferences);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
