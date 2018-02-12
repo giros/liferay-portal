@@ -23,6 +23,7 @@ import com.liferay.exportimport.content.processor.ExportImportContentProcessor;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.exportimport.warning.message.ExportImportWarningMessage;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -311,6 +312,17 @@ public class DLReferencesExportImportContentProcessor
 			FileEntry fileEntry = getFileEntry(dlReferenceParameters);
 
 			if (fileEntry == null) {
+				StringBundler warningSB = new StringBundler(4);
+
+				warningSB.append(
+					"Unable to process file entry for staged model ");
+				warningSB.append(stagedModel.getModelClassName());
+				warningSB.append(" with primary key ");
+				warningSB.append(stagedModel.getPrimaryKeyObj());
+
+				_exportImportWarningMessage.addWarningMessage(
+					warningSB.toString());
+
 				endPos = beginPos - 1;
 
 				continue;
@@ -370,21 +382,24 @@ public class DLReferencesExportImportContentProcessor
 				deleteTimestampParameters(sb, deleteTimestampParametersOffset);
 			}
 			catch (Exception e) {
+				StringBundler warningSB = new StringBundler(6);
+
+				warningSB.append("Unable to process file entry ");
+				warningSB.append(fileEntry.getFileEntryId());
+				warningSB.append(" for staged model ");
+				warningSB.append(stagedModel.getModelClassName());
+				warningSB.append(" with primary key ");
+				warningSB.append(stagedModel.getPrimaryKeyObj());
+
 				if (_log.isDebugEnabled()) {
 					_log.debug(e, e);
 				}
 				else if (_log.isWarnEnabled()) {
-					StringBundler exceptionSB = new StringBundler(6);
-
-					exceptionSB.append("Unable to process file entry ");
-					exceptionSB.append(fileEntry.getFileEntryId());
-					exceptionSB.append(" for staged model ");
-					exceptionSB.append(stagedModel.getModelClassName());
-					exceptionSB.append(" with primary key ");
-					exceptionSB.append(stagedModel.getPrimaryKeyObj());
-
-					_log.warn(exceptionSB.toString());
+					_log.warn(warningSB.toString());
 				}
+
+				_exportImportWarningMessage.addWarningMessage(
+					warningSB.toString());
 			}
 
 			endPos = beginPos - 1;
@@ -616,6 +631,9 @@ public class DLReferencesExportImportContentProcessor
 
 	@Reference
 	private DLFileEntryLocalService _dlFileEntryLocalService;
+
+	@Reference
+	private ExportImportWarningMessage _exportImportWarningMessage;
 
 	@Reference
 	private GroupLocalService _groupLocalService;
