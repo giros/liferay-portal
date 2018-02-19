@@ -103,12 +103,14 @@ BackgroundTask backgroundTask = (BackgroundTask)row.getObject();
 <c:if test="<%= Validator.isNotNull(backgroundTask.getStatusMessage()) %>">
 	<h5>
 		<a href="javascript:Liferay.fire('<portlet:namespace />viewBackgroundTaskDetails', {nodeId: 'backgroundTaskStatusMessage<%= backgroundTask.getBackgroundTaskId() %>', title: $('#<portlet:namespace />backgroundTaskName<%= backgroundTask.getBackgroundTaskId() %>').text()}); void(0);">
-			<c:when test="<%= backgroundTask.getStatus() == BackgroundTaskConstants.STATUS_FAILED %>">
-				<liferay-ui:message key="see-more-details" />
-			</c:when>
-			<c:otherwise>
-				<liferay-ui:message key="see-warnings" />
-			</c:otherwise>
+			<c:choose>
+				<c:when test="<%= backgroundTask.getStatus() == BackgroundTaskConstants.STATUS_FAILED %>">
+					<liferay-ui:message key="see-more-details" />
+				</c:when>
+				<c:otherwise>
+					<liferay-ui:message key="see-warnings" />
+				</c:otherwise>
+			</c:choose>
 		</a>
 	</h5>
 
