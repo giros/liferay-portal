@@ -160,7 +160,14 @@ if (Validator.isNotNull(backURL)) {
 
 			<c:if test="<%= Validator.isNotNull(curBackgroundTask.getStatusMessage()) %>">
 				<h6 class="background-task-status-row">
-					<a class="details-link" href="javascript:Liferay.fire('<portlet:namespace />viewBackgroundTaskDetails', {nodeId: 'backgroundTaskStatusMessage<%= curBackgroundTask.getBackgroundTaskId() %>', title: $('#<portlet:namespace />backgroundTaskName<%= curBackgroundTask.getBackgroundTaskId() %>').text()}); void(0);"><liferay-ui:message key="see-more-details" /></a>
+					<a class="details-link" href="javascript:Liferay.fire('<portlet:namespace />viewBackgroundTaskDetails', {nodeId: 'backgroundTaskStatusMessage<%= curBackgroundTask.getBackgroundTaskId() %>', title: $('#<portlet:namespace />backgroundTaskName<%= curBackgroundTask.getBackgroundTaskId() %>').text()}); void(0);">
+						<c:when test="<%= curBackgroundTask.getStatus() == BackgroundTaskConstants.STATUS_FAILED %>">
+							<liferay-ui:message key="see-more-details" />
+						</c:when>
+						<c:otherwise>
+							<liferay-ui:message key="see-warnings" />
+						</c:otherwise>
+					</a>
 				</h6>
 
 				<div class="background-task-status-message hide" id="<portlet:namespace />backgroundTaskStatusMessage<%= curBackgroundTask.getBackgroundTaskId() %>">
