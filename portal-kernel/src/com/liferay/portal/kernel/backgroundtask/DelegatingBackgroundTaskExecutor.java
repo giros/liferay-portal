@@ -56,6 +56,14 @@ public class DelegatingBackgroundTaskExecutor
 	}
 
 	@Override
+	public BackgroundTaskStatusMessageMessageTranslator
+		getBackgroundTaskStatusMessageMessageTranslator() {
+
+		return _backgroundTaskExecutor.
+			getBackgroundTaskStatusMessageMessageTranslator();
+	}
+
+	@Override
 	public BackgroundTaskStatusMessageTranslator
 		getBackgroundTaskStatusMessageTranslator() {
 

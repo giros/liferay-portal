@@ -24,6 +24,7 @@ import com.liferay.portal.background.task.service.BackgroundTaskLocalService;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutorRegistry;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageRegistry;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusRegistry;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocalManager;
 import com.liferay.portal.kernel.cluster.ClusterMasterExecutor;
@@ -580,6 +581,7 @@ public class BackgroundTaskManagerImpl implements BackgroundTaskManager {
 		BackgroundTaskMessageListener backgroundTaskMessageListener =
 			new BackgroundTaskMessageListener(
 				_backgroundTaskExecutorRegistry, this,
+				_backgroundTaskStatusMessageRegistry,
 				_backgroundTaskStatusRegistry,
 				_backgroundTaskThreadLocalManager, _messageBus);
 
@@ -707,6 +709,10 @@ public class BackgroundTaskManagerImpl implements BackgroundTaskManager {
 
 	@Reference
 	private BackgroundTaskLocalService _backgroundTaskLocalService;
+
+	@Reference
+	private BackgroundTaskStatusMessageRegistry
+		_backgroundTaskStatusMessageRegistry;
 
 	@Reference
 	private BackgroundTaskStatusRegistry _backgroundTaskStatusRegistry;
