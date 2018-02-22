@@ -28,6 +28,9 @@ public interface DestinationNames {
 	public static final String BACKGROUND_TASK_STATUS =
 		"liferay/background_task_status";
 
+	public static final String BACKGROUND_TASK_STATUS_MESSAGE =
+		"liferay/background_task_status_message";
+
 	public static final String CONVERT_PROCESS = "liferay/convert_process";
 
 	public static final String DEVICE_RECOGNITION_PROVIDER =
