@@ -14,11 +14,14 @@
 
 package com.liferay.portal.kernel.backgroundtask;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.backgroundtask.display.BackgroundTaskDisplay;
 
 /**
  * @author Michael C. Han
  */
+@ProviderType
 public interface BackgroundTaskExecutor {
 
 	public BackgroundTaskExecutor clone();
@@ -30,6 +33,9 @@ public interface BackgroundTaskExecutor {
 
 	public BackgroundTaskDisplay getBackgroundTaskDisplay(
 		BackgroundTask backgroundTask);
+
+	public BackgroundTaskStatusMessageMessageTranslator
+		getBackgroundTaskStatusMessageMessageTranslator();
 
 	public BackgroundTaskStatusMessageTranslator
 		getBackgroundTaskStatusMessageTranslator();

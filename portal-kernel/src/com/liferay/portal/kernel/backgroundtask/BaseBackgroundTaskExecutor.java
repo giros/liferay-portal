@@ -43,6 +43,13 @@ public abstract class BaseBackgroundTaskExecutor
 	}
 
 	@Override
+	public BackgroundTaskStatusMessageMessageTranslator
+		getBackgroundTaskStatusMessageMessageTranslator() {
+
+		return _backgroundTaskStatusMessageMessageTranslator;
+	}
+
+	@Override
 	public BackgroundTaskStatusMessageTranslator
 		getBackgroundTaskStatusMessageTranslator() {
 
@@ -94,6 +101,14 @@ public abstract class BaseBackgroundTaskExecutor
 		return LocaleUtil.getDefault();
 	}
 
+	protected void setBackgroundTaskStatusMessageMessageTranslator(
+		BackgroundTaskStatusMessageMessageTranslator
+			backgroundTaskStatusMessageMessageTranslator) {
+
+		_backgroundTaskStatusMessageMessageTranslator =
+			backgroundTaskStatusMessageMessageTranslator;
+	}
+
 	protected void setBackgroundTaskStatusMessageTranslator(
 		BackgroundTaskStatusMessageTranslator
 			backgroundTaskStatusMessageTranslator) {
@@ -109,6 +124,8 @@ public abstract class BaseBackgroundTaskExecutor
 	private static final Log _log = LogFactoryUtil.getLog(
 		BaseBackgroundTaskExecutor.class);
 
+	private BackgroundTaskStatusMessageMessageTranslator
+		_backgroundTaskStatusMessageMessageTranslator;
 	private BackgroundTaskStatusMessageTranslator
 		_backgroundTaskStatusMessageTranslator;
 	private int _isolationLevel =
