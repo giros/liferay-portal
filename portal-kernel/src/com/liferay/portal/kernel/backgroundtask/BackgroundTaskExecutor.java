@@ -31,6 +31,9 @@ public interface BackgroundTaskExecutor {
 	public BackgroundTaskDisplay getBackgroundTaskDisplay(
 		BackgroundTask backgroundTask);
 
+	public BackgroundTaskStatusMessageMessageTranslator
+		getBackgroundTaskStatusMessageMessageTranslator();
+
 	public BackgroundTaskStatusMessageTranslator
 		getBackgroundTaskStatusMessageTranslator();
 

@@ -20,6 +20,8 @@ import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutorRegistry;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskResult;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageMessageTranslator;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageRegistry;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageTranslator;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusRegistry;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
@@ -51,12 +53,15 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 	public BackgroundTaskMessageListener(
 		BackgroundTaskExecutorRegistry backgroundTaskExecutorRegistry,
 		BackgroundTaskManager backgroundTaskManager,
+		BackgroundTaskStatusMessageRegistry backgroundTaskStatusMessageRegistry,
 		BackgroundTaskStatusRegistry backgroundTaskStatusRegistry,
 		BackgroundTaskThreadLocalManager backgroundTaskThreadLocalManager,
 		MessageBus messageBus) {
 
 		_backgroundTaskExecutorRegistry = backgroundTaskExecutorRegistry;
 		_backgroundTaskManager = backgroundTaskManager;
+		_backgroundTaskStatusMessageRegistry =
+			backgroundTaskStatusMessageRegistry;
 		_backgroundTaskStatusRegistry = backgroundTaskStatusRegistry;
 		_backgroundTaskThreadLocalManager = backgroundTaskThreadLocalManager;
 		_messageBus = messageBus;
@@ -88,6 +93,8 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 		BackgroundTaskExecutor backgroundTaskExecutor = null;
 		BackgroundTaskStatusMessageListener
 			backgroundTaskStatusMessageListener = null;
+		BackgroundTaskStatusMessageMessageListener
+			backgroundTaskStatusMessageMessageListener = null;
 
 		int status = backgroundTask.getStatus();
 		String statusMessage = null;
@@ -116,6 +123,26 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 				_messageBus.registerMessageListener(
 					DestinationNames.BACKGROUND_TASK_STATUS,
 					backgroundTaskStatusMessageListener);
+			}
+
+			_backgroundTaskStatusMessageRegistry.
+				registerBackgroundTaskStatusMessage(backgroundTaskId);
+
+			BackgroundTaskStatusMessageMessageTranslator
+				backgroundTaskStatusMessageMessageTranslator =
+					backgroundTaskExecutor.
+						getBackgroundTaskStatusMessageMessageTranslator();
+
+			if (backgroundTaskStatusMessageMessageTranslator != null) {
+				backgroundTaskStatusMessageMessageListener =
+					new BackgroundTaskStatusMessageMessageListener(
+						backgroundTaskId,
+						backgroundTaskStatusMessageMessageTranslator,
+						_backgroundTaskStatusMessageRegistry);
+
+				_messageBus.registerMessageListener(
+					DestinationNames.BACKGROUND_TASK_STATUS_MESSAGE,
+					backgroundTaskStatusMessageMessageListener);
 			}
 
 			backgroundTask = _backgroundTaskManager.fetchBackgroundTask(
@@ -293,6 +320,8 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 	private final BackgroundTaskExecutorRegistry
 		_backgroundTaskExecutorRegistry;
 	private final BackgroundTaskManager _backgroundTaskManager;
+	private final BackgroundTaskStatusMessageRegistry
+		_backgroundTaskStatusMessageRegistry;
 	private final BackgroundTaskStatusRegistry _backgroundTaskStatusRegistry;
 	private final BackgroundTaskThreadLocalManager
 		_backgroundTaskThreadLocalManager;
