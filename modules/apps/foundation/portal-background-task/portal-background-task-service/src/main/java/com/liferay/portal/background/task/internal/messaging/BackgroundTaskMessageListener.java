@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutorRegistry;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskResult;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessage;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageMessageTranslator;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageRegistry;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageTranslator;
@@ -30,6 +31,8 @@ import com.liferay.portal.kernel.backgroundtask.ClassLoaderAwareBackgroundTaskEx
 import com.liferay.portal.kernel.backgroundtask.SerialBackgroundTaskExecutor;
 import com.liferay.portal.kernel.backgroundtask.ThreadLocalAwareBackgroundTaskExecutor;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.lock.DuplicateLockException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -44,6 +47,8 @@ import com.liferay.portal.kernel.util.StackTraceUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+
+import java.util.Iterator;
 
 /**
  * @author Michael C. Han
@@ -150,6 +155,9 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 
 			BackgroundTaskResult backgroundTaskResult =
 				backgroundTaskExecutor.execute(backgroundTask);
+
+			processBackgroundTaskStatusMessage(
+				backgroundTask.getBackgroundTaskId(), backgroundTaskResult);
 
 			status = backgroundTaskResult.getStatus();
 			statusMessage = backgroundTaskResult.getStatusMessage();
@@ -290,6 +298,49 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 		}
 
 		return classLoader;
+	}
+
+	protected void processBackgroundTaskStatusMessage(
+		long backgroundTaskId, BackgroundTaskResult backgroundTaskResult) {
+
+		BackgroundTaskStatusMessage backgroundTaskStatusMessage =
+			_backgroundTaskStatusMessageRegistry.getBackgroundTaskStatusMessage(
+				backgroundTaskId);
+
+		if (Validator.isNull(backgroundTaskResult.getStatusMessage())) {
+			backgroundTaskResult.setStatusMessage(
+				backgroundTaskStatusMessage.getStatusMessagesJSON());
+
+			return;
+		}
+
+		try {
+			JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
+				backgroundTaskResult.getStatusMessage());
+
+			JSONObject statusMessageJSONObject =
+				JSONFactoryUtil.createJSONObject(
+					backgroundTaskStatusMessage.getStatusMessagesJSON());
+
+			Iterator i = statusMessageJSONObject.keys();
+
+			while (i.hasNext()) {
+				String key = (String)i.next();
+
+				jsonObject.put(key, statusMessageJSONObject.get(key));
+			}
+
+			backgroundTaskResult.setStatusMessage(jsonObject.toString());
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+
+			if (_log.isWarnEnabled()) {
+				_log.warn(e, e);
+			}
+		}
 	}
 
 	protected BackgroundTaskExecutor wrapBackgroundTaskExecutor(
