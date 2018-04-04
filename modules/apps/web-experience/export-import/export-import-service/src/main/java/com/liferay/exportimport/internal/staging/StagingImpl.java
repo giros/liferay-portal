@@ -34,6 +34,7 @@ import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationSe
 import com.liferay.exportimport.kernel.exception.ExportImportContentValidationException;
 import com.liferay.exportimport.kernel.exception.ExportImportDocumentException;
 import com.liferay.exportimport.kernel.exception.ExportImportIOException;
+import com.liferay.exportimport.kernel.exception.ExportImportRuntimeException;
 import com.liferay.exportimport.kernel.exception.LARFileException;
 import com.liferay.exportimport.kernel.exception.LARFileSizeException;
 import com.liferay.exportimport.kernel.exception.LARTypeException;
@@ -989,6 +990,13 @@ public class StagingImpl implements Staging {
 			}
 
 			errorType = ServletResponseConstants.SC_FILE_CUSTOM_EXCEPTION;
+		}
+		else if (e instanceof ExportImportRuntimeException) {
+			ExportImportRuntimeException eire = (ExportImportRuntimeException)e;
+
+			errorMessage = LanguageUtil.format(
+				resourceBundle, "the-following-error-occurred-within-x-x",
+				new String[] {eire.getClassName(), eire.getMessage()});
 		}
 		else if (e instanceof FileExtensionException) {
 			errorMessage = LanguageUtil.format(
