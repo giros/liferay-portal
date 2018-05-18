@@ -256,13 +256,17 @@ public class FileEntryStagedModelDataHandler
 
 		FileVersion fileVersion = fileEntry.getFileVersion();
 
+		if (ExportImportThreadLocal.isInitialLayoutStagingInProcess()) {
+			fileVersion = fileEntry.getLatestFileVersion(true);
+		}
+
 		fileEntryElement.addAttribute("fileVersionUuid", fileVersion.getUuid());
 
 		fileEntryElement.addAttribute("version", fileEntry.getVersion());
 
 		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)fileEntry;
 
-		liferayFileEntry.setCachedFileVersion(fileEntry.getFileVersion());
+		liferayFileEntry.setCachedFileVersion(fileVersion);
 
 		if (!portletDataContext.isPerformDirectBinaryImport()) {
 			InputStream is = null;
