@@ -262,7 +262,23 @@ public class FileEntryStagedModelDataHandler
 
 		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)fileEntry;
 
-		liferayFileEntry.setCachedFileVersion(fileEntry.getFileVersion());
+		if (ExportImportThreadLocal.isInitialLayoutStagingInProcess()) {
+			FileVersion latestFileVersion = fileEntry.getLatestFileVersion(
+				true);
+
+			String latestVersion = latestFileVersion.getVersion();
+
+			if (latestVersion.equals(
+					DLFileEntryConstants.PRIVATE_WORKING_COPY_VERSION)) {
+
+				fileEntryElement.addAttribute(
+					"checkedOut", Boolean.TRUE.toString());
+
+				fileVersion = latestFileVersion;
+			}
+		}
+
+		liferayFileEntry.setCachedFileVersion(fileVersion);
 
 		if (!portletDataContext.isPerformDirectBinaryImport()) {
 			InputStream is = null;
@@ -476,6 +492,26 @@ public class FileEntryStagedModelDataHandler
 						importedFileEntry =
 							_dlTrashService.moveFileEntryToTrash(
 								importedFileEntry.getFileEntryId());
+					}
+
+					if (ExportImportThreadLocal.
+							isInitialLayoutStagingInProcess() &&
+						GetterUtil.getBoolean(
+							fileEntryElement.attributeValue("checkedOut"))) {
+
+						_dlAppService.checkOutFileEntry(
+							importedFileEntry.getFileEntryId(), serviceContext);
+
+						FileVersion newPWCFileVersion =
+							importedFileEntry.getLatestFileVersion(true);
+
+						LiferayFileEntry liferayFileEntry =
+							(LiferayFileEntry)fileEntry;
+
+						FileVersion originalPWCFileVersion =
+							liferayFileEntry.getCachedFileVersion();
+
+
 					}
 				}
 				else {
