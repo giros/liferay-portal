@@ -1004,24 +1004,53 @@ public class FileEntryStagedModelDataHandler
 	}
 
 	private void _addPWCFileVersion(
-		FileEntry fileEntry, FileEntry importedFileEntry) {
+			FileEntry fileEntry, FileEntry importedFileEntry,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		_dlFileEntryLocalService.checkOutFileEntry(
+			importedFileEntry.getUserId(), importedFileEntry.getFileEntryId(),
+			serviceContext);
+
+		FileVersion newPWCFileVersion = importedFileEntry.getLatestFileVersion(
+			true);
+
+		DLFileVersion newPWCDLFileVersion =
+			(DLFileVersion)newPWCFileVersion.getModel();
 
 		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)fileEntry;
 
-		FileVersion fileVersion = liferayFileEntry.getCachedFileVersion();
+		FileVersion oldPWCFileVersion = liferayFileEntry.getCachedFileVersion();
 
-		DLFileVersion dlFileVersion = (DLFileVersion)fileVersion.getModel();
+		DLFileVersion oldPWCDLFileVersion =
+			(DLFileVersion)oldPWCFileVersion.getModel();
 
-		dlFileVersion.setFileVersionId(_counterLocalService.increment());
-		dlFileVersion.setGroupId(importedFileEntry.getGroupId());
-		dlFileVersion.setRepositoryId(importedFileEntry.getRepositoryId());
-		dlFileVersion.setFileEntryId(importedFileEntry.getFileEntryId());
+		newPWCDLFileVersion.setUuid(oldPWCDLFileVersion.getUuid());
+		newPWCDLFileVersion.setUserId(oldPWCDLFileVersion.getUserId());
+		newPWCDLFileVersion.setUserName(oldPWCDLFileVersion.getUserName());
+		newPWCDLFileVersion.setCreateDate(oldPWCDLFileVersion.getCreateDate());
+		newPWCDLFileVersion.setModifiedDate(
+			oldPWCDLFileVersion.getModifiedDate());
+		newPWCDLFileVersion.setFileName(oldPWCDLFileVersion.getFileName());
+		newPWCDLFileVersion.setExtension(oldPWCDLFileVersion.getExtension());
+		newPWCDLFileVersion.setMimeType(oldPWCDLFileVersion.getMimeType());
+		newPWCDLFileVersion.setTitle(oldPWCDLFileVersion.getTitle());
+		newPWCDLFileVersion.setDescription(
+			oldPWCDLFileVersion.getDescription());
+		newPWCDLFileVersion.setChangeLog(oldPWCDLFileVersion.getChangeLog());
+		newPWCDLFileVersion.setExtraSettings(
+			oldPWCDLFileVersion.getExtraSettings());
+		newPWCDLFileVersion.setSize(oldPWCDLFileVersion.getSize());
+		newPWCDLFileVersion.setChecksum(oldPWCDLFileVersion.getChecksum());
+		newPWCDLFileVersion.setLastPublishDate(
+			oldPWCDLFileVersion.getLastPublishDate());
+		newPWCDLFileVersion.setStatusByUserId(
+			oldPWCDLFileVersion.getStatusByUserId());
+		newPWCDLFileVersion.setStatusByUserName(
+			oldPWCDLFileVersion.getStatusByUserName());
+		newPWCDLFileVersion.setStatusDate(oldPWCDLFileVersion.getStatusDate());
 
-		DLFileEntry dlFileEntry = (DLFileEntry)importedFileEntry.getModel();
-
-		dlFileVersion.setFileEntryTypeId(dlFileEntry.getFileEntryTypeId());
-
-		_dlFileVersionLocalService.addDLFileVersion(dlFileVersion);
+		_dlFileVersionLocalService.updateDLFileVersion(newPWCDLFileVersion);
 	}
 
 	private void _overrideFileVersion(
