@@ -14,6 +14,7 @@
 
 package com.liferay.document.library.internal.exportimport.data.handler;
 
+import com.liferay.counter.kernel.service.CounterLocalService;
 import com.liferay.document.library.exportimport.data.handler.DLPluggableContentDataHandler;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileEntryConstants;
@@ -260,9 +261,18 @@ public class FileEntryStagedModelDataHandler
 
 		fileEntryElement.addAttribute("version", fileEntry.getVersion());
 
+		if (ExportImportThreadLocal.isInitialLayoutStagingInProcess() &&
+			fileEntry.isCheckedOut()) {
+
+			fileEntryElement.addAttribute(
+				"checkedOut", Boolean.TRUE.toString());
+
+			fileVersion = fileEntry.getLatestFileVersion(true);
+		}
+
 		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)fileEntry;
 
-		liferayFileEntry.setCachedFileVersion(fileEntry.getFileVersion());
+		liferayFileEntry.setCachedFileVersion(fileVersion);
 
 		if (!portletDataContext.isPerformDirectBinaryImport()) {
 			InputStream is = null;
@@ -471,6 +481,14 @@ public class FileEntryStagedModelDataHandler
 						fileEntry.getMimeType(), fileEntryTitle,
 						fileEntry.getDescription(), null, is,
 						fileEntry.getSize(), serviceContext);
+
+					if (ExportImportThreadLocal.
+							isInitialLayoutStagingInProcess() &&
+						GetterUtil.getBoolean(
+							fileEntryElement.attributeValue("checkedOut"))) {
+
+						_addPWCFileVersion(fileEntry, importedFileEntry);
+					}
 
 					if (fileEntry.isInTrash()) {
 						importedFileEntry =
@@ -828,6 +846,13 @@ public class FileEntryStagedModelDataHandler
 		return fileEntry.isInTrash();
 	}
 
+	@Reference(unbind = "-")
+	protected void setCounterLocalService(
+		CounterLocalService counterLocalService) {
+
+		_counterLocalService = counterLocalService;
+	}
+
 	@Reference(
 		target = "(model.class.name=com.liferay.dynamic.data.mapping.storage.DDMFormValues)",
 		unbind = "-"
@@ -978,6 +1003,27 @@ public class FileEntryStagedModelDataHandler
 		}
 	}
 
+	private void _addPWCFileVersion(
+		FileEntry fileEntry, FileEntry importedFileEntry) {
+
+		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)fileEntry;
+
+		FileVersion fileVersion = liferayFileEntry.getCachedFileVersion();
+
+		DLFileVersion dlFileVersion = (DLFileVersion)fileVersion.getModel();
+
+		dlFileVersion.setFileVersionId(_counterLocalService.increment());
+		dlFileVersion.setGroupId(importedFileEntry.getGroupId());
+		dlFileVersion.setRepositoryId(importedFileEntry.getRepositoryId());
+		dlFileVersion.setFileEntryId(importedFileEntry.getFileEntryId());
+
+		DLFileEntry dlFileEntry = (DLFileEntry)importedFileEntry.getModel();
+
+		dlFileVersion.setFileEntryTypeId(dlFileEntry.getFileEntryTypeId());
+
+		_dlFileVersionLocalService.addDLFileVersion(dlFileVersion);
+	}
+
 	private void _overrideFileVersion(
 			final FileEntry importedFileEntry, final String version)
 		throws PortalException {
@@ -1041,6 +1087,7 @@ public class FileEntryStagedModelDataHandler
 		TransactionConfig.Factory.create(
 			Propagation.REQUIRED, new Class<?>[] {Exception.class});
 
+	private CounterLocalService _counterLocalService;
 	private ExportImportContentProcessor
 		<com.liferay.dynamic.data.mapping.storage.DDMFormValues>
 			_ddmFormValuesExportImportContentProcessor;
