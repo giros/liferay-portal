@@ -30,14 +30,15 @@ import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import org.junit.Assert;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.Assert;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.runner.RunWith;
 
 /**
  * @author Mate Thurzo
@@ -124,7 +125,6 @@ public class StagedExpandoColumnStagedModelDataHandlerTest
 
 		BookmarksFolder folder = (BookmarksFolder)dependentStagedModels.get(0);
 
-
 		BookmarksFolderLocalServiceUtil.getBookmarksFolderByUuidAndGroupId(
 			folder.getUuid(), group.getGroupId());
 	}
@@ -138,7 +138,6 @@ public class StagedExpandoColumnStagedModelDataHandlerTest
 
 		BookmarksEntry entry = (BookmarksEntry)stagedModel;
 		BookmarksEntry importedEntry = (BookmarksEntry)importedStagedModel;
-
 
 		Assert.assertEquals(entry.getName(), importedEntry.getName());
 		Assert.assertEquals(entry.getUrl(), importedEntry.getUrl());

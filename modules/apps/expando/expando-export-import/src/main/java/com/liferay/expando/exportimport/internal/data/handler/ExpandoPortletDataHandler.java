@@ -42,7 +42,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	immediate = true,
-	property = {"javax.portlet.name=" + ExpandoPortletKeys.EXPANDO},
+	property = "javax.portlet.name=" + ExpandoPortletKeys.EXPANDO,
 	service = PortletDataHandler.class
 )
 public class ExpandoPortletDataHandler extends BasePortletDataHandler {
