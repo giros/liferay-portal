@@ -59,6 +59,11 @@ public class DLAppHelperLocalServiceUtil {
 			destinationFileVersion, draftFileVersion, serviceContext);
 	}
 
+	public static void cancelGroupCheckOuts(long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		getService().cancelGroupCheckOuts(groupId);
+	}
+
 	public static void checkAssetEntry(long userId,
 		com.liferay.portal.kernel.repository.model.FileEntry fileEntry,
 		com.liferay.portal.kernel.repository.model.FileVersion fileVersion)
@@ -98,6 +103,11 @@ public class DLAppHelperLocalServiceUtil {
 		boolean active, int status) {
 		return getService()
 				   .getFileShortcutsCount(groupId, folderId, active, status);
+	}
+
+	public static long getGroupCheckedOutFileEntriesCount(long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().getGroupCheckedOutFileEntriesCount(groupId);
 	}
 
 	public static java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getNoAssetFileEntries() {

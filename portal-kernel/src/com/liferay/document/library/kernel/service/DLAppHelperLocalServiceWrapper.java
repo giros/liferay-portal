@@ -55,6 +55,12 @@ public class DLAppHelperLocalServiceWrapper implements DLAppHelperLocalService,
 	}
 
 	@Override
+	public void cancelGroupCheckOuts(long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_dlAppHelperLocalService.cancelGroupCheckOuts(groupId);
+	}
+
+	@Override
 	public void checkAssetEntry(long userId,
 		com.liferay.portal.kernel.repository.model.FileEntry fileEntry,
 		com.liferay.portal.kernel.repository.model.FileVersion fileVersion)
@@ -102,6 +108,12 @@ public class DLAppHelperLocalServiceWrapper implements DLAppHelperLocalService,
 		boolean active, int status) {
 		return _dlAppHelperLocalService.getFileShortcutsCount(groupId,
 			folderId, active, status);
+	}
+
+	@Override
+	public long getGroupCheckedOutFileEntriesCount(long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _dlAppHelperLocalService.getGroupCheckedOutFileEntriesCount(groupId);
 	}
 
 	@Override

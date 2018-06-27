@@ -67,6 +67,8 @@ public interface DLAppHelperLocalService extends BaseLocalService {
 		FileVersion draftFileVersion, ServiceContext serviceContext)
 		throws PortalException;
 
+	public void cancelGroupCheckOuts(long groupId) throws PortalException;
+
 	public void checkAssetEntry(long userId, FileEntry fileEntry,
 		FileVersion fileVersion) throws PortalException;
 
@@ -88,6 +90,10 @@ public interface DLAppHelperLocalService extends BaseLocalService {
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public int getFileShortcutsCount(long groupId, long folderId,
 		boolean active, int status);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public long getGroupCheckedOutFileEntriesCount(long groupId)
+		throws PortalException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<FileEntry> getNoAssetFileEntries();
