@@ -15,6 +15,7 @@
 package com.liferay.wiki.internal.exportimport.data.handler;
 
 import com.liferay.exportimport.kernel.lar.BasePortletDataHandler;
+import com.liferay.exportimport.kernel.lar.DataLevel;
 import com.liferay.exportimport.kernel.lar.ExportImportDateUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataException;
@@ -55,11 +56,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Mate Thurzo
  */
 @Component(
-	immediate = true,
-	property = {
-		"javax.portlet.name=" + WikiPortletKeys.WIKI,
-		"javax.portlet.name=" + WikiPortletKeys.WIKI_ADMIN
-	},
+	immediate = true, property = "javax.portlet.name=" + WikiPortletKeys.WIKI,
 	service = PortletDataHandler.class
 )
 public class WikiPortletDataHandler extends BasePortletDataHandler {
@@ -101,6 +98,7 @@ public class WikiPortletDataHandler extends BasePortletDataHandler {
 
 	@Activate
 	protected void activate() {
+		setDataLevel(DataLevel.PORTLET_INSTANCE);
 		setDataPortletPreferences("hiddenNodes, visibleNodes");
 		setDeletionSystemEventStagedModelTypes(
 			new StagedModelType(WikiNode.class),
