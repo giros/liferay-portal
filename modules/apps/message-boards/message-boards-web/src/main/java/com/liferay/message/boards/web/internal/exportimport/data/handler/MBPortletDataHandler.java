@@ -15,6 +15,7 @@
 package com.liferay.message.boards.web.internal.exportimport.data.handler;
 
 import com.liferay.exportimport.kernel.lar.BasePortletDataHandler;
+import com.liferay.exportimport.kernel.lar.DataLevel;
 import com.liferay.exportimport.kernel.lar.ExportImportDateUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataHandler;
@@ -64,10 +65,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Daniel Kocsis
  */
 @Component(
-	property = {
-		"javax.portlet.name=" + MBPortletKeys.MESSAGE_BOARDS,
-		"javax.portlet.name=" + MBPortletKeys.MESSAGE_BOARDS_ADMIN
-	},
+	property = "javax.portlet.name=" + MBPortletKeys.MESSAGE_BOARDS,
 	service = PortletDataHandler.class
 )
 public class MBPortletDataHandler extends BasePortletDataHandler {
@@ -88,6 +86,7 @@ public class MBPortletDataHandler extends BasePortletDataHandler {
 
 	@Activate
 	protected void activate() {
+		setDataLevel(DataLevel.PORTLET_INSTANCE);
 		setDeletionSystemEventStagedModelTypes(
 			new StagedModelType(MBBan.class),
 			new StagedModelType(MBCategory.class),
