@@ -20,6 +20,7 @@ import com.liferay.blogs.model.BlogsEntry;
 import com.liferay.blogs.service.BlogsEntryLocalService;
 import com.liferay.blogs.service.BlogsStatsUserLocalService;
 import com.liferay.exportimport.kernel.lar.BasePortletDataHandler;
+import com.liferay.exportimport.kernel.lar.DataLevel;
 import com.liferay.exportimport.kernel.lar.ExportImportDateUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataHandler;
@@ -47,10 +48,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Zsolt Berentey
  */
 @Component(
-	property = {
-		"javax.portlet.name=" + BlogsPortletKeys.BLOGS,
-		"javax.portlet.name=" + BlogsPortletKeys.BLOGS_ADMIN
-	},
+	property = "javax.portlet.name=" + BlogsPortletKeys.BLOGS,
 	service = PortletDataHandler.class
 )
 public class BlogsPortletDataHandler extends BasePortletDataHandler {
@@ -71,6 +69,7 @@ public class BlogsPortletDataHandler extends BasePortletDataHandler {
 
 	@Activate
 	protected void activate() {
+		setDataLevel(DataLevel.PORTLET_INSTANCE);
 		setDeletionSystemEventStagedModelTypes(
 			new StagedModelType(BlogsEntry.class));
 		setExportControls(
