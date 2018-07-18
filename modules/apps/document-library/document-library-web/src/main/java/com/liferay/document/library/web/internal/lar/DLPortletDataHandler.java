@@ -30,6 +30,7 @@ import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalService;
 import com.liferay.document.library.kernel.service.DLFileShortcutLocalService;
 import com.liferay.document.library.kernel.service.DLFolderLocalService;
 import com.liferay.exportimport.kernel.lar.BasePortletDataHandler;
+import com.liferay.exportimport.kernel.lar.DataLevel;
 import com.liferay.exportimport.kernel.lar.ExportImportDateUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataHandler;
@@ -87,10 +88,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Zsolt Berentey
  */
 @Component(
-	property = {
-		"javax.portlet.name=" + DLPortletKeys.DOCUMENT_LIBRARY,
-		"javax.portlet.name=" + DLPortletKeys.DOCUMENT_LIBRARY_ADMIN
-	},
+	property = "javax.portlet.name=" + DLPortletKeys.DOCUMENT_LIBRARY,
 	service = PortletDataHandler.class
 )
 public class DLPortletDataHandler extends BasePortletDataHandler {
@@ -116,6 +114,7 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 
 	@Activate
 	protected void activate(BundleContext bundleContext) {
+		setDataLevel(DataLevel.PORTLET_INSTANCE);
 		setDataLocalized(true);
 		setDataPortletPreferences("rootFolderId");
 		setDeletionSystemEventStagedModelTypes(
