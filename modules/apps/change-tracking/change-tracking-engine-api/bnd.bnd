@@ -1,3 +1,4 @@
 Bundle-Name: Liferay Change Tracking Engine API
 Bundle-SymbolicName: com.liferay.change.tracking.engine.api
 Bundle-Version: 1.0.0
+Export-Package: com.liferay.change.tracking.engine.configuration
