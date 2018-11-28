@@ -139,8 +139,10 @@ public interface ChangeTrackingConfiguration<T, U> {
 			public BuildStep addVersionEntity(
 				Class<U> versionEntityClass,
 				Function<Long, U> versionEntityByVersionEntityIdFunction,
-				Function<U, Serializable> resourceEntityIdFromVersionEntityFunction,
-				Function<U, Serializable> versionEntityIdFromVersionEntityFunction,
+				Function<U, Serializable>
+					resourceEntityIdFromVersionEntityFunction,
+				Function<U, Serializable>
+					versionEntityIdFromVersionEntityFunction,
 				BaseLocalService versionEntityLocalService,
 				Integer[] versionEntityAllowedStatuses,
 				Function<U, Integer> versionEntityStatusFunction);
