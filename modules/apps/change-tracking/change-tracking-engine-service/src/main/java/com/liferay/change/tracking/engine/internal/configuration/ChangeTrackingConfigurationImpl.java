@@ -17,7 +17,6 @@ package com.liferay.change.tracking.engine.internal.configuration;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.change.tracking.engine.configuration.ChangeTrackingConfiguration;
-import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.service.BaseLocalService;
 
 import java.io.Serializable;
@@ -34,12 +33,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 	@Override
 	public Integer[] getAllowedStatuses() {
 		return _versionEntityInformation.getAllowedStatuses();
-	}
-
-	@Override
-	public Indexer<U> getIndexer() {
-		return _versionEntityInformation._indexerFunction.apply(
-			_versionEntityInformation._class);
 	}
 
 	@Override
@@ -125,21 +118,10 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 		}
 
-		public class IndexerStepImpl implements IndexerStep {
-
-			public BuildStep indexer(Function<Class, Indexer> indexerFunction) {
-				_changesetConfiguration._versionEntityInformation.
-					setIndexerFunction(indexerFunction);
-
-				return new BuildStepImpl();
-			}
-
-		}
-
 		public class VersionEntityStepImpl<T, U>
 			implements VersionEntityStep<T, U> {
 
-			public IndexerStep addVersionEntity(
+			public BuildStep addVersionEntity(
 				Class<U> versionEntityClass,
 				Function<U, Serializable> resourceEntityIdFunction,
 				Function<Long, U> versionEntityFunction,
@@ -155,7 +137,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 						versionEntityLocalService, allowedStatuses,
 						statusFunction);
 
-				return new IndexerStepImpl();
+				return new BuildStepImpl();
 			}
 
 		}
@@ -202,10 +184,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			return _class;
 		}
 
-		public Function<Class<T>, Indexer<T>> getIndexerFunction() {
-			return _indexerFunction;
-		}
-
 		public Function<Long, T> getResourceEntityFunction() {
 			return _resourceEntityFunction;
 		}
@@ -226,16 +204,9 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			return _versionIdFunction;
 		}
 
-		public void setIndexerFunction(
-			Function<Class<T>, Indexer<T>> indexerFunction) {
-
-			_indexerFunction = indexerFunction;
-		}
-
 		private final Integer[] _allowedStatuses;
 		private final BaseLocalService _baseLocalService;
 		private final Class<T> _class;
-		private Function<Class<T>, Indexer<T>> _indexerFunction;
 		private final Function<Long, T> _resourceEntityFunction;
 		private final Function<T, Serializable> _resourceIdFunction;
 		private final Function<T, Integer> _statusFunction;
