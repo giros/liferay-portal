@@ -28,28 +28,94 @@ import java.util.function.Function;
 @ProviderType
 public interface ChangeTrackingConfiguration<T, U> {
 
+	/**
+	 * Returns the function from the configuration that retrieves the resource
+	 * entity by it's primary key
+	 *
+	 * @return The function from the configuration that retrieves the resource
+	 *         entity by it's primary key
+	 */
 	public Function<Long, T> getResourceEntityByResourceEntityIdFunction();
 
+	/**
+	 * Returns the resource entity's class from the configuration
+	 *
+	 * @return The resource entity's class from the configuration
+	 */
 	public Class<T> getResourceEntityClass();
 
+	/**
+	 * Returns the function from the configuration that retrieves the resource
+	 * entity's primary key from the resource entity
+	 *
+	 * @return The function from the configuration that retrieves the resource
+	 *         entity's primary key from the resource entity
+	 */
 	public Function<T, Serializable>
 		getResourceEntityIdFromResourceEntityFunction();
 
+	/**
+	 * Returns the function from the configuration that retrieves the resource
+	 * entity's primary key from the version entity
+	 *
+	 * @return The function from the configuration that retrieves the resource
+	 *         entity's primary key from the version entity
+	 */
 	public Function<U, Serializable>
 		getResourceEntityIdFromVersionEntityFunction();
 
+	/**
+	 * Returns an array of the allowed workflow statuses for the version entity
+	 * from the configuration
+	 *
+	 * @return An array of the allowed workflow statuses for the version entity
+	 *         from the configuration
+	 */
 	public Integer[] getVersionEntityAllowedStatuses();
 
+	/**
+	 * Returns the function from the configuration that retrieves the version
+	 * entity by it's primary key
+	 *
+	 * @return The function from the configuration that retrieves the version
+	 *         entity by it's primary key
+	 */
 	public Function<Long, U> getVersionEntityByVersionEntityIdFunction();
 
+	/**
+	 * Returns the version entity's class from the configuration
+	 *
+	 * @return The version entity's class from the configuration
+	 */
 	public Class<U> getVersionEntityClass();
 
+	/**
+	 * Returns the function from the configuration that retrieves the version
+	 * entity's primary key from the resource entity
+	 *
+	 * @return The function from the configuration that retrieves the version
+	 *         entity's primary key from the resource entity
+	 */
 	public Function<T, Serializable>
 		getVersionEntityIdFromResourceEntityFunction();
 
+	/**
+	 * Returns the function from the configuration that retrieves the version
+	 * entity's primary key from the version entity
+	 *
+	 * @return The function from the configuration that retrieves the version
+	 *         entity's primary key from the version entity
+	 */
 	public Function<U, Serializable>
 		getVersionEntityIdFromVersionEntityFunction();
 
+	/**
+	 * Returns the function from the configuration that retrieves the version
+	 * entity's workflow status from the version entity
+	 *
+	 * @return The function from the configuration that retrieves the version
+	 *         entity's workflow status from the version entity
+	 */
 	public Function<U, Integer> getVersionEntityStatusFunction();
 
 	public interface Builder<T, U> {
