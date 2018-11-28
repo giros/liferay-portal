@@ -74,8 +74,8 @@ public interface ChangeTrackingConfiguration<T, U> {
 
 		public BuildStep addVersionEntity(
 			Class<U> versionEntityClass,
-			Function<U, Serializable> resourceEntityIdFromVersionEntityFunction,
 			Function<Long, U> versionEntityByVersionEntityIdFunction,
+			Function<U, Serializable> resourceEntityIdFromVersionEntityFunction,
 			Function<U, Serializable> versionEntityIdFromVersionEntityFunction,
 			BaseLocalService versionEntityLocalService,
 			Integer[] versionEntityAllowedStatuses,

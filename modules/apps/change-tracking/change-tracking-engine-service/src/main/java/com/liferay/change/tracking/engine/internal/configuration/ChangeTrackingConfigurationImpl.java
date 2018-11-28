@@ -32,7 +32,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 	@Override
 	public Function<Long, T> getResourceEntityByResourceEntityIdFunction() {
-		return _resouceEntityInformation.getResourceEntityFunction();
+		return _resouceEntityInformation.getEntityFunction();
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 	@Override
 	public Function<Long, U> getVersionEntityByVersionEntityIdFunction() {
-		return _versionEntityInformation.getVersionEntityFunction();
+		return _versionEntityInformation.getEntityFunction();
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 				new EntityInformation<>(
 					resourceEntityClass,
 					resourceEntityByResourceEntityIdFunction,
-					resourceEntityIdFromResourceEntityFunction, null,
+					resourceEntityIdFromResourceEntityFunction,
 					versionEntityIdFromResourceEntityFunction,
 					resourceEntityLocalService, null, null);
 
@@ -127,9 +127,9 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 			public BuildStep addVersionEntity(
 				Class<U> versionEntityClass,
+				Function<Long, U> versionEntityByVersionEntityIdFunction,
 				Function<U, Serializable>
 					resourceEntityIdFromVersionEntityFunction,
-				Function<Long, U> versionEntityByVersionEntityIdFunction,
 				Function<U, Serializable>
 					versionEntityIdFromVersionEntityFunction,
 				BaseLocalService versionEntityLocalService,
@@ -138,9 +138,9 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 				_changesetConfiguration._versionEntityInformation =
 					new EntityInformation<>(
-						versionEntityClass, null,
-						resourceEntityIdFromVersionEntityFunction,
+						versionEntityClass,
 						versionEntityByVersionEntityIdFunction,
+						resourceEntityIdFromVersionEntityFunction,
 						versionEntityIdFromVersionEntityFunction,
 						versionEntityLocalService, versionEntityAllowedStatuses,
 						versionEntityStatusFunction);
@@ -163,17 +163,15 @@ public class ChangeTrackingConfigurationImpl<T, U>
 	private static class EntityInformation<T> {
 
 		public EntityInformation(
-			Class<T> entityClass, Function<Long, T> resourceEntityFunction,
+			Class<T> entityClass, Function<Long, T> entityFunction,
 			Function<T, Serializable> resourceEntityIdFunction,
-			Function<Long, T> versionEntityFunction,
 			Function<T, Serializable> versionEntityIdFunction,
 			BaseLocalService entityLocalService, Integer[] allowedStatuses,
 			Function<T, Integer> statusFunction) {
 
 			_entityClass = entityClass;
-			_resourceEntityFunction = resourceEntityFunction;
+			_entityFunction = entityFunction;
 			_resourceEntityIdFunction = resourceEntityIdFunction;
-			_versionEntityFunction = versionEntityFunction;
 			_versionEntityIdFunction = versionEntityIdFunction;
 			_entityLocalService = entityLocalService;
 			_allowedStatuses = allowedStatuses;
@@ -188,12 +186,12 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			return _entityClass;
 		}
 
-		public BaseLocalService getEntityLocalService() {
-			return _entityLocalService;
+		public Function<Long, T> getEntityFunction() {
+			return _entityFunction;
 		}
 
-		public Function<Long, T> getResourceEntityFunction() {
-			return _resourceEntityFunction;
+		public BaseLocalService getEntityLocalService() {
+			return _entityLocalService;
 		}
 
 		public Function<T, Serializable> getResourceIdFunction() {
@@ -204,21 +202,16 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			return _statusFunction;
 		}
 
-		public Function<Long, T> getVersionEntityFunction() {
-			return _versionEntityFunction;
-		}
-
 		public Function<T, Serializable> getVersionIdFunction() {
 			return _versionEntityIdFunction;
 		}
 
 		private final Integer[] _allowedStatuses;
 		private final Class<T> _entityClass;
+		private final Function<Long, T> _entityFunction;
 		private final BaseLocalService _entityLocalService;
-		private final Function<Long, T> _resourceEntityFunction;
 		private final Function<T, Serializable> _resourceEntityIdFunction;
 		private final Function<T, Integer> _statusFunction;
-		private final Function<Long, T> _versionEntityFunction;
 		private final Function<T, Serializable> _versionEntityIdFunction;
 
 	}
