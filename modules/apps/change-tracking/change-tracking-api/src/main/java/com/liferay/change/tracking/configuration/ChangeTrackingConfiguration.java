@@ -120,7 +120,7 @@ public interface ChangeTrackingConfiguration<T, U> {
 
 	public interface Builder<T, U> {
 
-		public VersionEntityStep<T, U> addResourceEntity(
+		public VersionEntityStep<U> addResourceEntity(
 			Class<T> resourceEntityClass,
 			Function<Long, T> resourceEntityByResourceEntityIdFunction,
 			Function<T, Serializable>
@@ -134,7 +134,7 @@ public interface ChangeTrackingConfiguration<T, U> {
 
 		}
 
-		public interface VersionEntityStep<T, U> {
+		public interface VersionEntityStep<U> {
 
 			public BuildStep addVersionEntity(
 				Class<U> versionEntityClass,
