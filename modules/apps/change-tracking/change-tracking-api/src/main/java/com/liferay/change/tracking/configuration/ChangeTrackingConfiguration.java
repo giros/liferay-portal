@@ -128,24 +128,24 @@ public interface ChangeTrackingConfiguration<T, U> {
 			Function<T, Serializable> versionEntityIdFromResourceEntityFunction,
 			BaseLocalService resourceEntityLocalService);
 
-	}
+		public interface BuildStep {
 
-	public interface BuildStep {
+			public ChangeTrackingConfiguration build();
 
-		public ChangeTrackingConfiguration build();
+		}
 
-	}
+		public interface VersionEntityStep<T, U> {
 
-	public interface VersionEntityStep<T, U> {
+			public BuildStep addVersionEntity(
+				Class<U> versionEntityClass,
+				Function<Long, U> versionEntityByVersionEntityIdFunction,
+				Function<U, Serializable> resourceEntityIdFromVersionEntityFunction,
+				Function<U, Serializable> versionEntityIdFromVersionEntityFunction,
+				BaseLocalService versionEntityLocalService,
+				Integer[] versionEntityAllowedStatuses,
+				Function<U, Integer> versionEntityStatusFunction);
 
-		public BuildStep addVersionEntity(
-			Class<U> versionEntityClass,
-			Function<Long, U> versionEntityByVersionEntityIdFunction,
-			Function<U, Serializable> resourceEntityIdFromVersionEntityFunction,
-			Function<U, Serializable> versionEntityIdFromVersionEntityFunction,
-			BaseLocalService versionEntityLocalService,
-			Integer[] versionEntityAllowedStatuses,
-			Function<U, Integer> versionEntityStatusFunction);
+		}
 
 	}
 
