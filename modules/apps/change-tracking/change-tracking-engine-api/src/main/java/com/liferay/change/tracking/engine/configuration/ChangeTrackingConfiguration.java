@@ -28,11 +28,9 @@ import java.util.function.Function;
 @ProviderType
 public interface ChangeTrackingConfiguration<T, U> {
 
-	public Integer[] getAllowedStatuses();
+	public Function<Long, T> getResourceEntityByResourceEntityIdFunction();
 
 	public Class<T> getResourceEntityClass();
-
-	public Function<Long, T> getResourceEntityFunction();
 
 	public Function<T, Serializable>
 		getResourceEntityIdFromResourceEntityFunction();
@@ -40,11 +38,11 @@ public interface ChangeTrackingConfiguration<T, U> {
 	public Function<U, Serializable>
 		getResourceEntityIdFromVersionEntityFunction();
 
-	public Function<U, Integer> getStatusFunction();
+	public Integer[] getVersionEntityAllowedStatuses();
+
+	public Function<Long, U> getVersionEntityByVersionEntityIdFunction();
 
 	public Class<U> getVersionEntityClass();
-
-	public Function<Long, U> getVersionEntityFunction();
 
 	public Function<T, Serializable>
 		getVersionEntityIdFromResourceEntityFunction();
@@ -52,13 +50,16 @@ public interface ChangeTrackingConfiguration<T, U> {
 	public Function<U, Serializable>
 		getVersionEntityIdFromVersionEntityFunction();
 
+	public Function<U, Integer> getVersionEntityStatusFunction();
+
 	public interface Builder<T, U> {
 
 		public VersionEntityStep<T, U> addResourceEntity(
 			Class<T> resourceEntityClass,
-			Function<Long, T> resourceEntityFunction,
-			Function<T, Serializable> resourceEntityIdFunction,
-			Function<T, Serializable> versionEntityIdFunction,
+			Function<Long, T> resourceEntityByResourceEntityIdFunction,
+			Function<T, Serializable>
+				resourceEntityIdFromResourceEntityFunction,
+			Function<T, Serializable> versionEntityIdFromResourceEntityFunction,
 			BaseLocalService resourceEntityLocalService);
 
 	}
@@ -73,11 +74,12 @@ public interface ChangeTrackingConfiguration<T, U> {
 
 		public BuildStep addVersionEntity(
 			Class<U> versionEntityClass,
-			Function<U, Serializable> resourceEntityIdFunction,
-			Function<Long, U> versionEntityFunction,
-			Function<U, Serializable> versionEntityIdFunction,
+			Function<U, Serializable> resourceEntityIdFromVersionEntityFunction,
+			Function<Long, U> versionEntityByVersionEntityIdFunction,
+			Function<U, Serializable> versionEntityIdFromVersionEntityFunction,
 			BaseLocalService versionEntityLocalService,
-			Integer[] allowedStatuses, Function<U, Integer> statusFunction);
+			Integer[] versionEntityAllowedStatuses,
+			Function<U, Integer> versionEntityStatusFunction);
 
 	}
 
