@@ -21,10 +21,7 @@ import com.liferay.portal.kernel.service.BaseLocalService;
 
 import java.io.Serializable;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author Mate Thurzo
@@ -33,8 +30,6 @@ import java.util.function.Supplier;
 public interface ChangeTrackingConfiguration<T, U> {
 
 	public Integer[] getAllowedStatuses();
-
-	public List<Supplier<? extends Collection<U>>> getBaselining();
 
 	public Indexer getIndexer();
 
@@ -59,13 +54,6 @@ public interface ChangeTrackingConfiguration<T, U> {
 
 	public Function<U, Serializable>
 		getVersionEntityIdFromVersionEntityFunction();
-
-	public interface BaseliningStep<T, U> {
-
-		public IndexerStep baselining(
-			Supplier<? extends Collection<U>> baseliningSupplier);
-
-	}
 
 	public interface Builder<T, U> {
 
@@ -92,7 +80,7 @@ public interface ChangeTrackingConfiguration<T, U> {
 
 	public interface VersionEntityStep<T, U> {
 
-		public BaseliningStep<T, U> addVersionEntity(
+		public IndexerStep addVersionEntity(
 			Class<U> versionEntityClass,
 			Function<U, Serializable> resourceEntityIdFunction,
 			Function<Long, U> versionEntityFunction,
