@@ -36,8 +36,6 @@ public interface ChangeTrackingConfiguration<T, U> {
 
 	public List<Supplier<? extends Collection<U>>> getBaselining();
 
-	public String getIdentifier();
-
 	public Indexer getIndexer();
 
 	public Class<T> getResourceEntityClass();
@@ -73,7 +71,12 @@ public interface ChangeTrackingConfiguration<T, U> {
 
 	public interface Builder<T, U> {
 
-		public ResourceEntityStep<T, U> identifier(String identifier);
+		public VersionEntityStep<T, U> addResourceEntity(
+			Class<T> resourceEntityClass,
+			Function<Long, T> resourceEntityFunction,
+			Function<T, Serializable> resourceEntityIdFunction,
+			Function<T, Serializable> versionEntityIdFunction,
+			BaseLocalService resourceEntityLocalService);
 
 	}
 
@@ -86,17 +89,6 @@ public interface ChangeTrackingConfiguration<T, U> {
 	public interface IndexerStep {
 
 		public BuildStep indexer(Function<Class, Indexer> indexerFunction);
-
-	}
-
-	public interface ResourceEntityStep<T, U> {
-
-		public VersionEntityStep<T, U> addResourceEntity(
-			Class<T> resourceEntityClass,
-			Function<Long, T> resourceEntityFunction,
-			Function<T, Serializable> resourceEntityIdFunction,
-			Function<T, Serializable> versionEntityIdFunction,
-			BaseLocalService resourceEntityLocalService);
 
 	}
 
