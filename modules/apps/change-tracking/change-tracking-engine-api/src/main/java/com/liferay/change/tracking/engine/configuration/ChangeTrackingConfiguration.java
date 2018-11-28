@@ -60,8 +60,6 @@ public interface ChangeTrackingConfiguration<T, U> {
 	public Function<U, Serializable>
 		getVersionEntityIdFromVersionEntityFunction();
 
-	public Function<U, ? extends Serializable> getVersionFunction();
-
 	public interface BaseliningStep<T, U> {
 
 		public IndexerStep baselining(
@@ -99,7 +97,6 @@ public interface ChangeTrackingConfiguration<T, U> {
 			Function<U, Serializable> resourceEntityIdFunction,
 			Function<Long, U> versionEntityFunction,
 			Function<U, Serializable> versionEntityIdFunction,
-			Function<U, ? extends Serializable> versionEntityVersionFunction,
 			BaseLocalService versionEntityLocalService,
 			Integer[] allowedStatuses, Function<U, Integer> statusFunction);
 

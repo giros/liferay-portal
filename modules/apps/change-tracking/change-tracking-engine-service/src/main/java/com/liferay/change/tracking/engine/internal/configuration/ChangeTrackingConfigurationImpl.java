@@ -103,11 +103,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 		return _versionEntityInformation.getVersionIdFunction();
 	}
 
-	@Override
-	public Function<U, ? extends Serializable> getVersionFunction() {
-		return _versionEntityInformation.getVersionFunction();
-	}
-
 	public static class BuilderImpl<T, U> implements Builder<T, U> {
 
 		public BuilderImpl() {
@@ -171,8 +166,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 				Function<U, Serializable> resourceEntityIdFunction,
 				Function<Long, U> versionEntityFunction,
 				Function<U, Serializable> versionEntityIdFunction,
-				Function<U, ? extends Serializable>
-					versionEntityVersionFunction,
 				BaseLocalService versionEntityLocalService,
 				Integer[] allowedStatuses,
 				Function<U, Integer> statusFunction) {
@@ -183,9 +176,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 						versionEntityFunction, versionEntityIdFunction,
 						versionEntityLocalService, allowedStatuses,
 						statusFunction);
-
-				_changesetConfiguration._versionEntityInformation.
-					setVersionFunction(versionEntityVersionFunction);
 
 				return new BaseliningStepImpl<>();
 			}
@@ -256,10 +246,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			return _versionEntityFunction;
 		}
 
-		public Function<T, ? extends Serializable> getVersionFunction() {
-			return _versionFunction;
-		}
-
 		public Function<T, Serializable> getVersionIdFunction() {
 			return _versionIdFunction;
 		}
@@ -270,12 +256,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			_indexerFunction = indexerFunction;
 		}
 
-		public void setVersionFunction(
-			Function<T, ? extends Serializable> versionFunction) {
-
-			_versionFunction = versionFunction;
-		}
-
 		private final Integer[] _allowedStatuses;
 		private final BaseLocalService _baseLocalService;
 		private final Class<T> _class;
@@ -284,7 +264,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 		private final Function<T, Serializable> _resourceIdFunction;
 		private final Function<T, Integer> _statusFunction;
 		private final Function<Long, T> _versionEntityFunction;
-		private Function<T, ? extends Serializable> _versionFunction;
 		private final Function<T, Serializable> _versionIdFunction;
 
 	}
