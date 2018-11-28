@@ -31,18 +31,13 @@ public class ChangeTrackingConfigurationImpl<T, U>
 	implements ChangeTrackingConfiguration<T, U> {
 
 	@Override
-	public Integer[] getAllowedStatuses() {
-		return _versionEntityInformation.getAllowedStatuses();
+	public Function<Long, T> getResourceEntityByResourceEntityIdFunction() {
+		return _resouceEntityInformation.getResourceEntityFunction();
 	}
 
 	@Override
 	public Class<T> getResourceEntityClass() {
 		return _resouceEntityInformation.getEntityClass();
-	}
-
-	@Override
-	public Function<Long, T> getResourceEntityFunction() {
-		return _resouceEntityInformation.getResourceEntityFunction();
 	}
 
 	@Override
@@ -60,17 +55,18 @@ public class ChangeTrackingConfigurationImpl<T, U>
 	}
 
 	@Override
-	public Function<U, Integer> getStatusFunction() {
-		return _versionEntityInformation.getStatusFunction();
+	public Integer[] getVersionEntityAllowedStatuses() {
+		return _versionEntityInformation.getAllowedStatuses();
+	}
+
+	@Override
+	public Function<Long, U> getVersionEntityByVersionEntityIdFunction() {
+		return _versionEntityInformation.getVersionEntityFunction();
 	}
 
 	@Override
 	public Class<U> getVersionEntityClass() {
 		return _versionEntityInformation.getEntityClass();
-	}
-
-	public Function<Long, U> getVersionEntityFunction() {
-		return _versionEntityInformation.getVersionEntityFunction();
 	}
 
 	@Override
@@ -87,6 +83,11 @@ public class ChangeTrackingConfigurationImpl<T, U>
 		return _versionEntityInformation.getVersionIdFunction();
 	}
 
+	@Override
+	public Function<U, Integer> getVersionEntityStatusFunction() {
+		return _versionEntityInformation.getStatusFunction();
+	}
+
 	public static class BuilderImpl<T, U> implements Builder<T, U> {
 
 		public BuilderImpl() {
@@ -95,15 +96,18 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 		public VersionEntityStep<T, U> addResourceEntity(
 			Class<T> resourceEntityClass,
-			Function<Long, T> resourceEntityFunction,
-			Function<T, Serializable> resourceEntityIdFunction,
-			Function<T, Serializable> versionEntityIdFunction,
+			Function<Long, T> resourceEntityByResourceEntityIdFunction,
+			Function<T, Serializable>
+				resourceEntityIdFromResourceEntityFunction,
+			Function<T, Serializable> versionEntityIdFromResourceEntityFunction,
 			BaseLocalService resourceEntityLocalService) {
 
 			_changesetConfiguration._resouceEntityInformation =
 				new EntityInformation<>(
-					resourceEntityClass, resourceEntityFunction,
-					resourceEntityIdFunction, null, versionEntityIdFunction,
+					resourceEntityClass,
+					resourceEntityByResourceEntityIdFunction,
+					resourceEntityIdFromResourceEntityFunction, null,
+					versionEntityIdFromResourceEntityFunction,
 					resourceEntityLocalService, null, null);
 
 			return new VersionEntityStepImpl<>();
@@ -123,19 +127,23 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 			public BuildStep addVersionEntity(
 				Class<U> versionEntityClass,
-				Function<U, Serializable> resourceEntityIdFunction,
-				Function<Long, U> versionEntityFunction,
-				Function<U, Serializable> versionEntityIdFunction,
+				Function<U, Serializable>
+					resourceEntityIdFromVersionEntityFunction,
+				Function<Long, U> versionEntityByVersionEntityIdFunction,
+				Function<U, Serializable>
+					versionEntityIdFromVersionEntityFunction,
 				BaseLocalService versionEntityLocalService,
-				Integer[] allowedStatuses,
-				Function<U, Integer> statusFunction) {
+				Integer[] versionEntityAllowedStatuses,
+				Function<U, Integer> versionEntityStatusFunction) {
 
 				_changesetConfiguration._versionEntityInformation =
 					new EntityInformation<>(
-						versionEntityClass, null, resourceEntityIdFunction,
-						versionEntityFunction, versionEntityIdFunction,
-						versionEntityLocalService, allowedStatuses,
-						statusFunction);
+						versionEntityClass, null,
+						resourceEntityIdFromVersionEntityFunction,
+						versionEntityByVersionEntityIdFunction,
+						versionEntityIdFromVersionEntityFunction,
+						versionEntityLocalService, versionEntityAllowedStatuses,
+						versionEntityStatusFunction);
 
 				return new BuildStepImpl();
 			}
