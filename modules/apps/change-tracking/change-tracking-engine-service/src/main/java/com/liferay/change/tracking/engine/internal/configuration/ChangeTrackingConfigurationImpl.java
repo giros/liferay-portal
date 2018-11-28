@@ -22,11 +22,7 @@ import com.liferay.portal.kernel.service.BaseLocalService;
 
 import java.io.Serializable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author Mate Thurzo
@@ -38,11 +34,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 	@Override
 	public Integer[] getAllowedStatuses() {
 		return _versionEntityInformation.getAllowedStatuses();
-	}
-
-	@Override
-	public List<Supplier<? extends Collection<U>>> getBaselining() {
-		return _baseliningSuppliers;
 	}
 
 	@Override
@@ -125,19 +116,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			return new VersionEntityStepImpl<>();
 		}
 
-		public class BaseliningStepImpl<T, U> implements BaseliningStep<T, U> {
-
-			public IndexerStep baselining(
-				Supplier<? extends Collection<U>> baseliningSupplier) {
-
-				_changesetConfiguration._baseliningSuppliers.add(
-					baseliningSupplier);
-
-				return new IndexerStepImpl();
-			}
-
-		}
-
 		public class BuildStepImpl implements BuildStep {
 
 			@Override
@@ -161,7 +139,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 		public class VersionEntityStepImpl<T, U>
 			implements VersionEntityStep<T, U> {
 
-			public BaseliningStep<T, U> addVersionEntity(
+			public IndexerStep addVersionEntity(
 				Class<U> versionEntityClass,
 				Function<U, Serializable> resourceEntityIdFunction,
 				Function<Long, U> versionEntityFunction,
@@ -177,7 +155,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 						versionEntityLocalService, allowedStatuses,
 						statusFunction);
 
-				return new BaseliningStepImpl<>();
+				return new IndexerStepImpl();
 			}
 
 		}
@@ -189,8 +167,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 	private ChangeTrackingConfigurationImpl() {
 	}
 
-	private final List<Supplier<? extends Collection<U>>> _baseliningSuppliers =
-		new ArrayList<>();
 	private EntityInformation<T> _resouceEntityInformation;
 	private EntityInformation<U> _versionEntityInformation;
 
