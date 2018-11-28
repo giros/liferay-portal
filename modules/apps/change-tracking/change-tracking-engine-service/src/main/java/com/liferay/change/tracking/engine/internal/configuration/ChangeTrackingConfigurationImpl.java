@@ -94,7 +94,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			_changesetConfiguration = new ChangeTrackingConfigurationImpl<>();
 		}
 
-		public VersionEntityStep<T, U> addResourceEntity(
+		public VersionEntityStep<U> addResourceEntity(
 			Class<T> resourceEntityClass,
 			Function<Long, T> resourceEntityByResourceEntityIdFunction,
 			Function<T, Serializable>
@@ -122,8 +122,8 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 		}
 
-		public class VersionEntityStepImpl<T, U>
-			implements VersionEntityStep<T, U> {
+		public class VersionEntityStepImpl<U>
+			implements VersionEntityStep<U> {
 
 			public BuildStep addVersionEntity(
 				Class<U> versionEntityClass,
