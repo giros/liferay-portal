@@ -170,12 +170,12 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			BaseLocalService entityLocalService, Integer[] allowedStatuses,
 			Function<T, Integer> statusFunction) {
 
-			_class = entityClass;
+			_entityClass = entityClass;
 			_resourceEntityFunction = resourceEntityFunction;
-			_resourceIdFunction = resourceEntityIdFunction;
+			_resourceEntityIdFunction = resourceEntityIdFunction;
 			_versionEntityFunction = versionEntityFunction;
-			_versionIdFunction = versionEntityIdFunction;
-			_baseLocalService = entityLocalService;
+			_versionEntityIdFunction = versionEntityIdFunction;
+			_entityLocalService = entityLocalService;
 			_allowedStatuses = allowedStatuses;
 			_statusFunction = statusFunction;
 		}
@@ -184,12 +184,12 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			return _allowedStatuses;
 		}
 
-		public BaseLocalService getBaseLocalService() {
-			return _baseLocalService;
+		public Class<T> getEntityClass() {
+			return _entityClass;
 		}
 
-		public Class<T> getEntityClass() {
-			return _class;
+		public BaseLocalService getEntityLocalService() {
+			return _entityLocalService;
 		}
 
 		public Function<Long, T> getResourceEntityFunction() {
@@ -197,7 +197,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 		}
 
 		public Function<T, Serializable> getResourceIdFunction() {
-			return _resourceIdFunction;
+			return _resourceEntityIdFunction;
 		}
 
 		public Function<T, Integer> getStatusFunction() {
@@ -209,17 +209,17 @@ public class ChangeTrackingConfigurationImpl<T, U>
 		}
 
 		public Function<T, Serializable> getVersionIdFunction() {
-			return _versionIdFunction;
+			return _versionEntityIdFunction;
 		}
 
 		private final Integer[] _allowedStatuses;
-		private final BaseLocalService _baseLocalService;
-		private final Class<T> _class;
+		private final Class<T> _entityClass;
+		private final BaseLocalService _entityLocalService;
 		private final Function<Long, T> _resourceEntityFunction;
-		private final Function<T, Serializable> _resourceIdFunction;
+		private final Function<T, Serializable> _resourceEntityIdFunction;
 		private final Function<T, Integer> _statusFunction;
 		private final Function<Long, T> _versionEntityFunction;
-		private final Function<T, Serializable> _versionIdFunction;
+		private final Function<T, Serializable> _versionEntityIdFunction;
 
 	}
 
