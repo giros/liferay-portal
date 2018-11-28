@@ -16,7 +16,6 @@ package com.liferay.change.tracking.configuration;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.service.BaseLocalService;
 
 import java.io.Serializable;
@@ -30,8 +29,6 @@ import java.util.function.Function;
 public interface ChangeTrackingConfiguration<T, U> {
 
 	public Integer[] getAllowedStatuses();
-
-	public Indexer getIndexer();
 
 	public Class<T> getResourceEntityClass();
 
@@ -72,15 +69,9 @@ public interface ChangeTrackingConfiguration<T, U> {
 
 	}
 
-	public interface IndexerStep {
-
-		public BuildStep indexer(Function<Class, Indexer> indexerFunction);
-
-	}
-
 	public interface VersionEntityStep<T, U> {
 
-		public IndexerStep addVersionEntity(
+		public BuildStep addVersionEntity(
 			Class<U> versionEntityClass,
 			Function<U, Serializable> resourceEntityIdFunction,
 			Function<Long, U> versionEntityFunction,
