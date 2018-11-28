@@ -46,11 +46,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 	}
 
 	@Override
-	public String getIdentifier() {
-		return _identifier;
-	}
-
-	@Override
 	public Indexer<U> getIndexer() {
 		return _versionEntityInformation._indexerFunction.apply(
 			_versionEntityInformation._class);
@@ -119,10 +114,20 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			_changesetConfiguration = new ChangeTrackingConfigurationImpl<>();
 		}
 
-		public ResourceEntityStep<T, U> identifier(String identifier) {
-			_changesetConfiguration._identifier = identifier;
+		public VersionEntityStep<T, U> addResourceEntity(
+			Class<T> resourceEntityClass,
+			Function<Long, T> resourceEntityFunction,
+			Function<T, Serializable> resourceEntityIdFunction,
+			Function<T, Serializable> versionEntityIdFunction,
+			BaseLocalService resourceEntityLocalService) {
 
-			return new ResourceEntityStepImpl<>();
+			_changesetConfiguration._resouceEntityInformation =
+				new EntityInformation<>(
+					resourceEntityClass, resourceEntityFunction,
+					resourceEntityIdFunction, null, versionEntityIdFunction,
+					resourceEntityLocalService, null, null);
+
+			return new VersionEntityStepImpl<>();
 		}
 
 		public class BaseliningStepImpl<T, U> implements BaseliningStep<T, U> {
@@ -154,27 +159,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 					setIndexerFunction(indexerFunction);
 
 				return new BuildStepImpl();
-			}
-
-		}
-
-		public class ResourceEntityStepImpl<T, U>
-			implements ResourceEntityStep<T, U> {
-
-			public VersionEntityStep<T, U> addResourceEntity(
-				Class<T> resourceEntityClass,
-				Function<Long, T> resourceEntityFunction,
-				Function<T, Serializable> resourceEntityIdFunction,
-				Function<T, Serializable> versionEntityIdFunction,
-				BaseLocalService resourceEntityLocalService) {
-
-				_changesetConfiguration._resouceEntityInformation =
-					new EntityInformation<>(
-						resourceEntityClass, resourceEntityFunction,
-						resourceEntityIdFunction, null, versionEntityIdFunction,
-						resourceEntityLocalService, null, null);
-
-				return new VersionEntityStepImpl<>();
 			}
 
 		}
@@ -217,7 +201,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 	private final List<Supplier<? extends Collection<U>>> _baseliningSuppliers =
 		new ArrayList<>();
-	private String _identifier;
 	private EntityInformation<T> _resouceEntityInformation;
 	private EntityInformation<U> _versionEntityInformation;
 
