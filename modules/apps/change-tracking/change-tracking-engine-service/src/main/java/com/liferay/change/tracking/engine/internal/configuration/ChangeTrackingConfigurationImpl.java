@@ -122,8 +122,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 		}
 
-		public class VersionEntityStepImpl<U>
-			implements VersionEntityStep<U> {
+		public class VersionEntityStepImpl<U> implements VersionEntityStep<U> {
 
 			public BuildStep addVersionEntity(
 				Class<U> versionEntityClass,
