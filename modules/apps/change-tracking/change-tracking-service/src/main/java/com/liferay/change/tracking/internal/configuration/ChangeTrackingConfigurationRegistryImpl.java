@@ -37,26 +37,27 @@ public class ChangeTrackingConfigurationRegistryImpl
 	implements ChangeTrackingConfigurationRegistry {
 
 	public Optional<ChangeTrackingConfiguration<?, ?>>
-		getChangesetConfigurationByResourceClass(Class<?> clazz) {
+		getChangeTrackingConfigurationByResourceClass(Class<?> clazz) {
 
-		return getChangesetConfigurationByResourceClassName(clazz.getName());
+		return getChangeTrackingConfigurationByResourceClassName(
+			clazz.getName());
 	}
 
 	public Optional<ChangeTrackingConfiguration<?, ?>>
-		getChangesetConfigurationByResourceClassName(String className) {
+		getChangeTrackingConfigurationByResourceClassName(String className) {
 
 		return Optional.ofNullable(
 			_configurationsByResourceClassName.get(className));
 	}
 
 	public Optional<ChangeTrackingConfiguration<?, ?>>
-		getChangesetConfigurationByVersionClass(Class<?> clazz) {
+		getChangeTrackingConfigurationByVersionClass(Class<?> clazz) {
 
-		return getChangesetConfigurationByVersionClassName(clazz.getName());
+		return getChangeTrackingConfigurationByVersionClassName(clazz.getName());
 	}
 
 	public Optional<ChangeTrackingConfiguration<?, ?>>
-		getChangesetConfigurationByVersionClassName(String className) {
+		getChangeTrackingConfigurationByVersionClassName(String className) {
 
 		return Optional.ofNullable(
 			_configurationsByVersionClassName.get(className));
