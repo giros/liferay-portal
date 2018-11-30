@@ -91,7 +91,8 @@ public class ChangeTrackingConfigurationImpl<T, U>
 	public static class BuilderImpl<T, U> implements Builder<T, U> {
 
 		public BuilderImpl() {
-			_changesetConfiguration = new ChangeTrackingConfigurationImpl<>();
+			_changeTrackingConfiguration =
+				new ChangeTrackingConfigurationImpl<>();
 		}
 
 		public VersionEntityStep<U> addResourceEntity(
@@ -102,7 +103,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			Function<T, Serializable> versionEntityIdFromResourceEntityFunction,
 			BaseLocalService resourceEntityLocalService) {
 
-			_changesetConfiguration._resouceEntityInformation =
+			_changeTrackingConfiguration._resouceEntityInformation =
 				new EntityInformation<>(
 					resourceEntityClass,
 					resourceEntityByResourceEntityIdFunction,
@@ -117,7 +118,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 			@Override
 			public ChangeTrackingConfiguration build() {
-				return _changesetConfiguration;
+				return _changeTrackingConfiguration;
 			}
 
 		}
@@ -135,7 +136,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 				Integer[] versionEntityAllowedStatuses,
 				Function<U, Integer> versionEntityStatusFunction) {
 
-				_changesetConfiguration._versionEntityInformation =
+				_changeTrackingConfiguration._versionEntityInformation =
 					new EntityInformation<>(
 						versionEntityClass,
 						versionEntityByVersionEntityIdFunction,
@@ -149,7 +150,8 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 		}
 
-		private final ChangeTrackingConfigurationImpl _changesetConfiguration;
+		private final ChangeTrackingConfigurationImpl
+			_changeTrackingConfiguration;
 
 	}
 

@@ -33,7 +33,7 @@ public interface ChangeTrackingConfigurationRegistry {
 	 *         given resource class
 	 */
 	public Optional<ChangeTrackingConfiguration<?, ?>>
-		getChangesetConfigurationByResourceClass(Class<?> clazz);
+		getChangeTrackingConfigurationByResourceClass(Class<?> clazz);
 
 	/**
 	 * Returns an Optional of the ChangeTrackingConfiguration registered for the
@@ -44,7 +44,7 @@ public interface ChangeTrackingConfigurationRegistry {
 	 *         given resource class' name
 	 */
 	public Optional<ChangeTrackingConfiguration<?, ?>>
-		getChangesetConfigurationByResourceClassName(String className);
+		getChangeTrackingConfigurationByResourceClassName(String className);
 
 	/**
 	 * Returns an Optional of the ChangeTrackingConfiguration registered for the
@@ -55,7 +55,7 @@ public interface ChangeTrackingConfigurationRegistry {
 	 *         given version class
 	 */
 	public Optional<ChangeTrackingConfiguration<?, ?>>
-		getChangesetConfigurationByVersionClass(Class<?> clazz);
+		getChangeTrackingConfigurationByVersionClass(Class<?> clazz);
 
 	/**
 	 * Returns an Optional of the ChangeTrackingConfiguration registered for the
@@ -66,6 +66,6 @@ public interface ChangeTrackingConfigurationRegistry {
 	 *         given version class' name
 	 */
 	public Optional<ChangeTrackingConfiguration<?, ?>>
-		getChangesetConfigurationByVersionClassName(String className);
+		getChangeTrackingConfigurationByVersionClassName(String className);
 
 }
