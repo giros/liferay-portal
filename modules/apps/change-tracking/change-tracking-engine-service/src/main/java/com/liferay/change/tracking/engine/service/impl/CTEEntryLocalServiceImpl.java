@@ -31,9 +31,11 @@ import com.liferay.change.tracking.engine.service.base.CTEEntryLocalServiceBaseI
  * @see com.liferay.change.tracking.engine.service.CTEEntryLocalServiceUtil
  */
 public class CTEEntryLocalServiceImpl extends CTEEntryLocalServiceBaseImpl {
-	/*
+
+	/**
 	 * NOTE FOR DEVELOPERS:
 	 *
 	 * Never reference this class directly. Always use {@link com.liferay.change.tracking.engine.service.CTEEntryLocalServiceUtil} to access the cte entry local service.
 	 */
+
 }

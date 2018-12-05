@@ -27,11 +27,13 @@ import aQute.bnd.annotation.ProviderType;
  */
 @ProviderType
 public class CTECollectionImpl extends CTECollectionBaseImpl {
-	/*
+
+	/**
 	 * NOTE FOR DEVELOPERS:
 	 *
 	 * Never reference this class directly. All methods that expect a cte collection model instance should use the {@link com.liferay.change.tracking.engine.model.CTECollection} interface instead.
 	 */
 	public CTECollectionImpl() {
 	}
+
 }

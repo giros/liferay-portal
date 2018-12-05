@@ -32,9 +32,11 @@ import com.liferay.change.tracking.engine.service.base.CTECollectionLocalService
  */
 public class CTECollectionLocalServiceImpl
 	extends CTECollectionLocalServiceBaseImpl {
-	/*
+
+	/**
 	 * NOTE FOR DEVELOPERS:
 	 *
 	 * Never reference this class directly. Always use {@link com.liferay.change.tracking.engine.service.CTECollectionLocalServiceUtil} to access the cte collection local service.
 	 */
+
 }
