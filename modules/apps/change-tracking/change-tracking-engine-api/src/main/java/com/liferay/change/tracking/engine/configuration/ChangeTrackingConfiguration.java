@@ -16,8 +16,6 @@ package com.liferay.change.tracking.engine.configuration;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.portal.kernel.service.BaseLocalService;
-
 import java.io.Serializable;
 
 import java.util.function.Function;
@@ -120,13 +118,8 @@ public interface ChangeTrackingConfiguration<T, U> {
 
 	public interface Builder<T, U> {
 
-		public VersionEntityStep<U> addResourceEntity(
-			Class<T> resourceEntityClass,
-			Function<Long, T> resourceEntityByResourceEntityIdFunction,
-			Function<T, Serializable>
-				resourceEntityIdFromResourceEntityFunction,
-			Function<T, Serializable>
-				versionEntityIdFromResourceEntityFunction);
+		public ResourceEntityByResourceEntityIdStep<T, U> setEntityClasses(
+			Class<T> resourceEntityClass, Class<U> versionEntityClass);
 
 		public interface BuildStep {
 
@@ -134,15 +127,47 @@ public interface ChangeTrackingConfiguration<T, U> {
 
 		}
 
-		public interface VersionEntityStep<U> {
+		public interface EntityIdsFromResourceEntityStep<T, U> {
 
-			public BuildStep addVersionEntity(
-				Class<U> versionEntityClass,
-				Function<Long, U> versionEntityByVersionEntityIdFunction,
-				Function<U, Serializable>
-					resourceEntityIdFromVersionEntityFunction,
-				Function<U, Serializable>
-					versionEntityIdFromVersionEntityFunction,
+			public VersionEntityByVersionEntityIdStep<U>
+				setEntityIdsFromResourceEntityFunctions(
+					Function<T, Serializable>
+						resourceEntityIdFromResourceEntityFunction,
+					Function<T, Serializable>
+						versionEntityIdFromResourceEntityFunction);
+
+		}
+
+		public interface EntityIdsFromVersionEntityStep<U> {
+
+			public VersionEntityStatusInfoStep<U>
+				setEntityIdsFromVersionEntityFunctions(
+					Function<U, Serializable>
+						resourceEntityIdFromVersionEntityFunction,
+					Function<U, Serializable>
+						versionEntityIdFromVersionEntityFunction);
+
+		}
+
+		public interface ResourceEntityByResourceEntityIdStep<T, U> {
+
+			public EntityIdsFromResourceEntityStep<T, U>
+				setResourceEntityByResourceEntityIdFunction(
+					Function<Long, T> resourceEntityByResourceEntityIdFunction);
+
+		}
+
+		public interface VersionEntityByVersionEntityIdStep<U> {
+
+			public EntityIdsFromVersionEntityStep<U>
+				setversionEntityByVersionEntityIdFunction(
+					Function<Long, U> versionEntityByVersionEntityIdFunction);
+
+		}
+
+		public interface VersionEntityStatusInfoStep<U> {
+
+			public BuildStep setVersionEntityStatusInfo(
 				Integer[] versionEntityAllowedStatuses,
 				Function<U, Integer> versionEntityStatusFunction);
 
