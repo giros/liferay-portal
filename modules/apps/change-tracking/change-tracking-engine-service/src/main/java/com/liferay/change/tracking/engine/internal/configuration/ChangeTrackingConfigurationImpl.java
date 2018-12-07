@@ -17,7 +17,6 @@ package com.liferay.change.tracking.engine.internal.configuration;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.change.tracking.engine.configuration.ChangeTrackingConfiguration;
-import com.liferay.portal.kernel.service.BaseLocalService;
 
 import java.io.Serializable;
 
@@ -95,21 +94,15 @@ public class ChangeTrackingConfigurationImpl<T, U>
 				new ChangeTrackingConfigurationImpl<>();
 		}
 
-		public VersionEntityStep<U> addResourceEntity(
-			Class<T> resourceEntityClass,
-			Function<Long, T> resourceEntityByResourceEntityIdFunction,
-			Function<T, Serializable>
-				resourceEntityIdFromResourceEntityFunction,
-			Function<T, Serializable> versionEntityIdFromResourceEntityFunction) {
+		public ResourceEntityByResourceEntityIdStep<T, U> setEntityClasses(
+			Class<T> resourceEntityClass, Class<U> versionEntityClass) {
 
 			_changeTrackingConfiguration._resouceEntityInformation =
-				new EntityInformation<>(
-					resourceEntityClass,
-					resourceEntityByResourceEntityIdFunction,
-					resourceEntityIdFromResourceEntityFunction,
-					versionEntityIdFromResourceEntityFunction, null, null);
+				new EntityInformation<>(resourceEntityClass);
+			_changeTrackingConfiguration._versionEntityInformation =
+				new EntityInformation<>(versionEntityClass);
 
-			return new VersionEntityStepImpl<>();
+			return new ResourceEntityByResourceEntityIdStepImpl<>();
 		}
 
 		public class BuildStepImpl implements BuildStep {
@@ -121,25 +114,100 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 		}
 
-		public class VersionEntityStepImpl<U> implements VersionEntityStep<U> {
+		public class EntityIdsFromResourceEntityStepImpl<T, U>
+			implements EntityIdsFromResourceEntityStep<T, U> {
 
-			public BuildStep addVersionEntity(
-				Class<U> versionEntityClass,
-				Function<Long, U> versionEntityByVersionEntityIdFunction,
-				Function<U, Serializable>
-					resourceEntityIdFromVersionEntityFunction,
-				Function<U, Serializable>
-					versionEntityIdFromVersionEntityFunction,
+			@Override
+			public VersionEntityByVersionEntityIdStep<U>
+				setEntityIdsFromResourceEntityFunctions(
+					Function<T, Serializable>
+						resourceEntityIdFromResourceEntityFunction,
+					Function<T, Serializable>
+						versionEntityIdFromResourceEntityFunction) {
+
+				_changeTrackingConfiguration.
+					_resouceEntityInformation.setResourceEntityIdFunction(
+						resourceEntityIdFromResourceEntityFunction);
+				_changeTrackingConfiguration.
+					_resouceEntityInformation.setVersionEntityIdFunction(
+						versionEntityIdFromResourceEntityFunction);
+
+				return new VersionEntityByVersionEntityIdStepImpl<>();
+			}
+
+		}
+
+		public class EntityIdsFromVersionEntityStepImpl<U>
+			implements EntityIdsFromVersionEntityStep<U> {
+
+			@Override
+			public VersionEntityStatusInfoStep<U>
+				setEntityIdsFromVersionEntityFunctions(
+					Function<U, Serializable>
+						resourceEntityIdFromVersionEntityFunction,
+					Function<U, Serializable>
+						versionEntityIdFromVersionEntityFunction) {
+
+				_changeTrackingConfiguration.
+					_versionEntityInformation.setResourceEntityIdFunction(
+						resourceEntityIdFromVersionEntityFunction);
+				_changeTrackingConfiguration.
+					_versionEntityInformation.setVersionEntityIdFunction(
+						versionEntityIdFromVersionEntityFunction);
+
+				return new VersionEntityStatusInfoStepImpl<>();
+			}
+
+		}
+
+		public class ResourceEntityByResourceEntityIdStepImpl<T, U>
+			implements ResourceEntityByResourceEntityIdStep<T, U> {
+
+			@Override
+			public EntityIdsFromResourceEntityStep<T, U>
+				setResourceEntityByResourceEntityIdFunction(
+					Function<Long, T>
+						resourceEntityByResourceEntityIdFunction) {
+
+				_changeTrackingConfiguration.
+					_resouceEntityInformation.setEntityFunction(
+						resourceEntityByResourceEntityIdFunction);
+
+				return new EntityIdsFromResourceEntityStepImpl<>();
+			}
+
+		}
+
+		public class VersionEntityByVersionEntityIdStepImpl<U>
+			implements VersionEntityByVersionEntityIdStep<U> {
+
+			@Override
+			public EntityIdsFromVersionEntityStep<U>
+				setversionEntityByVersionEntityIdFunction(
+					Function<Long, U> versionEntityByVersionEntityIdFunction) {
+
+				_changeTrackingConfiguration.
+					_versionEntityInformation.setEntityFunction(
+						versionEntityByVersionEntityIdFunction);
+
+				return new EntityIdsFromVersionEntityStepImpl<>();
+			}
+
+		}
+
+		public class VersionEntityStatusInfoStepImpl<U>
+			implements VersionEntityStatusInfoStep<U> {
+
+			@Override
+			public BuildStep setVersionEntityStatusInfo(
 				Integer[] versionEntityAllowedStatuses,
 				Function<U, Integer> versionEntityStatusFunction) {
 
-				_changeTrackingConfiguration._versionEntityInformation =
-					new EntityInformation<>(
-						versionEntityClass,
-						versionEntityByVersionEntityIdFunction,
-						resourceEntityIdFromVersionEntityFunction,
-						versionEntityIdFromVersionEntityFunction,
-						versionEntityAllowedStatuses,
+				_changeTrackingConfiguration.
+					_versionEntityInformation.setAllowedStatuses(
+						versionEntityAllowedStatuses);
+				_changeTrackingConfiguration.
+					_versionEntityInformation.setStatusFunction(
 						versionEntityStatusFunction);
 
 				return new BuildStepImpl();
@@ -160,18 +228,8 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 	private static class EntityInformation<T> {
 
-		public EntityInformation(
-			Class<T> entityClass, Function<Long, T> entityFunction,
-			Function<T, Serializable> resourceEntityIdFunction,
-			Function<T, Serializable> versionEntityIdFunction,
-			Integer[] allowedStatuses, Function<T, Integer> statusFunction) {
-
+		public EntityInformation(Class<T> entityClass) {
 			_entityClass = entityClass;
-			_entityFunction = entityFunction;
-			_resourceEntityIdFunction = resourceEntityIdFunction;
-			_versionEntityIdFunction = versionEntityIdFunction;
-			_allowedStatuses = allowedStatuses;
-			_statusFunction = statusFunction;
 		}
 
 		public Integer[] getAllowedStatuses() {
@@ -198,12 +256,36 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			return _versionEntityIdFunction;
 		}
 
-		private final Integer[] _allowedStatuses;
+		public void setAllowedStatuses(Integer[] allowedStatuses) {
+			_allowedStatuses = allowedStatuses;
+		}
+
+		public void setEntityFunction(Function<Long, T> entityFunction) {
+			_entityFunction = entityFunction;
+		}
+
+		public void setResourceEntityIdFunction(
+			Function<T, Serializable> resourceEntityIdFunction) {
+
+			_resourceEntityIdFunction = resourceEntityIdFunction;
+		}
+
+		public void setStatusFunction(Function<T, Integer> statusFunction) {
+			_statusFunction = statusFunction;
+		}
+
+		public void setVersionEntityIdFunction(
+			Function<T, Serializable> versionEntityIdFunction) {
+
+			_versionEntityIdFunction = versionEntityIdFunction;
+		}
+
+		private Integer[] _allowedStatuses;
 		private final Class<T> _entityClass;
-		private final Function<Long, T> _entityFunction;
-		private final Function<T, Serializable> _resourceEntityIdFunction;
-		private final Function<T, Integer> _statusFunction;
-		private final Function<T, Serializable> _versionEntityIdFunction;
+		private Function<Long, T> _entityFunction;
+		private Function<T, Serializable> _resourceEntityIdFunction;
+		private Function<T, Integer> _statusFunction;
+		private Function<T, Serializable> _versionEntityIdFunction;
 
 	}
 
