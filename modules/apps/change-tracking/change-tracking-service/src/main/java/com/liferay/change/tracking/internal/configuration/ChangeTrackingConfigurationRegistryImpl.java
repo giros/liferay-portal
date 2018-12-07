@@ -53,7 +53,8 @@ public class ChangeTrackingConfigurationRegistryImpl
 	public Optional<ChangeTrackingConfiguration<?, ?>>
 		getChangeTrackingConfigurationByVersionClass(Class<?> clazz) {
 
-		return getChangeTrackingConfigurationByVersionClassName(clazz.getName());
+		return getChangeTrackingConfigurationByVersionClassName(
+			clazz.getName());
 	}
 
 	public Optional<ChangeTrackingConfiguration<?, ?>>
