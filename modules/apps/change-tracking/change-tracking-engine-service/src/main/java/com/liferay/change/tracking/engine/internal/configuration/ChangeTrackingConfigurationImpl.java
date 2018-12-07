@@ -100,16 +100,14 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			Function<Long, T> resourceEntityByResourceEntityIdFunction,
 			Function<T, Serializable>
 				resourceEntityIdFromResourceEntityFunction,
-			Function<T, Serializable> versionEntityIdFromResourceEntityFunction,
-			BaseLocalService resourceEntityLocalService) {
+			Function<T, Serializable> versionEntityIdFromResourceEntityFunction) {
 
 			_changeTrackingConfiguration._resouceEntityInformation =
 				new EntityInformation<>(
 					resourceEntityClass,
 					resourceEntityByResourceEntityIdFunction,
 					resourceEntityIdFromResourceEntityFunction,
-					versionEntityIdFromResourceEntityFunction,
-					resourceEntityLocalService, null, null);
+					versionEntityIdFromResourceEntityFunction, null, null);
 
 			return new VersionEntityStepImpl<>();
 		}
@@ -132,7 +130,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 					resourceEntityIdFromVersionEntityFunction,
 				Function<U, Serializable>
 					versionEntityIdFromVersionEntityFunction,
-				BaseLocalService versionEntityLocalService,
 				Integer[] versionEntityAllowedStatuses,
 				Function<U, Integer> versionEntityStatusFunction) {
 
@@ -142,7 +139,7 @@ public class ChangeTrackingConfigurationImpl<T, U>
 						versionEntityByVersionEntityIdFunction,
 						resourceEntityIdFromVersionEntityFunction,
 						versionEntityIdFromVersionEntityFunction,
-						versionEntityLocalService, versionEntityAllowedStatuses,
+						versionEntityAllowedStatuses,
 						versionEntityStatusFunction);
 
 				return new BuildStepImpl();
@@ -167,14 +164,12 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			Class<T> entityClass, Function<Long, T> entityFunction,
 			Function<T, Serializable> resourceEntityIdFunction,
 			Function<T, Serializable> versionEntityIdFunction,
-			BaseLocalService entityLocalService, Integer[] allowedStatuses,
-			Function<T, Integer> statusFunction) {
+			Integer[] allowedStatuses, Function<T, Integer> statusFunction) {
 
 			_entityClass = entityClass;
 			_entityFunction = entityFunction;
 			_resourceEntityIdFunction = resourceEntityIdFunction;
 			_versionEntityIdFunction = versionEntityIdFunction;
-			_entityLocalService = entityLocalService;
 			_allowedStatuses = allowedStatuses;
 			_statusFunction = statusFunction;
 		}
@@ -189,10 +184,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 
 		public Function<Long, T> getEntityFunction() {
 			return _entityFunction;
-		}
-
-		public BaseLocalService getEntityLocalService() {
-			return _entityLocalService;
 		}
 
 		public Function<T, Serializable> getResourceIdFunction() {
@@ -210,7 +201,6 @@ public class ChangeTrackingConfigurationImpl<T, U>
 		private final Integer[] _allowedStatuses;
 		private final Class<T> _entityClass;
 		private final Function<Long, T> _entityFunction;
-		private final BaseLocalService _entityLocalService;
 		private final Function<T, Serializable> _resourceEntityIdFunction;
 		private final Function<T, Integer> _statusFunction;
 		private final Function<T, Serializable> _versionEntityIdFunction;

@@ -125,8 +125,8 @@ public interface ChangeTrackingConfiguration<T, U> {
 			Function<Long, T> resourceEntityByResourceEntityIdFunction,
 			Function<T, Serializable>
 				resourceEntityIdFromResourceEntityFunction,
-			Function<T, Serializable> versionEntityIdFromResourceEntityFunction,
-			BaseLocalService resourceEntityLocalService);
+			Function<T, Serializable>
+				versionEntityIdFromResourceEntityFunction);
 
 		public interface BuildStep {
 
@@ -143,7 +143,6 @@ public interface ChangeTrackingConfiguration<T, U> {
 					resourceEntityIdFromVersionEntityFunction,
 				Function<U, Serializable>
 					versionEntityIdFromVersionEntityFunction,
-				BaseLocalService versionEntityLocalService,
 				Integer[] versionEntityAllowedStatuses,
 				Function<U, Integer> versionEntityStatusFunction);
 
