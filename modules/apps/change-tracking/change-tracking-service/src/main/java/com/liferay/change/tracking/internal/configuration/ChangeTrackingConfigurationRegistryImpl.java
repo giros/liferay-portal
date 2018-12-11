@@ -15,7 +15,6 @@
 package com.liferay.change.tracking.internal.configuration;
 
 import com.liferay.change.tracking.configuration.ChangeTrackingConfiguration;
-import com.liferay.change.tracking.configuration.ChangeTrackingConfigurationRegistrar;
 import com.liferay.change.tracking.configuration.ChangeTrackingConfigurationRegistry;
 
 import java.util.HashMap;
@@ -70,12 +69,7 @@ public class ChangeTrackingConfigurationRegistryImpl
 		unbind = "_removeChangeTrackingConfiguration"
 	)
 	private void _addChangeTrackingConfiguration(
-		ChangeTrackingConfigurationRegistrar<?, ?>
-			changeTrackingConfigurationRegistrar) {
-
-		ChangeTrackingConfiguration<?, ?> changeTrackingConfiguration =
-			changeTrackingConfigurationRegistrar.changeTrackingConfiguration(
-				new ChangeTrackingConfigurationImpl.BuilderImpl<>());
+		ChangeTrackingConfiguration<?, ?> changeTrackingConfiguration) {
 
 		Class<?> resourceEntityClass =
 			changeTrackingConfiguration.getResourceEntityClass();
@@ -89,12 +83,7 @@ public class ChangeTrackingConfigurationRegistryImpl
 	}
 
 	private void _removeChangeTrackingConfiguration(
-		ChangeTrackingConfigurationRegistrar<?, ?>
-			changeTrackingConfigurationRegistrar) {
-
-		ChangeTrackingConfiguration<?, ?> changeTrackingConfiguration =
-			changeTrackingConfigurationRegistrar.changeTrackingConfiguration(
-				new ChangeTrackingConfigurationImpl.BuilderImpl<>());
+		ChangeTrackingConfiguration<?, ?> changeTrackingConfiguration) {
 
 		Class<?> resourceEntityClass =
 			changeTrackingConfiguration.getResourceEntityClass();
