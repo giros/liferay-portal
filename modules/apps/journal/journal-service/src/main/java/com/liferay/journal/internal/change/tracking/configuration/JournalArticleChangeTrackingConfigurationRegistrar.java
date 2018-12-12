@@ -15,48 +15,53 @@
 package com.liferay.journal.internal.change.tracking.configuration;
 
 import com.liferay.change.tracking.configuration.ChangeTrackingConfigurationRegistrar;
-import com.liferay.change.tracking.engine.configuration.ChangeTrackingConfiguration;
+import com.liferay.change.tracking.configuration.builder.ChangeTrackingConfigurationBuilder;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleResource;
 import com.liferay.journal.service.persistence.JournalArticleResourceUtil;
 import com.liferay.journal.service.persistence.JournalArticleUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Gergely Mathe
  */
-@Component(
-	immediate = true, service = ChangeTrackingConfigurationRegistrar.class
-)
-public class JournalArticleChangeTrackingConfigurationRegistrar
-	implements ChangeTrackingConfigurationRegistrar
-		<JournalArticleResource, JournalArticle> {
+@Component(immediate = true)
+public class JournalArticleChangeTrackingConfigurationRegistrar {
 
-	public ChangeTrackingConfiguration changeTrackingConfiguration(
-		ChangeTrackingConfiguration.Builder
-			<JournalArticleResource, JournalArticle> builder) {
-
-		return builder.setEntityClasses(
-			JournalArticleResource.class, JournalArticle.class
-		).setResourceEntityByResourceEntityIdFunction(
-			JournalArticleResourceUtil::fetchByPrimaryKey
-		).setEntityIdsFromResourceEntityFunctions(
-			JournalArticleResource::getResourcePrimKey,
-			JournalArticleResource::getLatestArticlePK
-		).setversionEntityByVersionEntityIdFunction(
-			JournalArticleUtil::fetchByPrimaryKey
-		).setEntityIdsFromVersionEntityFunctions(
-			JournalArticle::getResourcePrimKey, JournalArticle::getId
-		).setVersionEntityStatusInfo(
-			new Integer[]
-				{
-					WorkflowConstants.STATUS_APPROVED,
-					WorkflowConstants.STATUS_DRAFT
-				},
-			JournalArticle::getStatus
-		).build();
+	@Activate
+	public void activate() {
+		_changeTrackingConfigurationRegistrar.register(
+			_builder.setEntityClasses(
+				JournalArticleResource.class, JournalArticle.class
+			).setResourceEntityByResourceEntityIdFunction(
+				JournalArticleResourceUtil::fetchByPrimaryKey
+			).setEntityIdsFromResourceEntityFunctions(
+				JournalArticleResource::getResourcePrimKey,
+				JournalArticleResource::getLatestArticlePK
+			).setversionEntityByVersionEntityIdFunction(
+				JournalArticleUtil::fetchByPrimaryKey
+			).setEntityIdsFromVersionEntityFunctions(
+				JournalArticle::getResourcePrimKey, JournalArticle::getId
+			).setVersionEntityStatusInfo(
+				new Integer[]
+					{
+						WorkflowConstants.STATUS_APPROVED,
+						WorkflowConstants.STATUS_DRAFT
+					},
+				JournalArticle::getStatus
+			).build());
 	}
+
+	@Reference
+	private ChangeTrackingConfigurationBuilder
+		<JournalArticleResource, JournalArticle> _builder;
+
+	@Reference
+	private ChangeTrackingConfigurationRegistrar
+		_changeTrackingConfigurationRegistrar;
 
 }
