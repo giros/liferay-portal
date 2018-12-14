@@ -14,9 +14,9 @@
 
 package com.liferay.change.tracking.internal.configuration.builder;
 
-import com.liferay.change.tracking.configuration.ChangeTrackingConfiguration;
-import com.liferay.change.tracking.configuration.builder.ChangeTrackingConfigurationBuilder;
-import com.liferay.change.tracking.internal.configuration.ChangeTrackingConfigurationImpl;
+import com.liferay.change.tracking.configuration.CTConfiguration;
+import com.liferay.change.tracking.configuration.builder.CTConfigurationBuilder;
+import com.liferay.change.tracking.internal.configuration.CTConfigurationImpl;
 
 import java.io.Serializable;
 
@@ -28,22 +28,21 @@ import org.osgi.service.component.annotations.Component;
 /**
  * @author Gergely Mathe
  */
-@Component(immediate = true, service = ChangeTrackingConfigurationBuilder.class)
-public class ChangeTrackingConfigurationBuilderImpl<T, U>
-	implements ChangeTrackingConfigurationBuilder<T, U> {
+@Component(immediate = true, service = CTConfigurationBuilder.class)
+public class CTConfigurationBuilderImpl<T, U>
+	implements CTConfigurationBuilder<T, U> {
 
 	@Activate
 	public void activate() {
-		_changeTrackingConfiguration = new ChangeTrackingConfigurationImpl<>();
+		_ctConfiguration = new CTConfigurationImpl<>();
 	}
 
 	@Override
 	public ResourceEntityByResourceEntityIdStep<T, U> setEntityClasses(
 		Class<T> resourceEntityClass, Class<U> versionEntityClass) {
 
-		_changeTrackingConfiguration.setResourceEntityClass(
-			resourceEntityClass);
-		_changeTrackingConfiguration.setVersionEntityClass(versionEntityClass);
+		_ctConfiguration.setResourceEntityClass(resourceEntityClass);
+		_ctConfiguration.setVersionEntityClass(versionEntityClass);
 
 		return new ResourceEntityByResourceEntityIdStepImpl<>();
 	}
@@ -51,8 +50,8 @@ public class ChangeTrackingConfigurationBuilderImpl<T, U>
 	public class BuildStepImpl implements BuildStep {
 
 		@Override
-		public ChangeTrackingConfiguration build() {
-			return _changeTrackingConfiguration;
+		public CTConfiguration build() {
+			return _ctConfiguration;
 		}
 
 	}
@@ -68,12 +67,10 @@ public class ChangeTrackingConfigurationBuilderImpl<T, U>
 				Function<T, Serializable>
 					versionEntityIdFromResourceEntityFunction) {
 
-			_changeTrackingConfiguration.
-				setResourceEntityIdFromResourceEntityFunction(
-					resourceEntityIdFromResourceEntityFunction);
-			_changeTrackingConfiguration.
-				setVersionEntityIdFromResourceEntityFunction(
-					versionEntityIdFromResourceEntityFunction);
+			_ctConfiguration.setResourceEntityIdFromResourceEntityFunction(
+				resourceEntityIdFromResourceEntityFunction);
+			_ctConfiguration.setVersionEntityIdFromResourceEntityFunction(
+				versionEntityIdFromResourceEntityFunction);
 
 			return new VersionEntityByVersionEntityIdStepImpl<>();
 		}
@@ -91,12 +88,10 @@ public class ChangeTrackingConfigurationBuilderImpl<T, U>
 				Function<U, Serializable>
 					versionEntityIdFromVersionEntityFunction) {
 
-			_changeTrackingConfiguration.
-				setResourceEntityIdFromVersionEntityFunction(
-					resourceEntityIdFromVersionEntityFunction);
-			_changeTrackingConfiguration.
-				setVersionEntityIdFromVersionEntityFunction(
-					versionEntityIdFromVersionEntityFunction);
+			_ctConfiguration.setResourceEntityIdFromVersionEntityFunction(
+				resourceEntityIdFromVersionEntityFunction);
+			_ctConfiguration.setVersionEntityIdFromVersionEntityFunction(
+				versionEntityIdFromVersionEntityFunction);
 
 			return new VersionEntityStatusInfoStepImpl<>();
 		}
@@ -111,9 +106,8 @@ public class ChangeTrackingConfigurationBuilderImpl<T, U>
 			setResourceEntityByResourceEntityIdFunction(
 				Function<Long, T> resourceEntityByResourceEntityIdFunction) {
 
-			_changeTrackingConfiguration.
-				setResourceEntityByResourceEntityIdFunction(
-					resourceEntityByResourceEntityIdFunction);
+			_ctConfiguration.setResourceEntityByResourceEntityIdFunction(
+				resourceEntityByResourceEntityIdFunction);
 
 			return new EntityIdsFromResourceEntityStepImpl<>();
 		}
@@ -128,9 +122,8 @@ public class ChangeTrackingConfigurationBuilderImpl<T, U>
 			setversionEntityByVersionEntityIdFunction(
 				Function<Long, U> versionEntityByVersionEntityIdFunction) {
 
-			_changeTrackingConfiguration.
-				setVersionEntityByVersionEntityIdFunction(
-					versionEntityByVersionEntityIdFunction);
+			_ctConfiguration.setVersionEntityByVersionEntityIdFunction(
+				versionEntityByVersionEntityIdFunction);
 
 			return new EntityIdsFromVersionEntityStepImpl<>();
 		}
@@ -145,9 +138,9 @@ public class ChangeTrackingConfigurationBuilderImpl<T, U>
 			Integer[] versionEntityAllowedStatuses,
 			Function<U, Integer> versionEntityStatusFunction) {
 
-			_changeTrackingConfiguration.setVersionEntityAllowedStatuses(
+			_ctConfiguration.setVersionEntityAllowedStatuses(
 				versionEntityAllowedStatuses);
-			_changeTrackingConfiguration.setVersionEntityStatusFunction(
+			_ctConfiguration.setVersionEntityStatusFunction(
 				versionEntityStatusFunction);
 
 			return new BuildStepImpl();
@@ -155,6 +148,6 @@ public class ChangeTrackingConfigurationBuilderImpl<T, U>
 
 	}
 
-	private ChangeTrackingConfigurationImpl _changeTrackingConfiguration;
+	private CTConfigurationImpl _ctConfiguration;
 
 }

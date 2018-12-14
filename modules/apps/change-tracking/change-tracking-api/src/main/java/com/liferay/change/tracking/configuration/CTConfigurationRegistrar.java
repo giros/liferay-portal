@@ -17,15 +17,14 @@ package com.liferay.change.tracking.configuration;
 /**
  * @author Mate Thurzo
  */
-public interface ChangeTrackingConfigurationRegistrar {
+public interface CTConfigurationRegistrar {
 
 	/**
 	 * Registers the change tracking configuration object as a component service
 	 *
-	 * @param changeTrackingConfiguration The change tracking configuration
-	 *                                    object to be registered
+	 * @param CTConfiguration The change tracking configuration object to be
+	 *                        registered
 	 */
-	public void register(
-		ChangeTrackingConfiguration<?, ?> changeTrackingConfiguration);
+	public void register(CTConfiguration<?, ?> ctConfiguration);
 
 }

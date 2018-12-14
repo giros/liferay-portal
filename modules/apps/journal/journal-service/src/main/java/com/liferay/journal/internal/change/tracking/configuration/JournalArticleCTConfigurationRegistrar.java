@@ -14,8 +14,8 @@
 
 package com.liferay.journal.internal.change.tracking.configuration;
 
-import com.liferay.change.tracking.configuration.ChangeTrackingConfigurationRegistrar;
-import com.liferay.change.tracking.configuration.builder.ChangeTrackingConfigurationBuilder;
+import com.liferay.change.tracking.configuration.CTConfigurationRegistrar;
+import com.liferay.change.tracking.configuration.builder.CTConfigurationBuilder;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleResource;
 import com.liferay.journal.service.persistence.JournalArticleResourceUtil;
@@ -29,12 +29,12 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * @author Gergely Mathe
  */
-@Component(immediate = true)
-public class JournalArticleChangeTrackingConfigurationRegistrar {
+@Component(immediate = true, service = {})
+public class JournalArticleCTConfigurationRegistrar {
 
 	@Activate
 	public void activate() {
-		_changeTrackingConfigurationRegistrar.register(
+		_ctConfigurationRegistrar.register(
 			_builder.setEntityClasses(
 				JournalArticleResource.class, JournalArticle.class
 			).setResourceEntityByResourceEntityIdFunction(
@@ -57,11 +57,10 @@ public class JournalArticleChangeTrackingConfigurationRegistrar {
 	}
 
 	@Reference
-	private ChangeTrackingConfigurationBuilder
-		<JournalArticleResource, JournalArticle> _builder;
+	private CTConfigurationBuilder<JournalArticleResource, JournalArticle>
+		_builder;
 
 	@Reference
-	private ChangeTrackingConfigurationRegistrar
-		_changeTrackingConfigurationRegistrar;
+	private CTConfigurationRegistrar _ctConfigurationRegistrar;
 
 }

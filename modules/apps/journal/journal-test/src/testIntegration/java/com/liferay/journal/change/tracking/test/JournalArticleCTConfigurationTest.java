@@ -15,8 +15,8 @@
 package com.liferay.journal.change.tracking.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
-import com.liferay.change.tracking.configuration.ChangeTrackingConfiguration;
-import com.liferay.change.tracking.configuration.ChangeTrackingConfigurationRegistry;
+import com.liferay.change.tracking.configuration.CTConfiguration;
+import com.liferay.change.tracking.configuration.CTConfigurationRegistry;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleResource;
 import com.liferay.journal.model.JournalFolderConstants;
@@ -46,7 +46,7 @@ import org.junit.runner.RunWith;
  * @author Gergely Mathe
  */
 @RunWith(Arquillian.class)
-public class JournalArticleChangeTrackingConfigurationTest {
+public class JournalArticleCTConfigurationTest {
 
 	@ClassRule
 	@Rule
@@ -67,21 +67,18 @@ public class JournalArticleChangeTrackingConfigurationTest {
 	}
 
 	@Test
-	public void testJournalArticleChangeTrackingConfiguration() {
-		Optional<ChangeTrackingConfiguration<?, ?>>
-			changeTrackingConfigurationOptional =
-				_changeTrackingConfigurationRegistry.
-					getChangeTrackingConfigurationByVersionClass(
-						JournalArticle.class);
+	public void testJournalArticleCTConfiguration() {
+		Optional<CTConfiguration<?, ?>> ctConfigurationOptional =
+			_ctConfigurationRegistry.getCTConfigurationByVersionClass(
+				JournalArticle.class);
 
 		Assert.assertTrue(
 			"Change tracking configuration not found in registry",
-			changeTrackingConfigurationOptional.isPresent());
+			ctConfigurationOptional.isPresent());
 
 		JournalArticleResource resourceEntity =
-			(JournalArticleResource)changeTrackingConfigurationOptional.map(
-				ChangeTrackingConfiguration::
-					getResourceEntityByResourceEntityIdFunction
+			(JournalArticleResource)ctConfigurationOptional.map(
+				CTConfiguration::getResourceEntityByResourceEntityIdFunction
 			).map(
 				resourceEntityByResourceEntityIdFunction ->
 					resourceEntityByResourceEntityIdFunction.apply(
@@ -99,8 +96,8 @@ public class JournalArticleChangeTrackingConfigurationTest {
 
 		Class<JournalArticleResource> resourceClass =
 			(Class<JournalArticleResource>)
-				changeTrackingConfigurationOptional.map(
-					ChangeTrackingConfiguration::getResourceEntityClass
+				ctConfigurationOptional.map(
+					CTConfiguration::getResourceEntityClass
 				).orElse(
 					null
 				);
@@ -109,9 +106,8 @@ public class JournalArticleChangeTrackingConfigurationTest {
 			"Resource entity class is invalid",
 			_journalArticleResource.getModelClass(), resourceClass);
 
-		long resourceEntityId = (long)changeTrackingConfigurationOptional.map(
-			ChangeTrackingConfiguration::
-				getResourceEntityIdFromResourceEntityFunction
+		long resourceEntityId = (long)ctConfigurationOptional.map(
+			CTConfiguration::getResourceEntityIdFromResourceEntityFunction
 		).map(
 			resourceEntityIdFromResourceEntityFunction ->
 				(Function<JournalArticleResource, Serializable>)
@@ -128,9 +124,8 @@ public class JournalArticleChangeTrackingConfigurationTest {
 			"Resource entity id by resource entity is invalid",
 			_journalArticleResource.getResourcePrimKey(), resourceEntityId);
 
-		resourceEntityId = (long)changeTrackingConfigurationOptional.map(
-			ChangeTrackingConfiguration::
-				getResourceEntityIdFromVersionEntityFunction
+		resourceEntityId = (long)ctConfigurationOptional.map(
+			CTConfiguration::getResourceEntityIdFromVersionEntityFunction
 		).map(
 			resourceEntityIdFromVersionEntityFunction ->
 				(Function<JournalArticle, Serializable>)
@@ -147,9 +142,8 @@ public class JournalArticleChangeTrackingConfigurationTest {
 			_journalArticleResource.getResourcePrimKey(), resourceEntityId);
 
 		JournalArticle versionEntity =
-			(JournalArticle)changeTrackingConfigurationOptional.map(
-				ChangeTrackingConfiguration::
-					getVersionEntityByVersionEntityIdFunction
+			(JournalArticle)ctConfigurationOptional.map(
+				CTConfiguration::getVersionEntityByVersionEntityIdFunction
 			).map(
 				versionEntityByVersionEntityIdFunction ->
 					versionEntityByVersionEntityIdFunction.apply(
@@ -166,8 +160,8 @@ public class JournalArticleChangeTrackingConfigurationTest {
 			versionEntity);
 
 		Class<JournalArticle> versionClass =
-			(Class<JournalArticle>)changeTrackingConfigurationOptional.map(
-				ChangeTrackingConfiguration::getVersionEntityClass
+			(Class<JournalArticle>)ctConfigurationOptional.map(
+				CTConfiguration::getVersionEntityClass
 			).orElse(
 				null
 			);
@@ -176,9 +170,8 @@ public class JournalArticleChangeTrackingConfigurationTest {
 			"Version entity class is invalid", _journalArticle.getModelClass(),
 			versionClass);
 
-		long versionEntityId = (long)changeTrackingConfigurationOptional.map(
-			ChangeTrackingConfiguration::
-				getVersionEntityIdFromResourceEntityFunction
+		long versionEntityId = (long)ctConfigurationOptional.map(
+			CTConfiguration::getVersionEntityIdFromResourceEntityFunction
 		).map(
 			versionEntityIdFromResourceEntityFunction ->
 				(Function<JournalArticleResource, Serializable>)
@@ -195,9 +188,8 @@ public class JournalArticleChangeTrackingConfigurationTest {
 			"Version entity id by resource entity is invalid",
 			_journalArticle.getId(), versionEntityId);
 
-		versionEntityId = (long)changeTrackingConfigurationOptional.map(
-			ChangeTrackingConfiguration::
-				getVersionEntityIdFromVersionEntityFunction
+		versionEntityId = (long)ctConfigurationOptional.map(
+			CTConfiguration::getVersionEntityIdFromVersionEntityFunction
 		).map(
 			versionEntityIdFromVersionEntityFunction ->
 				(Function<JournalArticle, Serializable>)
@@ -213,8 +205,8 @@ public class JournalArticleChangeTrackingConfigurationTest {
 			"Version entity id by version entity is invalid",
 			_journalArticle.getId(), versionEntityId);
 
-		int versionEntityStatus = (int)changeTrackingConfigurationOptional.map(
-			ChangeTrackingConfiguration::getVersionEntityStatusFunction
+		int versionEntityStatus = (int)ctConfigurationOptional.map(
+			CTConfiguration::getVersionEntityStatusFunction
 		).map(
 			versionEntityStatusFunction ->
 				(Function<JournalArticle, Integer>)versionEntityStatusFunction
@@ -231,8 +223,7 @@ public class JournalArticleChangeTrackingConfigurationTest {
 	}
 
 	@Inject
-	private ChangeTrackingConfigurationRegistry
-		_changeTrackingConfigurationRegistry;
+	private CTConfigurationRegistry _ctConfigurationRegistry;
 
 	@DeleteAfterTestRun
 	private Group _group;

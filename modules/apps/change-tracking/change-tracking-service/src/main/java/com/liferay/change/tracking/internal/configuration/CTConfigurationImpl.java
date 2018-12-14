@@ -24,10 +24,10 @@ import java.util.function.Function;
  * @author Mate Thurzo
  */
 @ProviderType
-public class ChangeTrackingConfigurationImpl<T, U>
-	implements ChangeTrackingConfigurationExtended<T, U> {
+public class CTConfigurationImpl<T, U>
+	implements CTConfigurationExtended<T, U> {
 
-	public ChangeTrackingConfigurationImpl() {
+	public CTConfigurationImpl() {
 		_resouceEntityInformation = new EntityInformation<>();
 		_versionEntityInformation = new EntityInformation<>();
 	}
@@ -161,8 +161,8 @@ public class ChangeTrackingConfigurationImpl<T, U>
 			versionEntityStatusFunction);
 	}
 
-	private EntityInformation<T> _resouceEntityInformation;
-	private EntityInformation<U> _versionEntityInformation;
+	private final EntityInformation<T> _resouceEntityInformation;
+	private final EntityInformation<U> _versionEntityInformation;
 
 	private static class EntityInformation<T> {
 

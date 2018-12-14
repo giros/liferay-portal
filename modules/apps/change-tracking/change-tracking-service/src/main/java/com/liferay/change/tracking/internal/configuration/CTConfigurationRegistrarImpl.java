@@ -14,8 +14,8 @@
 
 package com.liferay.change.tracking.internal.configuration;
 
-import com.liferay.change.tracking.configuration.ChangeTrackingConfiguration;
-import com.liferay.change.tracking.configuration.ChangeTrackingConfigurationRegistrar;
+import com.liferay.change.tracking.configuration.CTConfiguration;
+import com.liferay.change.tracking.configuration.CTConfigurationRegistrar;
 
 import java.util.Hashtable;
 
@@ -27,27 +27,21 @@ import org.osgi.service.component.annotations.Component;
 /**
  * @author Gergely Mathe
  */
-@Component(
-	immediate = true, service = ChangeTrackingConfigurationRegistrar.class
-)
-public class ChangeTrackingConfigurationRegistrarImpl
-	implements ChangeTrackingConfigurationRegistrar {
+@Component(immediate = true, service = CTConfigurationRegistrar.class)
+public class CTConfigurationRegistrarImpl implements CTConfigurationRegistrar {
 
-	public void register(
-		ChangeTrackingConfiguration<?, ?> changeTrackingConfiguration) {
-
-		if (changeTrackingConfiguration == null) {
+	public void register(CTConfiguration<?, ?> ctConfiguration) {
+		if (ctConfiguration == null) {
 			return;
 		}
 
 		final Bundle bundle = FrameworkUtil.getBundle(
-			ChangeTrackingConfigurationRegistrarImpl.class);
+			CTConfigurationRegistrarImpl.class);
 
 		final BundleContext bundleContext = bundle.getBundleContext();
 
 		bundleContext.registerService(
-			ChangeTrackingConfiguration.class, changeTrackingConfiguration,
-			new Hashtable<>());
+			CTConfiguration.class, ctConfiguration, new Hashtable<>());
 	}
 
 }

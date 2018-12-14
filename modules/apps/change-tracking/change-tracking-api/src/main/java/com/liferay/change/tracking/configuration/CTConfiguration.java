@@ -24,7 +24,7 @@ import java.util.function.Function;
  * @author Mate Thurzo
  */
 @ProviderType
-public interface ChangeTrackingConfiguration<T, U> {
+public interface CTConfiguration<T, U> {
 
 	/**
 	 * Returns the function from the configuration that retrieves the resource

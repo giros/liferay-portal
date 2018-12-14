@@ -14,7 +14,7 @@
 
 package com.liferay.change.tracking.internal.configuration;
 
-import com.liferay.change.tracking.configuration.ChangeTrackingConfiguration;
+import com.liferay.change.tracking.configuration.CTConfiguration;
 
 import java.io.Serializable;
 
@@ -23,8 +23,7 @@ import java.util.function.Function;
 /**
  * @author Gergely Mathe
  */
-public interface ChangeTrackingConfigurationExtended<T, U>
-	extends ChangeTrackingConfiguration<T, U> {
+public interface CTConfigurationExtended<T, U> extends CTConfiguration<T, U> {
 
 	public void setResourceEntityByResourceEntityIdFunction(
 		Function<Long, T> resourceEntityByResourceEntityIdFunction);

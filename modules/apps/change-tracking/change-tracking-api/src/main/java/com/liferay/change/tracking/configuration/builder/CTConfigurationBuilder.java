@@ -14,7 +14,7 @@
 
 package com.liferay.change.tracking.configuration.builder;
 
-import com.liferay.change.tracking.configuration.ChangeTrackingConfiguration;
+import com.liferay.change.tracking.configuration.CTConfiguration;
 
 import java.io.Serializable;
 
@@ -23,14 +23,14 @@ import java.util.function.Function;
 /**
  * @author Gergely Mathe
  */
-public interface ChangeTrackingConfigurationBuilder<T, U> {
+public interface CTConfigurationBuilder<T, U> {
 
 	public ResourceEntityByResourceEntityIdStep<T, U> setEntityClasses(
 		Class<T> resourceEntityClass, Class<U> versionEntityClass);
 
 	public interface BuildStep {
 
-		public ChangeTrackingConfiguration build();
+		public CTConfiguration build();
 
 	}
 
