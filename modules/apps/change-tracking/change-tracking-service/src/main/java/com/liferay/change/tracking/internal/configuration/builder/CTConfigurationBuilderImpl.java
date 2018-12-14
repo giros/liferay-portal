@@ -56,6 +56,41 @@ public class CTConfigurationBuilderImpl<T, U>
 
 	}
 
+	public interface CTConfigurationExtended<T, U>
+		extends CTConfiguration<T, U> {
+
+		public void setResourceEntityByResourceEntityIdFunction(
+			Function<Long, T> resourceEntityByResourceEntityIdFunction);
+
+		public void setResourceEntityClass(Class<T> resourceEntityClass);
+
+		public void setResourceEntityIdFromResourceEntityFunction(
+			Function<T, Serializable>
+				resourceEntityIdFromResourceEntityFunction);
+
+		public void setResourceEntityIdFromVersionEntityFunction(
+			Function<U, Serializable>
+				resourceEntityIdFromVersionEntityFunction);
+
+		public void setVersionEntityAllowedStatuses(Integer[] allowedStatuses);
+
+		public void setVersionEntityByVersionEntityIdFunction(
+			Function<Long, U> versionEntityByVersionEntityIdFunction);
+
+		public void setVersionEntityClass(Class<U> versionEntityClass);
+
+		public void setVersionEntityIdFromResourceEntityFunction(
+			Function<T, Serializable>
+				versionEntityIdFromResourceEntityFunction);
+
+		public void setVersionEntityIdFromVersionEntityFunction(
+			Function<U, Serializable> versionEntityIdFromVersionEntityFunction);
+
+		public void setVersionEntityStatusFunction(
+			Function<U, Integer> versionEntityStatusFunction);
+
+	}
+
 	public class EntityIdsFromResourceEntityStepImpl<T, U>
 		implements EntityIdsFromResourceEntityStep<T, U> {
 

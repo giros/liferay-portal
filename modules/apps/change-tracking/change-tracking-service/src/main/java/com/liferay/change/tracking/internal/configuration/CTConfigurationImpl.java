@@ -16,6 +16,8 @@ package com.liferay.change.tracking.internal.configuration;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.change.tracking.internal.configuration.builder.CTConfigurationBuilderImpl;
+
 import java.io.Serializable;
 
 import java.util.function.Function;
@@ -25,7 +27,7 @@ import java.util.function.Function;
  */
 @ProviderType
 public class CTConfigurationImpl<T, U>
-	implements CTConfigurationExtended<T, U> {
+	implements CTConfigurationBuilderImpl.CTConfigurationExtended<T, U> {
 
 	public CTConfigurationImpl() {
 		_resouceEntityInformation = new EntityInformation<>();
