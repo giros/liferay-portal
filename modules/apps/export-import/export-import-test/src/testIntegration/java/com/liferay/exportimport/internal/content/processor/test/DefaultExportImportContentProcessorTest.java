@@ -73,6 +73,7 @@ import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
+import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.randomizerbumpers.FriendlyURLRandomizerBumper;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.util.PortalImpl;
@@ -124,7 +125,7 @@ public class DefaultExportImportContentProcessorTest {
 		new LiferayIntegrationTestRule();
 
 	@BeforeClass
-	public static void setUpClass() {
+	public static void setUpClass() throws Exception {
 		Registry registry = RegistryUtil.getRegistry();
 
 		StringBundler sb = new StringBundler(3);
@@ -138,6 +139,8 @@ public class DefaultExportImportContentProcessorTest {
 		_serviceTracker = registry.trackServices(filter);
 
 		_serviceTracker.open();
+
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
 	}
 
 	@Before
