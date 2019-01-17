@@ -43,6 +43,7 @@ import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.TimeZoneUtil;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
@@ -81,7 +82,9 @@ public class JournalContentTest {
 		new LiferayIntegrationTestRule();
 
 	@Before
-	public void setUp() throws PortalException {
+	public void setUp() throws Exception {
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
+
 		MockHttpServletRequest httpServletRequest =
 			new MockHttpServletRequest();
 

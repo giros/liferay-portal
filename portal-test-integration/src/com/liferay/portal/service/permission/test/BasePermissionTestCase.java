@@ -45,6 +45,8 @@ public abstract class BasePermissionTestCase {
 
 	@Before
 	public void setUp() throws Exception {
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
+
 		group = GroupTestUtil.addGroup();
 		user = UserTestUtil.addUser();
 

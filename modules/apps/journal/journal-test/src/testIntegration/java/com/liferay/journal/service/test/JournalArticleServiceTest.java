@@ -97,7 +97,9 @@ public class JournalArticleServiceTest {
 		new LiferayIntegrationTestRule();
 
 	@BeforeClass
-	public static void setUpClass() {
+	public static void setUpClass() throws Exception {
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
+
 		InvocationHandler invocationHandler = ProxyUtil.getInvocationHandler(
 			_journalArticleLocalService);
 
