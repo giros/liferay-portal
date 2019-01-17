@@ -24,10 +24,12 @@ import com.liferay.journal.test.util.JournalTestUtil;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.service.PortletPreferencesLocalServiceUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
+import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.SynchronousMailTestRule;
 import com.liferay.portlet.subscriptions.test.BaseSubscriptionLocalizedContentTestCase;
@@ -57,6 +59,8 @@ public class JournalSubscriptionLocalizedContentTest
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
+
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
 
 		user = UserTestUtil.addOmniAdminUser();
 	}

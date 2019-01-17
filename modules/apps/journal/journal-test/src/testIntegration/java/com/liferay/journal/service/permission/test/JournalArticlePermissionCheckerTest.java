@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.service.permission.test.BasePermissionTestCase;
+import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
@@ -57,6 +58,8 @@ public class JournalArticlePermissionCheckerTest
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
+
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
 
 		_journalServiceConfiguration =
 			ConfigurationProviderUtil.getCompanyConfiguration(
