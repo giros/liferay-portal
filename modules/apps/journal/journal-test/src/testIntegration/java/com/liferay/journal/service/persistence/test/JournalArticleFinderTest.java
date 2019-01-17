@@ -45,6 +45,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.TransactionalTestRule;
 
@@ -173,6 +174,8 @@ public class JournalArticleFinderTest {
 			JournalArticleFinder.class);
 
 		_journalArticleFinder = _bundleContext.getService(_serviceReference);
+
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
 	}
 
 	@After

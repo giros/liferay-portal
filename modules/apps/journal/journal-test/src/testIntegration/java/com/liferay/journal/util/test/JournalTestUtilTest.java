@@ -43,6 +43,7 @@ import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.kernel.xml.UnsecureSAXReaderUtil;
+import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
 import java.lang.reflect.Method;
@@ -80,6 +81,8 @@ public class JournalTestUtilTest {
 		_transformMethod = JournalTestUtil.getJournalUtilTransformMethod();
 
 		_getTokensMethod = JournalTestUtil.getJournalUtilGetTokensMethod();
+
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
 	}
 
 	@Test

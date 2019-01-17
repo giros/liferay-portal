@@ -22,7 +22,9 @@ import com.liferay.journal.service.JournalFolderLocalServiceUtil;
 import com.liferay.journal.test.util.JournalTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.SynchronousMailTestRule;
 import com.liferay.portlet.subscriptions.test.BaseSubscriptionRootContainerModelTestCase;
@@ -52,6 +54,8 @@ public class JournalSubscriptionRootContainerModelTest
 		super.setUp();
 
 		user = UserTestUtil.addOmniAdminUser();
+
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
 	}
 
 	@Override

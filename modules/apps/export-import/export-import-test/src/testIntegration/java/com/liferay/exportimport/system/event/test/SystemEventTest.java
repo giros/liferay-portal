@@ -194,6 +194,8 @@ public class SystemEventTest {
 				_serverPort = _portal.getPortalServerPort(true);
 			}
 		}
+
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
 	}
 
 	@After

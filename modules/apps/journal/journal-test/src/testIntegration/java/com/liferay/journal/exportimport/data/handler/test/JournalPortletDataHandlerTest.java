@@ -39,6 +39,7 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.lar.test.BasePortletDataHandlerTestCase;
+import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.util.test.LayoutTestUtil;
@@ -100,6 +101,8 @@ public class JournalPortletDataHandlerTest
 			TestPropsValues.getCompanyId(),
 			PortletKeys.PREFS_OWNER_TYPE_COMPANY,
 			PortletPreferencesFactoryUtil.toXML(portalPreferenceces));
+
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
 	}
 
 	@After

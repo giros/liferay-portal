@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
@@ -89,6 +90,8 @@ public class AssetPublisherServiceTest {
 			_NO_ASSET_CATEGORY_IDS, _NO_ASSET_TAG_NAMES, 5, true);
 		_permissionChecker = PermissionCheckerFactoryUtil.create(
 			TestPropsValues.getUser());
+
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
 	}
 
 	@Test

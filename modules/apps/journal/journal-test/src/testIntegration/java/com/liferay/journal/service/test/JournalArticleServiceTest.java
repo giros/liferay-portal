@@ -97,12 +97,14 @@ public class JournalArticleServiceTest {
 		new LiferayIntegrationTestRule();
 
 	@BeforeClass
-	public static void setUpClass() {
+	public static void setUpClass() throws Exception {
 		InvocationHandler invocationHandler = ProxyUtil.getInvocationHandler(
 			_journalArticleLocalService);
 
 		_journalArticleLocalServiceImplInstance = ReflectionTestUtil.invoke(
 			invocationHandler, "getTarget", new Class<?>[0]);
+
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
 	}
 
 	@Before

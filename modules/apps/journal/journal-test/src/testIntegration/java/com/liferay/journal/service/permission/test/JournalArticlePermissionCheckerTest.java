@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.service.permission.test.BasePermissionTestCase;
+import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
@@ -64,6 +65,8 @@ public class JournalArticlePermissionCheckerTest
 				TestPropsValues.getCompanyId());
 
 		CompanyThreadLocal.setCompanyId(TestPropsValues.getCompanyId());
+
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
 	}
 
 	@Test

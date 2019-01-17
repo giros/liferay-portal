@@ -41,6 +41,7 @@ import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.TimeZoneUtil;
+import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.log.CaptureAppender;
 import com.liferay.portal.test.log.Log4JLoggerTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -90,6 +91,8 @@ public class ExportImportLifecycleEventTest {
 		_parameterMap =
 			ExportImportConfigurationParameterMapFactoryUtil.
 				buildParameterMap();
+
+		ServiceTestUtil.setUser(TestPropsValues.getUser());
 	}
 
 	@Test
