@@ -172,10 +172,10 @@ public class JournalArticleActionDropdownItems {
 					if (_trashHelper.isTrashEnabled(
 							_themeDisplay.getScopeGroupId())) {
 
-						add(_getDeleteArticleAction(_article.getArticleId()));
+						add(_getMoveToTrashArticleAction());
 					}
 					else {
-						add(_getMoveToTrashArticleAction());
+						add(_getDeleteArticleAction(_article.getArticleId()));
 					}
 				}
 
