@@ -29,9 +29,11 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,15 +52,21 @@ public class CTManagerImpl implements CTManager {
 	public Optional<CTEntry> getLatestModelChangeCTEntryOptional(
 		long userId, long resourcePrimKey) {
 
+		long companyId = CompanyThreadLocal.getCompanyId();
+
 		User user = _userLocalService.fetchUser(userId);
 
-		if (user == null) {
-			_log.error("Unable to get user " + userId);
+		if (user != null) {
+			companyId = user.getCompanyId();
+		}
+
+		if (Validator.isNull(companyId)) {
+			_log.warn("Unable to determine companyId");
 
 			return Optional.empty();
 		}
 
-		if (!_ctEngineManager.isChangeTrackingEnabled(user.getCompanyId())) {
+		if (!_ctEngineManager.isChangeTrackingEnabled(companyId)) {
 			return Optional.empty();
 		}
 
@@ -96,15 +104,21 @@ public class CTManagerImpl implements CTManager {
 		long userId, long resourcePrimKey,
 		QueryDefinition<CTEntry> queryDefinition) {
 
+		long companyId = CompanyThreadLocal.getCompanyId();
+
 		User user = _userLocalService.fetchUser(userId);
 
-		if (user == null) {
-			_log.error("Unable to get user " + userId);
+		if (user != null) {
+			companyId = user.getCompanyId();
+		}
+
+		if (Validator.isNull(companyId)) {
+			_log.warn("Unable to determine companyId");
 
 			return Collections.emptyList();
 		}
 
-		if (!_ctEngineManager.isChangeTrackingEnabled(user.getCompanyId())) {
+		if (!_ctEngineManager.isChangeTrackingEnabled(companyId)) {
 			return Collections.emptyList();
 		}
 
@@ -125,15 +139,21 @@ public class CTManagerImpl implements CTManager {
 	public Optional<CTEntry> getModelChangeCTEntryOptional(
 		long userId, long classNameId, long classPK) {
 
+		long companyId = CompanyThreadLocal.getCompanyId();
+
 		User user = _userLocalService.fetchUser(userId);
 
-		if (user == null) {
-			_log.error("Unable to find user " + userId);
+		if (user != null) {
+			companyId = user.getCompanyId();
+		}
+
+		if (Validator.isNull(companyId)) {
+			_log.warn("Unable to determine companyId");
 
 			return Optional.empty();
 		}
 
-		if (!_ctEngineManager.isChangeTrackingEnabled(user.getCompanyId()) ||
+		if (!_ctEngineManager.isChangeTrackingEnabled(companyId) ||
 			!_ctEngineManager.isChangeTrackingSupported(
 				user.getCompanyId(), classNameId)) {
 
@@ -160,15 +180,21 @@ public class CTManagerImpl implements CTManager {
 			long userId, long classNameId, long classPK, long resourcePrimKey)
 		throws CTException {
 
+		long companyId = CompanyThreadLocal.getCompanyId();
+
 		User user = _userLocalService.fetchUser(userId);
 
-		if (user == null) {
-			_log.error("Unable to find user " + userId);
+		if (user != null) {
+			companyId = user.getCompanyId();
+		}
+
+		if (Validator.isNull(companyId)) {
+			_log.warn("Unable to determine companyId");
 
 			return Optional.empty();
 		}
 
-		if (!_ctEngineManager.isChangeTrackingEnabled(user.getCompanyId()) ||
+		if (!_ctEngineManager.isChangeTrackingEnabled(companyId) ||
 			!_ctEngineManager.isChangeTrackingSupported(
 				user.getCompanyId(), classNameId)) {
 
