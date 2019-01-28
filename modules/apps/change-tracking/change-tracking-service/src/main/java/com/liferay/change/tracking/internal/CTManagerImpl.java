@@ -53,7 +53,7 @@ public class CTManagerImpl implements CTManager {
 		User user = _userLocalService.fetchUser(userId);
 
 		if (user == null) {
-			_log.error("Unable to get user " + userId);
+			_log.warn("Unable to get user " + userId);
 
 			return Optional.empty();
 		}
@@ -99,7 +99,7 @@ public class CTManagerImpl implements CTManager {
 		User user = _userLocalService.fetchUser(userId);
 
 		if (user == null) {
-			_log.error("Unable to get user " + userId);
+			_log.warn("Unable to get user " + userId);
 
 			return Collections.emptyList();
 		}
@@ -128,7 +128,7 @@ public class CTManagerImpl implements CTManager {
 		User user = _userLocalService.fetchUser(userId);
 
 		if (user == null) {
-			_log.error("Unable to find user " + userId);
+			_log.warn("Unable to find user " + userId);
 
 			return Optional.empty();
 		}
@@ -163,7 +163,7 @@ public class CTManagerImpl implements CTManager {
 		User user = _userLocalService.fetchUser(userId);
 
 		if (user == null) {
-			_log.error("Unable to find user " + userId);
+			_log.warn("Unable to find user " + userId);
 
 			return Optional.empty();
 		}
