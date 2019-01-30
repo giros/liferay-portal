@@ -18,6 +18,8 @@ import com.liferay.change.tracking.CTManager;
 import com.liferay.change.tracking.constants.CTConstants;
 import com.liferay.change.tracking.exception.CTEntryException;
 import com.liferay.change.tracking.exception.CTException;
+import com.liferay.change.tracking.model.CTEntry;
+import com.liferay.journal.exception.NoSuchArticleException;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.journal.service.JournalArticleLocalServiceWrapper;
@@ -27,13 +29,17 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceWrapper;
+import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringBundler;
 
 import java.io.File;
 import java.io.Serializable;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -223,6 +229,461 @@ public class CTJournalArticleLocalServiceWrapper
 		_unregisterChange(journalArticle);
 
 		return journalArticle;
+	}
+
+	@Override
+	public JournalArticle fetchArticle(long id) {
+		JournalArticle journalArticle = super.fetchArticle(id);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		return null;
+	}
+
+	@Override
+	public JournalArticle fetchArticle(long groupId, String articleId) {
+		JournalArticle journalArticle = super.fetchArticle(groupId, articleId);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		return null;
+	}
+
+	@Override
+	public JournalArticle fetchArticle(
+		long groupId, String articleId, double version) {
+
+		JournalArticle journalArticle = super.fetchArticle(
+			groupId, articleId, version);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		return null;
+	}
+
+	@Override
+	public JournalArticle fetchArticleByUrlTitle(
+		long groupId, String urlTitle) {
+
+		JournalArticle journalArticle = super.fetchArticleByUrlTitle(
+			groupId, urlTitle);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		return null;
+	}
+
+	@Override
+	public JournalArticle fetchDisplayArticle(long groupId, String articleId) {
+		JournalArticle journalArticle = super.fetchDisplayArticle(
+			groupId, articleId);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		return null;
+	}
+
+	@Override
+	public JournalArticle fetchLatestArticle(long resourcePrimKey) {
+		JournalArticle journalArticle = super.fetchLatestArticle(
+			resourcePrimKey);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		return null;
+	}
+
+	@Override
+	public JournalArticle fetchLatestArticle(long resourcePrimKey, int status) {
+		JournalArticle journalArticle = super.fetchLatestArticle(
+			resourcePrimKey, status);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		return null;
+	}
+
+	@Override
+	public JournalArticle fetchLatestArticle(
+		long resourcePrimKey, int status, boolean preferApproved) {
+
+		JournalArticle journalArticle = super.fetchLatestArticle(
+			resourcePrimKey, status, preferApproved);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		return null;
+	}
+
+	@Override
+	public JournalArticle fetchLatestArticle(
+		long resourcePrimKey, int[] statuses) {
+
+		JournalArticle journalArticle = super.fetchLatestArticle(
+			resourcePrimKey, statuses);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		return null;
+	}
+
+	@Override
+	public JournalArticle fetchLatestArticle(
+		long groupId, String articleId, int status) {
+
+		JournalArticle journalArticle = super.fetchLatestArticle(
+			groupId, articleId, status);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		return null;
+	}
+
+	@Override
+	public JournalArticle fetchLatestArticleByUrlTitle(
+		long groupId, String urlTitle, int status) {
+
+		JournalArticle journalArticle = super.fetchLatestArticleByUrlTitle(
+			groupId, urlTitle, status);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		return null;
+	}
+
+	@Override
+	public JournalArticle fetchLatestIndexableArticle(long resourcePrimKey) {
+		JournalArticle journalArticle = super.fetchLatestIndexableArticle(
+			resourcePrimKey);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		return null;
+	}
+
+	@Override
+	public JournalArticle getArticle(long id) throws PortalException {
+		JournalArticle journalArticle = super.getArticle(id);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		throw new NoSuchArticleException(
+			_NO_SUCH_ARTICLE_IN_CURRENT_CHANGE_COLLECTION + "id=" + id);
+	}
+
+	@Override
+	public JournalArticle getArticle(long groupId, String articleId)
+		throws PortalException {
+
+		JournalArticle journalArticle = super.getArticle(groupId, articleId);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		StringBundler msg = new StringBundler(8);
+
+		msg.append(_NO_SUCH_ARTICLE_IN_CURRENT_CHANGE_COLLECTION);
+
+		msg.append("groupId=");
+		msg.append(groupId);
+
+		msg.append(", articleId=");
+		msg.append(articleId);
+
+		throw new NoSuchArticleException(msg.toString());
+	}
+
+	@Override
+	public JournalArticle getArticle(
+			long groupId, String articleId, double version)
+		throws PortalException {
+
+		JournalArticle journalArticle = super.getArticle(
+			groupId, articleId, version);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		StringBundler msg = new StringBundler(8);
+
+		msg.append(_NO_SUCH_ARTICLE_IN_CURRENT_CHANGE_COLLECTION);
+
+		msg.append("groupId=");
+		msg.append(groupId);
+
+		msg.append(", articleId=");
+		msg.append(articleId);
+
+		msg.append(", version");
+		msg.append(version);
+
+		throw new NoSuchArticleException(msg.toString());
+	}
+
+	@Override
+	public JournalArticle getArticle(
+			long groupId, String className, long classPK)
+		throws PortalException {
+
+		JournalArticle journalArticle = super.getArticle(
+			groupId, className, classPK);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		StringBundler msg = new StringBundler(8);
+
+		msg.append(_NO_SUCH_ARTICLE_IN_CURRENT_CHANGE_COLLECTION);
+
+		msg.append("groupId=");
+		msg.append(groupId);
+
+		msg.append(", className=");
+		msg.append(className);
+
+		msg.append(", classPK");
+		msg.append(classPK);
+
+		throw new NoSuchArticleException(msg.toString());
+	}
+
+	@Override
+	public JournalArticle getArticleByUrlTitle(long groupId, String urlTitle)
+		throws PortalException {
+
+		JournalArticle journalArticle = super.getArticleByUrlTitle(
+			groupId, urlTitle);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		StringBundler msg = new StringBundler(8);
+
+		msg.append(_NO_SUCH_ARTICLE_IN_CURRENT_CHANGE_COLLECTION);
+
+		msg.append("groupId=");
+		msg.append(groupId);
+
+		msg.append(", urlTitle=");
+		msg.append(urlTitle);
+
+		throw new NoSuchArticleException(msg.toString());
+	}
+
+	@Override
+	public List<JournalArticle> getArticles() {
+		List<JournalArticle> journalArticles = super.getArticles();
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticles(long groupId) {
+		List<JournalArticle> journalArticles = super.getArticles(groupId);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticles(long groupId, int start, int end) {
+		List<JournalArticle> journalArticles = super.getArticles(
+			groupId, start, end);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticles(
+		long groupId, int start, int end,
+		OrderByComparator<JournalArticle> obc) {
+
+		List<JournalArticle> journalArticles = super.getArticles(
+			groupId, start, end, obc);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticles(long groupId, long folderId) {
+		List<JournalArticle> journalArticles = super.getArticles(
+			groupId, folderId);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticles(
+		long groupId, long folderId, int start, int end) {
+
+		List<JournalArticle> journalArticles = super.getArticles(
+			groupId, folderId, start, end);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticles(
+		long groupId, long folderId, int status, int start, int end) {
+
+		List<JournalArticle> journalArticles = super.getArticles(
+			groupId, folderId, status, start, end);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticles(
+		long groupId, long folderId, int start, int end,
+		OrderByComparator<JournalArticle> orderByComparator) {
+
+		List<JournalArticle> journalArticles = super.getArticles(
+			groupId, folderId, start, end, orderByComparator);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticles(long groupId, String articleId) {
+		List<JournalArticle> journalArticles = super.getArticles(
+			groupId, articleId);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticles(
+		long groupId, String articleId, int start, int end,
+		OrderByComparator<JournalArticle> orderByComparator) {
+
+		List<JournalArticle> journalArticles = super.getArticles(
+			groupId, articleId, start, end, orderByComparator);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticlesByResourcePrimKey(
+		long resourcePrimKey) {
+
+		List<JournalArticle> journalArticles =
+			super.getArticlesByResourcePrimKey(resourcePrimKey);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticlesBySmallImageId(long smallImageId) {
+		List<JournalArticle> journalArticles = super.getArticlesBySmallImageId(
+			smallImageId);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticlesByStructureId(
+		long groupId, long classNameId, String ddmStructureKey, int status,
+		int start, int end, OrderByComparator<JournalArticle> obc) {
+
+		List<JournalArticle> journalArticles = super.getArticlesByStructureId(
+			groupId, classNameId, ddmStructureKey, status, start, end, obc);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticlesByStructureId(
+		long groupId, String ddmStructureKey, int status, int start, int end,
+		OrderByComparator<JournalArticle> obc) {
+
+		List<JournalArticle> journalArticles = super.getArticlesByStructureId(
+			groupId, ddmStructureKey, status, start, end, obc);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getArticlesByStructureId(
+		long groupId, String ddmStructureKey, int start, int end,
+		OrderByComparator<JournalArticle> obc) {
+
+		List<JournalArticle> journalArticles = super.getArticlesByStructureId(
+			groupId, ddmStructureKey, start, end, obc);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public int getArticlesCount(long groupId) {
+		List<JournalArticle> journalArticles = getArticles(groupId);
+
+		return journalArticles.size();
+	}
+
+	@Override
+	public int getArticlesCount(long groupId, long folderId) {
+		List<JournalArticle> journalArticles = getArticles(groupId, folderId);
+
+		return journalArticles.size();
 	}
 
 	@Override
@@ -508,6 +969,16 @@ public class CTJournalArticleLocalServiceWrapper
 		return journalArticle;
 	}
 
+	private boolean _hasChange(JournalArticle journalArticle) {
+		Optional<CTEntry> ctEntryOptional =
+			_ctManager.getModelChangeCTEntryOptional(
+				PrincipalThreadLocal.getUserId(),
+				_portal.getClassNameId(JournalArticle.class.getName()),
+				journalArticle.getId());
+
+		return ctEntryOptional.isPresent();
+	}
+
 	private void _registerChange(JournalArticle journalArticle, int changeType)
 		throws CTException {
 
@@ -537,6 +1008,9 @@ public class CTJournalArticleLocalServiceWrapper
 			journalArticle.getId());
 	}
 
+	private static final String _NO_SUCH_ARTICLE_IN_CURRENT_CHANGE_COLLECTION =
+		"No JournalArticle exist in the current change collection with the " +
+			"following parameters: ";
 	private static final Log _log = LogFactoryUtil.getLog(
 		CTJournalArticleLocalServiceWrapper.class);
 
