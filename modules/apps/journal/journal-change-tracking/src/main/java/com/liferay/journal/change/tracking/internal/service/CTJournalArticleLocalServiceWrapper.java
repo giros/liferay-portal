@@ -23,9 +23,13 @@ import com.liferay.journal.exception.NoSuchArticleException;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.journal.service.JournalArticleLocalServiceWrapper;
+import com.liferay.portal.kernel.dao.orm.QueryDefinition;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.search.BaseModelSearchResult;
+import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceWrapper;
@@ -36,6 +40,8 @@ import com.liferay.portal.kernel.util.StringBundler;
 import java.io.File;
 import java.io.Serializable;
 
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -687,6 +693,389 @@ public class CTJournalArticleLocalServiceWrapper
 		List<JournalArticle> journalArticles = getArticles(groupId, folderId);
 
 		return journalArticles.size();
+	}
+
+	@Override
+	public int getArticlesCount(long groupId, long folderId, int status) {
+		List<JournalArticle> journalArticles = getArticles(
+			groupId, folderId, status, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+
+		return journalArticles.size();
+	}
+
+	@Override
+	public int getArticlesCount(long groupId, String articleId) {
+		List<JournalArticle> journalArticles = getArticles(groupId, articleId);
+
+		return journalArticles.size();
+	}
+
+	@Override
+	public List<JournalArticle> getCompanyArticles(
+		long companyId, double version, int status, int start, int end) {
+
+		List<JournalArticle> journalArticles = super.getCompanyArticles(
+			companyId, version, status, start, end);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getCompanyArticles(
+		long companyId, int status, int start, int end) {
+
+		List<JournalArticle> journalArticles = super.getCompanyArticles(
+			companyId, status, start, end);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public int getCompanyArticlesCount(
+		long companyId, double version, int status, int start, int end) {
+
+		List<JournalArticle> journalArticles = getCompanyArticles(
+			companyId, version, status, start, end);
+
+		return journalArticles.size();
+	}
+
+	@Override
+	public int getCompanyArticlesCount(long companyId, int status) {
+		List<JournalArticle> journalArticles = getCompanyArticles(
+			companyId, status, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+
+		return journalArticles.size();
+	}
+
+	@Override
+	public JournalArticle getDisplayArticle(long groupId, String articleId)
+		throws PortalException {
+
+		JournalArticle journalArticle = super.getDisplayArticle(
+			groupId, articleId);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		StringBundler msg = new StringBundler(8);
+
+		msg.append(_NO_SUCH_ARTICLE_IN_CURRENT_CHANGE_COLLECTION);
+
+		msg.append("groupId=");
+		msg.append(groupId);
+
+		msg.append(", articleId=");
+		msg.append(articleId);
+
+		throw new NoSuchArticleException(msg.toString());
+	}
+
+	@Override
+	public JournalArticle getDisplayArticleByUrlTitle(
+			long groupId, String urlTitle)
+		throws PortalException {
+
+		JournalArticle journalArticle = super.getDisplayArticleByUrlTitle(
+			groupId, urlTitle);
+
+		if (_hasChange(journalArticle)) {
+			return journalArticle;
+		}
+
+		StringBundler msg = new StringBundler(8);
+
+		msg.append(_NO_SUCH_ARTICLE_IN_CURRENT_CHANGE_COLLECTION);
+
+		msg.append("groupId=");
+		msg.append(groupId);
+
+		msg.append(", urlTitle=");
+		msg.append(urlTitle);
+
+		throw new NoSuchArticleException(msg.toString());
+	}
+
+	@Override
+	public List<JournalArticle> getIndexableArticlesByDDMStructureKey(
+		String[] ddmStructureKeys) {
+
+		List<JournalArticle> journalArticles =
+			super.getIndexableArticlesByDDMStructureKey(ddmStructureKeys);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getIndexableArticlesByResourcePrimKey(
+		long resourcePrimKey) {
+
+		List<JournalArticle> journalArticles =
+			super.getIndexableArticlesByResourcePrimKey(resourcePrimKey);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getNoAssetArticles() {
+		List<JournalArticle> journalArticles = super.getNoAssetArticles();
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getNoPermissionArticles() {
+		List<JournalArticle> journalArticles = super.getNoPermissionArticles();
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getStructureArticles(
+		long groupId, String ddmStructureKey) {
+
+		List<JournalArticle> journalArticles = super.getStructureArticles(
+			groupId, ddmStructureKey);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getStructureArticles(
+		long groupId, String ddmStructureKey, int start, int end,
+		OrderByComparator<JournalArticle> obc) {
+
+		List<JournalArticle> journalArticles = super.getStructureArticles(
+			groupId, ddmStructureKey, start, end, obc);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getStructureArticles(
+		String[] ddmStructureKeys) {
+
+		List<JournalArticle> journalArticles = super.getStructureArticles(
+			ddmStructureKeys);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public int getStructureArticlesCount(long groupId, String ddmStructureKey) {
+		List<JournalArticle> journalArticles = getStructureArticles(
+			groupId, ddmStructureKey);
+
+		return journalArticles.size();
+	}
+
+	@Override
+	public List<JournalArticle> getTemplateArticles(
+		long groupId, String ddmTemplateKey) {
+
+		List<JournalArticle> journalArticles = super.getTemplateArticles(
+			groupId, ddmTemplateKey);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> getTemplateArticles(
+		long groupId, String ddmTemplateKey, int start, int end,
+		OrderByComparator<JournalArticle> obc) {
+
+		List<JournalArticle> journalArticles = super.getTemplateArticles(
+			groupId, ddmTemplateKey, start, end, obc);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public int getTemplateArticlesCount(long groupId, String ddmTemplateKey) {
+		List<JournalArticle> journalArticles = getTemplateArticles(
+			groupId, ddmTemplateKey);
+
+		return journalArticles.size();
+	}
+
+	@Override
+	public List<JournalArticle> search(
+		long groupId, List<Long> folderIds, Locale locale, int status,
+		int start, int end) {
+
+		List<JournalArticle> journalArticles = super.search(
+			groupId, folderIds, locale, status, start, end);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> search(
+		long groupId, long folderId, int status, int start, int end) {
+
+		List<JournalArticle> journalArticles = super.search(
+			groupId, folderId, status, start, end);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> search(
+		long companyId, long groupId, List<Long> folderIds, long classNameId,
+		String keywords, Double version, String ddmStructureKey,
+		String ddmTemplateKey, Date displayDateGT, Date displayDateLT,
+		int status, Date reviewDate, int start, int end,
+		OrderByComparator<JournalArticle> obc) {
+
+		List<JournalArticle> journalArticles = super.search(
+			companyId, groupId, folderIds, classNameId, keywords, version,
+			ddmStructureKey, ddmTemplateKey, displayDateGT, displayDateLT,
+			status, reviewDate, start, end, obc);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> search(
+		long companyId, long groupId, List<Long> folderIds, long classNameId,
+		String articleId, Double version, String title, String description,
+		String content, String ddmStructureKey, String ddmTemplateKey,
+		Date displayDateGT, Date displayDateLT, int status, Date reviewDate,
+		boolean andOperator, int start, int end,
+		OrderByComparator<JournalArticle> obc) {
+
+		List<JournalArticle> journalArticles = super.search(
+			companyId, groupId, folderIds, classNameId, articleId, version,
+			title, description, content, ddmStructureKey, ddmTemplateKey,
+			displayDateGT, displayDateLT, status, reviewDate, andOperator,
+			start, end, obc);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public List<JournalArticle> search(
+		long companyId, long groupId, List<Long> folderIds, long classNameId,
+		String articleId, Double version, String title, String description,
+		String content, String[] ddmStructureKeys, String[] ddmTemplateKeys,
+		Date displayDateGT, Date displayDateLT, int status, Date reviewDate,
+		boolean andOperator, int start, int end,
+		OrderByComparator<JournalArticle> obc) {
+
+		List<JournalArticle> journalArticles = super.search(
+			companyId, groupId, folderIds, classNameId, articleId, version,
+			title, description, content, ddmStructureKeys, ddmTemplateKeys,
+			displayDateGT, displayDateLT, status, reviewDate, andOperator,
+			start, end, obc);
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return journalArticles;
+	}
+
+	@Override
+	public int searchCount(long groupId, long folderId, int status) {
+		List<JournalArticle> journalArticles = search(
+			groupId, folderId, status, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+
+		return journalArticles.size();
+	}
+
+	@Override
+	public BaseModelSearchResult<JournalArticle> searchJournalArticles(
+			long companyId, long groupId, List<Long> folderIds,
+			long classNameId, String ddmStructureKey, String ddmTemplateKey,
+			String keywords, LinkedHashMap<String, Object> params, int start,
+			int end, Sort sort)
+		throws PortalException {
+
+		BaseModelSearchResult<JournalArticle> baseModelSearchResult =
+			super.searchJournalArticles(
+				companyId, groupId, folderIds, classNameId, ddmStructureKey,
+				ddmTemplateKey, keywords, params, start, end, sort);
+
+		List<JournalArticle> journalArticles =
+			baseModelSearchResult.getBaseModels();
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return new BaseModelSearchResult<>(
+			journalArticles, journalArticles.size());
+	}
+
+	@Override
+	public BaseModelSearchResult<JournalArticle> searchJournalArticles(
+			long companyId, long groupId, List<Long> folderIds,
+			long classNameId, String articleId, String title,
+			String description, String content, int status,
+			String ddmStructureKey, String ddmTemplateKey,
+			LinkedHashMap<String, Object> params, boolean andSearch, int start,
+			int end, Sort sort)
+		throws PortalException {
+
+		BaseModelSearchResult<JournalArticle> baseModelSearchResult =
+			super.searchJournalArticles(
+				companyId, groupId, folderIds, classNameId, articleId, title,
+				description, content, status, ddmStructureKey, ddmTemplateKey,
+				params, andSearch, start, end, sort);
+
+		List<JournalArticle> journalArticles =
+			baseModelSearchResult.getBaseModels();
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return new BaseModelSearchResult<>(
+			journalArticles, journalArticles.size());
+	}
+
+	@Override
+	public BaseModelSearchResult<JournalArticle> searchJournalArticles(
+			long groupId, long userId, long creatorUserId, int status,
+			int start, int end)
+		throws PortalException {
+
+		BaseModelSearchResult<JournalArticle> baseModelSearchResult =
+			super.searchJournalArticles(
+				groupId, userId, creatorUserId, status, start, end);
+
+		List<JournalArticle> journalArticles =
+			baseModelSearchResult.getBaseModels();
+
+		journalArticles.removeIf(journalArticle -> !_hasChange(journalArticle));
+
+		return new BaseModelSearchResult<>(
+			journalArticles, journalArticles.size());
 	}
 
 	@Override
