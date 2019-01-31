@@ -27,9 +27,7 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.template.soy.util.SoyContext;
 import com.liferay.portal.template.soy.util.SoyContextFactoryUtil;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.portlet.PortletURL;
@@ -60,31 +58,10 @@ public class ChangeListsDisplayContext {
 			"spritemap",
 			_themeDisplay.getPathThemeImages() + "/lexicon/icons.svg");
 
-		// Translations
-
-		Map<String, String> translations = new HashMap<>();
-
-		translations.put(
-			"description",
-			LanguageUtil.get(_httpServletRequest, "description"));
-		translations.put(
-			"production-view",
-			LanguageUtil.get(_httpServletRequest, "production-view"));
-		translations.put(
-			"published-by",
-			LanguageUtil.get(_httpServletRequest, "published-by"));
-		translations.put(
-			"published-change-list",
-			LanguageUtil.get(_httpServletRequest, "published-change-list"));
-
-		soyContext.put("translations", translations);
-
-		// URLs
-
 		soyContext.put(
 			"urlProductionCollection",
 			_themeDisplay.getPortalURL() +
-				"/o/change-tracking/collections/production/" +
+				"/o/change-tracking/collections?type=production&companyId=" +
 					_themeDisplay.getCompanyId());
 		soyContext.put("urlProductionView", _themeDisplay.getPortalURL());
 

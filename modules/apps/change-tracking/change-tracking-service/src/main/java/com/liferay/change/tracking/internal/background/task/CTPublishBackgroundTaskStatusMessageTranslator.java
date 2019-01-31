@@ -14,24 +14,57 @@
 
 package com.liferay.change.tracking.internal.background.task;
 
+import com.liferay.change.tracking.internal.process.log.CTProcessLog;
+import com.liferay.change.tracking.internal.process.log.CTProcessLogEntry;
+import com.liferay.change.tracking.internal.process.util.CTProcessMessageSenderUtil;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatus;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageTranslator;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.messaging.Message;
 
+import java.io.Serializable;
+
+import java.util.Date;
+import java.util.Map;
+
 /**
  * @author Zoltan Csaszi
+ * @author Daniel Kocsis
  */
 public class CTPublishBackgroundTaskStatusMessageTranslator
 	implements BackgroundTaskStatusMessageTranslator {
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void translate(
 		BackgroundTaskStatus backgroundTaskStatus, Message message) {
 
+		CTProcessLog ctProcessLog =
+			(CTProcessLog)backgroundTaskStatus.getAttribute("ctProcessLog");
+
+		if (ctProcessLog == null) {
+			ctProcessLog = new CTProcessLog();
+
+			backgroundTaskStatus.setAttribute("ctProcessLog", ctProcessLog);
+		}
+
+		CTProcessLogEntry.Builder builder = new CTProcessLogEntry.Builder();
+
+		final CTProcessLogEntry ctProcessLogEntry = builder.date(
+			(Date)message.get("date")
+		).level(
+			((CTProcessMessageSenderUtil.Level)message.get("level")).getLabel()
+		).messageKey(
+			message.getString("message")
+		).messageParameters(
+			(Map<String, Serializable>)message.get("messageParameters")
+		).build();
+
+		ctProcessLog.insertLogEntry(ctProcessLogEntry);
+
 		if (_log.isInfoEnabled()) {
-			_log.info(message.getPayload());
+			_log.info(ctProcessLog.toString());
 		}
 	}
 

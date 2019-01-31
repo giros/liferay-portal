@@ -185,7 +185,18 @@ public class CTManagerImpl implements CTManager {
 
 	@Override
 	public Optional<CTEntry> registerModelChange(
-			long userId, long classNameId, long classPK, long resourcePrimKey)
+			long userId, long classNameId, long classPK, long resourcePrimKey,
+			int changeType)
+		throws CTException {
+
+		return registerModelChange(
+			userId, classNameId, classPK, resourcePrimKey, changeType, false);
+	}
+
+	@Override
+	public Optional<CTEntry> registerModelChange(
+			long userId, long classNameId, long classPK, long resourcePrimKey,
+			int changeType, boolean force)
 		throws CTException {
 
 		long companyId = _getCompanyId(userId);
@@ -211,10 +222,15 @@ public class CTManagerImpl implements CTManager {
 		CTCollection ctCollection = ctCollectionOptional.get();
 
 		try {
+			ServiceContext serviceContext = new ServiceContext();
+
+			serviceContext.setAttribute("force", force);
+
 			return Optional.of(
 				_ctEntryLocalService.addCTEntry(
 					userId, classNameId, classPK, resourcePrimKey,
-					ctCollection.getCtCollectionId(), new ServiceContext()));
+					ctCollection.getCtCollectionId(), changeType,
+					serviceContext));
 		}
 		catch (DuplicateCTEntryException dctee) {
 			StringBundler sb = new StringBundler(8);
@@ -246,6 +262,17 @@ public class CTManagerImpl implements CTManager {
 
 			throw new CTException(companyId, sb.toString(), pe);
 		}
+	}
+
+	@Override
+	public Optional<CTEntry> unregisterModelChange(
+		long userId, long classNameId, long classPK) {
+
+		Optional<CTEntry> ctEntryOptional = getModelChangeCTEntryOptional(
+			userId, classNameId, classPK);
+
+		return ctEntryOptional.map(
+			ctEntry -> _ctEntryLocalService.deleteCTEntry(ctEntry));
 	}
 
 	private long _getCompanyId(long userId) {

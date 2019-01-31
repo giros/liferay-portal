@@ -14,6 +14,7 @@
 
 package com.liferay.change.tracking.service.impl;
 
+import com.liferay.change.tracking.constants.CTConstants;
 import com.liferay.change.tracking.exception.DuplicateCTEntryException;
 import com.liferay.change.tracking.model.CTEntry;
 import com.liferay.change.tracking.service.base.CTEntryLocalServiceBaseImpl;
@@ -21,6 +22,7 @@ import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.util.Date;
 import java.util.List;
@@ -34,36 +36,25 @@ public class CTEntryLocalServiceImpl extends CTEntryLocalServiceBaseImpl {
 	@Override
 	public CTEntry addCTEntry(
 			long userId, long classNameId, long classPK, long resourcePrimKey,
-			long ctCollectionId, ServiceContext serviceContext)
+			long ctCollectionId, int changeType, ServiceContext serviceContext)
 		throws PortalException {
 
-		_validate(classNameId, classPK, ctCollectionId);
+		boolean force = GetterUtil.getBoolean(
+			serviceContext.getAttribute("force"));
 
-		long ctEntryId = counterLocalService.increment();
+		CTEntry ctEntry = ctEntryPersistence.fetchByC_C(classNameId, classPK);
 
-		CTEntry ctEntry = ctEntryPersistence.create(ctEntryId);
+		_validate(ctEntry, ctCollectionId, changeType, force);
 
 		User user = userLocalService.getUser(userId);
 
-		ctEntry.setCompanyId(user.getCompanyId());
-		ctEntry.setUserId(user.getUserId());
-		ctEntry.setUserName(user.getFullName());
+		if (ctEntry != null) {
+			return _updateCTEntry(ctEntry, user, changeType, serviceContext);
+		}
 
-		Date now = new Date();
-
-		ctEntry.setCreateDate(serviceContext.getCreateDate(now));
-		ctEntry.setModifiedDate(serviceContext.getModifiedDate(now));
-
-		ctEntry.setClassNameId(classNameId);
-		ctEntry.setClassPK(classPK);
-		ctEntry.setResourcePrimKey(resourcePrimKey);
-
-		ctEntry = ctEntryPersistence.update(ctEntry);
-
-		ctCollectionLocalService.addCTEntryCTCollection(
-			ctEntry.getCtEntryId(), ctCollectionId);
-
-		return ctEntry;
+		return _createCTEntry(
+			user, classNameId, classPK, resourcePrimKey, ctCollectionId,
+			changeType, serviceContext);
 	}
 
 	@Override
@@ -94,16 +85,65 @@ public class CTEntryLocalServiceImpl extends CTEntryLocalServiceBaseImpl {
 		return ctEntryFinder.findByC_C_C(ctCollectionId, classNameId, classPK);
 	}
 
-	private void _validate(long classNameId, long classPK, long ctCollectionId)
+	private CTEntry _createCTEntry(
+		User user, long classNameId, long classPK, long resourcePrimKey,
+		long ctCollectionId, int changeType, ServiceContext serviceContext) {
+
+		long ctEntryId = counterLocalService.increment();
+
+		CTEntry ctEntry = ctEntryPersistence.create(ctEntryId);
+
+		ctEntry.setCompanyId(user.getCompanyId());
+		ctEntry.setUserId(user.getUserId());
+		ctEntry.setUserName(user.getFullName());
+
+		Date now = new Date();
+
+		ctEntry.setCreateDate(serviceContext.getCreateDate(now));
+		ctEntry.setModifiedDate(serviceContext.getModifiedDate(now));
+
+		ctEntry.setClassNameId(classNameId);
+		ctEntry.setClassPK(classPK);
+		ctEntry.setResourcePrimKey(resourcePrimKey);
+		ctEntry.setChangeType(changeType);
+
+		ctEntry = ctEntryPersistence.update(ctEntry);
+
+		ctCollectionLocalService.addCTEntryCTCollection(
+			ctEntry.getCtEntryId(), ctCollectionId);
+
+		return ctEntry;
+	}
+
+	private CTEntry _updateCTEntry(
+		CTEntry ctEntry, User user, int changeType,
+		ServiceContext serviceContext) {
+
+		ctEntry.setUserId(user.getUserId());
+		ctEntry.setUserName(user.getFullName());
+
+		ctEntry.setModifiedDate(serviceContext.getModifiedDate(new Date()));
+		ctEntry.setChangeType(changeType);
+
+		return ctEntryPersistence.update(ctEntry);
+	}
+
+	private void _validate(
+			CTEntry ctEntry, long ctCollectionId, int changeType, boolean force)
 		throws PortalException {
 
-		CTEntry ctEntry = ctEntryPersistence.fetchByC_C(classNameId, classPK);
-
-		if (ctEntry != null) {
+		if (!force && (ctEntry != null)) {
 			throw new DuplicateCTEntryException();
 		}
 
 		ctCollectionLocalService.getCTCollection(ctCollectionId);
+
+		if ((changeType != CTConstants.CT_CHANGE_TYPE_ADDITION) &&
+			(changeType != CTConstants.CT_CHANGE_TYPE_DELETION) &&
+			(changeType != CTConstants.CT_CHANGE_TYPE_MODIFICATION)) {
+
+			throw new IllegalArgumentException("Change type value is invalid");
+		}
 	}
 
 }
