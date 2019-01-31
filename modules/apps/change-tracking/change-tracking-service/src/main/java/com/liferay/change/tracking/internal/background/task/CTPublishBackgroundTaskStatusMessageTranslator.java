@@ -14,8 +14,8 @@
 
 package com.liferay.change.tracking.internal.background.task;
 
-import com.liferay.change.tracking.internal.process.model.CTProcessLogEntryModel;
-import com.liferay.change.tracking.internal.process.model.CTProcessLogModel;
+import com.liferay.change.tracking.internal.process.log.CTProcessLog;
+import com.liferay.change.tracking.internal.process.log.CTProcessLogEntry;
 import com.liferay.change.tracking.internal.process.util.CTProcessMessageSenderUtil;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatus;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageTranslator;
@@ -40,21 +40,18 @@ public class CTPublishBackgroundTaskStatusMessageTranslator
 	public void translate(
 		BackgroundTaskStatus backgroundTaskStatus, Message message) {
 
-		CTProcessLogModel ctProcessLogModel =
-			(CTProcessLogModel)backgroundTaskStatus.getAttribute(
-				"ctProcessLogModel");
+		CTProcessLog ctProcessLog =
+			(CTProcessLog)backgroundTaskStatus.getAttribute("ctProcessLog");
 
-		if (ctProcessLogModel == null) {
-			ctProcessLogModel = new CTProcessLogModel();
+		if (ctProcessLog == null) {
+			ctProcessLog = new CTProcessLog();
 
-			backgroundTaskStatus.setAttribute(
-				"ctProcessLogModel", ctProcessLogModel);
+			backgroundTaskStatus.setAttribute("ctProcessLog", ctProcessLog);
 		}
 
-		CTProcessLogEntryModel.Builder builder =
-			new CTProcessLogEntryModel.Builder();
+		CTProcessLogEntry.Builder builder = new CTProcessLogEntry.Builder();
 
-		final CTProcessLogEntryModel ctProcessLogEntryModel = builder.date(
+		final CTProcessLogEntry ctProcessLogEntry = builder.date(
 			(Date)message.get("date")
 		).level(
 			((CTProcessMessageSenderUtil.Level)message.get("level")).getLabel()
@@ -64,10 +61,10 @@ public class CTPublishBackgroundTaskStatusMessageTranslator
 			(Map<String, Serializable>)message.get("messageParameters")
 		).build();
 
-		ctProcessLogModel.insertLogEntry(ctProcessLogEntryModel);
+		ctProcessLog.insertLogEntry(ctProcessLogEntry);
 
 		if (_log.isInfoEnabled()) {
-			_log.info(ctProcessLogModel.toString());
+			_log.info(ctProcessLog.toString());
 		}
 	}
 

@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.change.tracking.internal.process.model;
+package com.liferay.change.tracking.internal.process.log;
 
 import java.io.Serializable;
 
@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * @author Daniel Kocsis
  */
-public class CTProcessLogEntryModel implements Serializable {
+public class CTProcessLogEntry implements Serializable {
 
 	public Date getDate() {
 		return _date;
@@ -42,8 +42,8 @@ public class CTProcessLogEntryModel implements Serializable {
 
 	public static class Builder {
 
-		public CTProcessLogEntryModel build() {
-			return new CTProcessLogEntryModel(this);
+		public CTProcessLogEntry build() {
+			return new CTProcessLogEntry(this);
 		}
 
 		public Builder date(Date date) {
@@ -79,7 +79,7 @@ public class CTProcessLogEntryModel implements Serializable {
 
 	}
 
-	private CTProcessLogEntryModel(Builder builder) {
+	private CTProcessLogEntry(Builder builder) {
 		_date = builder._date;
 		_level = builder._level;
 		_messageKey = builder._messageKey;

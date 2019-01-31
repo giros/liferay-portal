@@ -16,7 +16,7 @@ package com.liferay.change.tracking.internal.background.task;
 
 import com.liferay.change.tracking.CTEngineManager;
 import com.liferay.change.tracking.exception.CTException;
-import com.liferay.change.tracking.internal.process.model.CTProcessLogModel;
+import com.liferay.change.tracking.internal.process.log.CTProcessLog;
 import com.liferay.change.tracking.internal.process.util.CTProcessMessageSenderUtil;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.model.CTEntry;
@@ -119,11 +119,10 @@ public class CTPublishBackgroundTaskExecutor
 			BackgroundTaskStatusRegistryUtil.getBackgroundTaskStatus(
 				backgroundTask.getBackgroundTaskId());
 
-		CTProcessLogModel ctProcessLogModel =
-			(CTProcessLogModel)backgroundTaskStatus.getAttribute(
-				"ctProcessLogModel");
+		CTProcessLog ctProcessLog =
+			(CTProcessLog)backgroundTaskStatus.getAttribute("ctProcessLog");
 
-		String ctProcessLogJSON = ctProcessLogModel.toString();
+		String ctProcessLogJSON = ctProcessLog.toString();
 
 		BackgroundTaskManagerUtil.addBackgroundTaskAttachment(
 			backgroundTask.getUserId(), backgroundTask.getBackgroundTaskId(),

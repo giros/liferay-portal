@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.change.tracking.internal.process.model;
+package com.liferay.change.tracking.internal.process.log;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,26 +26,25 @@ import java.util.List;
 /**
  * @author Daniel Kocsis
  */
-public class CTProcessLogModel implements Serializable {
+public class CTProcessLog implements Serializable {
 
-	public static CTProcessLogModel from(String processLogJSON) {
+	public static CTProcessLog from(String processLogJSON) {
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		try {
-			return objectMapper.readValue(
-				processLogJSON, CTProcessLogModel.class);
+			return objectMapper.readValue(processLogJSON, CTProcessLog.class);
 		}
 		catch (Exception e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
-	public List<CTProcessLogEntryModel> getLogEntries() {
-		return _ctProcessLogEntryModel;
+	public List<CTProcessLogEntry> getLogEntries() {
+		return _ctProcessLogEntry;
 	}
 
-	public void insertLogEntry(CTProcessLogEntryModel ctProcessLogEntryModel) {
-		_ctProcessLogEntryModel.add(ctProcessLogEntryModel);
+	public void insertLogEntry(CTProcessLogEntry ctProcessLogEntry) {
+		_ctProcessLogEntry.add(ctProcessLogEntry);
 	}
 
 	@Override
@@ -63,7 +62,7 @@ public class CTProcessLogModel implements Serializable {
 		}
 	}
 
-	private final List<CTProcessLogEntryModel> _ctProcessLogEntryModel =
+	private final List<CTProcessLogEntry> _ctProcessLogEntry =
 		new LinkedList<>();
 
 }
