@@ -41,11 +41,11 @@ public class CTProcessLogModel implements Serializable {
 	}
 
 	public List<CTProcessLogEntryModel> getLogEntries() {
-		return _logEntryModels;
+		return _ctProcessLogEntryModel;
 	}
 
 	public void insertLogEntry(CTProcessLogEntryModel ctProcessLogEntryModel) {
-		_logEntryModels.add(ctProcessLogEntryModel);
+		_ctProcessLogEntryModel.add(ctProcessLogEntryModel);
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class CTProcessLogModel implements Serializable {
 		}
 	}
 
-	private final List<CTProcessLogEntryModel> _logEntryModels =
+	private final List<CTProcessLogEntryModel> _ctProcessLogEntryModel =
 		new LinkedList<>();
 
 }
