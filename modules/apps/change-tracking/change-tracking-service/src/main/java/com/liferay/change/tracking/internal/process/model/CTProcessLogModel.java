@@ -36,7 +36,7 @@ public class CTProcessLogModel implements Serializable {
 				processLogJSON, CTProcessLogModel.class);
 		}
 		catch (Exception e) {
-			throw new IllegalArgumentException("Invalid input format!", e);
+			throw new IllegalArgumentException(e);
 		}
 	}
 
