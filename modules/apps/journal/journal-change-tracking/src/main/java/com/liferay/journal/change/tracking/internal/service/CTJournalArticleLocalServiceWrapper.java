@@ -1365,6 +1365,10 @@ public class CTJournalArticleLocalServiceWrapper
 	}
 
 	private boolean _hasChange(JournalArticle journalArticle) {
+		if (journalArticle == null) {
+			return false;
+		}
+
 		Optional<CTEntry> ctEntryOptional =
 			_ctManager.getModelChangeCTEntryOptional(
 				PrincipalThreadLocal.getUserId(),
