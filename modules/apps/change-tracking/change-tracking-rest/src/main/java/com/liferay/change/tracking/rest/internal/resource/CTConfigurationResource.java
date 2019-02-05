@@ -16,13 +16,17 @@ package com.liferay.change.tracking.rest.internal.resource;
 
 import com.liferay.change.tracking.CTEngineManager;
 import com.liferay.change.tracking.configuration.CTConfiguration;
+import com.liferay.change.tracking.rest.internal.exception.CTJaxRsException;
 import com.liferay.change.tracking.rest.internal.model.configuration.CTConfigurationModel;
 import com.liferay.change.tracking.rest.internal.model.configuration.CTConfigurationUpdateModel;
-import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.change.tracking.rest.internal.util.CTJaxRsUtil;
+import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -57,13 +61,26 @@ public class CTConfigurationResource {
 	@GET
 	@Path("/{companyId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public CTConfigurationModel getCtConfiguration(
+	public CTConfigurationModel getCtConfigurationModel(
 			@PathParam("companyId") long companyId)
-		throws PortalException {
+		throws CTJaxRsException {
 
-		_companyLocalService.getCompany(companyId);
+		CTJaxRsUtil.checkCompany(companyId);
 
 		return _getCTConfigurationModel(companyId);
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<CTConfigurationModel> getCTConfigurationModels() {
+		List<CTConfigurationModel> ctConfigurationModels = new ArrayList<>();
+
+		for (Company company : _companyLocalService.getCompanies()) {
+			ctConfigurationModels.add(
+				_getCTConfigurationModel(company.getCompanyId()));
+		}
+
+		return ctConfigurationModels;
 	}
 
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -73,9 +90,9 @@ public class CTConfigurationResource {
 	public CTConfigurationModel updateCtConfiguration(
 			@PathParam("companyId") long companyId, @Context User user,
 			CTConfigurationUpdateModel ctConfigurationUpdateModel)
-		throws PortalException {
+		throws CTJaxRsException {
 
-		_companyLocalService.getCompany(companyId);
+		CTJaxRsUtil.checkCompany(companyId);
 
 		_updateChangeTrackingEnabled(
 			companyId, user, ctConfigurationUpdateModel);
@@ -91,9 +108,7 @@ public class CTConfigurationResource {
 		_ctConfigurations.add(ctConfiguration);
 	}
 
-	private CTConfigurationModel _getCTConfigurationModel(long companyId)
-		throws PortalException {
-
+	private CTConfigurationModel _getCTConfigurationModel(long companyId) {
 		Set<String> supportedContentTypeLanguageKeys = new HashSet<>();
 		Set<String> supportedContentTypes = new HashSet<>();
 
