@@ -18,9 +18,7 @@ import com.liferay.change.tracking.CTEngineManager;
 import com.liferay.change.tracking.constants.CTPortletKeys;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.Optional;
 
@@ -38,54 +36,29 @@ import org.osgi.service.component.annotations.Reference;
 	immediate = true,
 	property = {
 		"javax.portlet.name=" + CTPortletKeys.CHANGE_LISTS,
-		"mvc.command.name=/", "mvc.command.name=/change_lists/view"
+		"mvc.command.name=/change_lists/add",
+		"mvc.command.name=/change_lists/edit"
 	},
 	service = MVCRenderCommand.class
 )
-public class ViewMVCRenderCommand implements MVCRenderCommand {
+public class EditCTCollectionMVCRenderCommand implements MVCRenderCommand {
 
 	@Override
 	public String render(
 			RenderRequest renderRequest, RenderResponse renderResponse)
 		throws PortletException {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)renderRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
+		long ctCollectionId = ParamUtil.getLong(
+			renderRequest, "ctCollectionId");
 
-		long userId = themeDisplay.getUserId();
-
-		boolean reset = ParamUtil.getBoolean(renderRequest, "reset");
-
-		if (reset) {
-			_resetCheckedOutCTCollection(themeDisplay.getCompanyId(), userId);
-
-			return "/view.jsp";
-		}
-
-		Optional<CTCollection> activeCTCollectionOptional =
-			_ctEngineManager.getActiveCTCollectionOptional(userId);
-
-		if (!activeCTCollectionOptional.isPresent()) {
-			return "/view.jsp";
-		}
-
-		CTCollection activeCTCollection = activeCTCollectionOptional.get();
-
-		if (activeCTCollection.isProduction()) {
-			return "/view.jsp";
-		}
-
-		return "/overview.jsp";
-	}
-
-	private void _resetCheckedOutCTCollection(long companyId, long userId) {
 		Optional<CTCollection> ctCollectionOptional =
-			_ctEngineManager.getProductionCTCollectionOptional(companyId);
+			_ctEngineManager.getCTCollectionOptional(ctCollectionId);
 
-		CTCollection ctCollection = ctCollectionOptional.get();
+		ctCollectionOptional.ifPresent(
+			ctCollection -> renderRequest.setAttribute(
+				"ctCollection", ctCollection));
 
-		_ctEngineManager.checkoutCTCollection(
-			userId, ctCollection.getCtCollectionId());
+		return "/edit_collection.jsp";
 	}
 
 	@Reference
