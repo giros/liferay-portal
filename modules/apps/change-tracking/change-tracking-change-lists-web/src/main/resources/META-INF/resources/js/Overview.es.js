@@ -49,6 +49,16 @@ class Overview extends PortletBase {
 		let activeCollection = requestResult[0];
 		let productionInformation = requestResult[1];
 
+		let foundLink = activeCollection.links.find(
+			function(link) {
+				return link.rel === 'entries';
+			}
+		);
+
+		if (foundLink) {
+			this._fetchChangeEntries(foundLink.href);
+		}
+
 		// Changes
 
 		this.changes = {
@@ -113,6 +123,74 @@ class Overview extends PortletBase {
 		};
 	}
 
+	_fetchChangeEntries(url) {
+		let headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		let init = {
+			credentials: 'include',
+			headers,
+			method: 'GET'
+		};
+
+		fetch(url, init)
+			.then(r => r.json())
+			.then(response => this._populateChangeEntries(response))
+			.catch(
+				error => {
+					const message = typeof error === 'string' ?
+						error :
+						Liferay.Util.sub(Liferay.Language.get('an-error-occured-while-getting-data-from-x'), url);
+
+					openToast(
+						{
+							message,
+							title: Liferay.Language.get('error'),
+							type: 'danger'
+						}
+					);
+				}
+			);
+	}
+
+	_populateChangeEntries(changeEntriesResult) {
+		this.changeEntries = [];
+
+		changeEntriesResult.forEach(
+			changeEntry => {
+				let changeTypeStr = Liferay.Language.get('added');
+
+				if (changeEntry.changeType === 2) {
+					changeTypeStr = Liferay.Language.get('deleted');
+				}
+				else if (changeEntry.changeType === 3) {
+					changeTypeStr = Liferay.Language.get('modified');
+				}
+
+				this.changeEntries.push(
+					{
+						changeType: changeTypeStr,
+						conflict: false,
+						contentType: changeEntry.contentType,
+						lastEdited: new Intl.DateTimeFormat(
+							Liferay.ThemeDisplay.getBCP47LanguageId(),
+							{
+								day: 'numeric',
+								hour: 'numeric',
+								minute: 'numeric',
+								month: 'numeric',
+								year: 'numeric'
+							}).format(changeEntry.modifiedDate),
+						site: changeEntry.siteName,
+						title: changeEntry.title,
+						userName: changeEntry.userName,
+						version: String(changeEntry.version)
+					}
+				);
+			}
+		);
+	}
+
 	_fetchAll(urls, init) {
 		return Promise.all(
 			urls.map(
@@ -123,7 +201,7 @@ class Overview extends PortletBase {
 						error => {
 							const message = typeof error === 'string' ?
 								error :
-								Lang.sub(Liferay.Language.get('an-error-occured-while-getting-data-from-x'), [url]);
+								Liferay.Util.sub(Liferay.Language.get('an-error-occured-while-getting-data-from-x'), url);
 
 							openToast(
 								{
@@ -147,6 +225,8 @@ class Overview extends PortletBase {
  * @type {!Object}
  */
 Overview.STATE = {
+
+	activeCTCollectionId: Config.number().value(0),
 
 	/**
 	 * Contains the number of changes for the active change list
@@ -183,6 +263,21 @@ Overview.STATE = {
 	 * @type {String}
 	 */
 	descriptionProductionInformation: Config.string(),
+
+	changeEntries: Config.arrayOf(
+		Config.shapeOf(
+			{
+				changeType: Config.string(),
+				conflict: Config.bool(),
+				contentType: Config.string(),
+				lastEdited: Config.string(),
+				site: Config.string(),
+				title: Config.string(),
+				userName: Config.string(),
+				version: Config.string()
+			}
+		)
+	),
 
 	/**
 	 * List of drop down menu items
@@ -258,6 +353,8 @@ Overview.STATE = {
 	 * @type {!String}
 	 */
 	urlActiveCollection: Config.string().required(),
+
+	urlChangeEntries: Config.string(),
 
 	/**
 	 * Property that contains the url for the REST service to the change
