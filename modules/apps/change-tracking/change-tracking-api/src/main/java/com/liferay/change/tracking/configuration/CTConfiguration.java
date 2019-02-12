@@ -128,6 +128,8 @@ public interface CTConfiguration<T, U> {
 	public Function<U, Serializable>
 		getVersionEntityIdFromVersionEntityFunction();
 
+	public Function<U, String> getVersionEntitySiteNameFunction();
+
 	/**
 	 * Returns the function from the configuration that retrieves the version
 	 * entity's workflow status from the version entity
@@ -136,5 +138,9 @@ public interface CTConfiguration<T, U> {
 	 *         entity's workflow status from the version entity
 	 */
 	public Function<U, Integer> getVersionEntityStatusFunction();
+
+	public Function<U, String> getVersionEntityTitleFunction();
+
+	public Function<U, Serializable> getVersionEntityVersionFunction();
 
 }

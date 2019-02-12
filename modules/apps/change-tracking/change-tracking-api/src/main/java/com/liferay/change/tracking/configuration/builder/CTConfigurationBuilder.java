@@ -79,9 +79,18 @@ public interface CTConfigurationBuilder<T, U> {
 
 	public interface VersionEntityByVersionEntityIdStep<U> {
 
-		public EntityIdsFromVersionEntityStep<U>
+		public VersionEntityDetailsStep<U>
 			setVersionEntityByVersionEntityIdFunction(
 				Function<Long, U> versionEntityByVersionEntityIdFunction);
+
+	}
+
+	public interface VersionEntityDetailsStep<U> {
+
+		public EntityIdsFromVersionEntityStep<U> setVersionEntityDetails(
+			Function<U, String> versionEntitySiteNameFunction,
+			Function<U, String> versionEntityTitleFunction,
+			Function<U, Serializable> versionEntityVersionFunction);
 
 	}
 

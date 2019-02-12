@@ -15,6 +15,7 @@
 package com.liferay.change.tracking.internal.configuration;
 
 import com.liferay.change.tracking.configuration.CTConfiguration;
+import com.liferay.change.tracking.configuration.CTConfigurationRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Gergely Mathe
  */
 @Component(immediate = true, service = CTConfigurationRegistry.class)
-public class CTConfigurationRegistry {
+public class CTConfigurationRegistryImpl implements CTConfigurationRegistry {
 
 	public Optional<CTConfiguration<?, ?>>
 		getCTConfigurationOptionalByResourceClass(Class<?> clazz) {

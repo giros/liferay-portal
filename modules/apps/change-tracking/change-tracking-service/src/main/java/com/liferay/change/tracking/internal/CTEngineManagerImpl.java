@@ -16,9 +16,9 @@ package com.liferay.change.tracking.internal;
 
 import com.liferay.change.tracking.CTEngineManager;
 import com.liferay.change.tracking.configuration.CTConfiguration;
+import com.liferay.change.tracking.configuration.CTConfigurationRegistry;
 import com.liferay.change.tracking.constants.CTConstants;
 import com.liferay.change.tracking.constants.CTPortletKeys;
-import com.liferay.change.tracking.internal.configuration.CTConfigurationRegistry;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.model.CTEntry;
 import com.liferay.change.tracking.service.CTCollectionLocalService;

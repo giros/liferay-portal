@@ -104,8 +104,17 @@ public class CTConfigurationBuilderImpl<T, U>
 		public void setVersionEntityIdFromVersionEntityFunction(
 			Function<U, Serializable> versionEntityIdFromVersionEntityFunction);
 
+		public void setVersionEntitySiteNameFunction(
+			Function<U, String> versionEntitySiteNameFunction);
+
 		public void setVersionEntityStatusFunction(
 			Function<U, Integer> versionEntityStatusFunction);
+
+		public void setVersionEntityTitleFunction(
+			Function<U, String> versionEntityTitleFunction);
+
+		public void setVersionEntityVersionFunction(
+			Function<U, Serializable> versionEntityVersionFunction);
 
 	}
 
@@ -185,12 +194,33 @@ public class CTConfigurationBuilderImpl<T, U>
 		implements VersionEntityByVersionEntityIdStep<U> {
 
 		@Override
-		public EntityIdsFromVersionEntityStep<U>
+		public VersionEntityDetailsStep<U>
 			setVersionEntityByVersionEntityIdFunction(
 				Function<Long, U> versionEntityByVersionEntityIdFunction) {
 
 			_ctConfiguration.setVersionEntityByVersionEntityIdFunction(
 				versionEntityByVersionEntityIdFunction);
+
+			return new VersionEntityDetailsStepImpl();
+		}
+
+	}
+
+	public class VersionEntityDetailsStepImpl
+		implements VersionEntityDetailsStep<U> {
+
+		@Override
+		public EntityIdsFromVersionEntityStep<U> setVersionEntityDetails(
+			Function<U, String> versionEntitySiteNameFunction,
+			Function<U, String> versionEntityTitleFunction,
+			Function<U, Serializable> versionEntityVersionFunction) {
+
+			_ctConfiguration.setVersionEntitySiteNameFunction(
+				versionEntitySiteNameFunction);
+			_ctConfiguration.setVersionEntityTitleFunction(
+				versionEntityTitleFunction);
+			_ctConfiguration.setVersionEntityVersionFunction(
+				versionEntityVersionFunction);
 
 			return new EntityIdsFromVersionEntityStepImpl();
 		}

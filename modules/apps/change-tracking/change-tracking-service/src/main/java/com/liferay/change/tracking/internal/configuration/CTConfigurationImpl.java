@@ -98,8 +98,23 @@ public class CTConfigurationImpl<T, U>
 	}
 
 	@Override
+	public Function<U, String> getVersionEntitySiteNameFunction() {
+		return _versionEntityInformation.getVersionEntitySiteNameFunction();
+	}
+
+	@Override
 	public Function<U, Integer> getVersionEntityStatusFunction() {
 		return _versionEntityInformation.getStatusFunction();
+	}
+
+	@Override
+	public Function<U, String> getVersionEntityTitleFunction() {
+		return _versionEntityInformation.getVersionEntityTitleFunction();
+	}
+
+	@Override
+	public Function<U, Serializable> getVersionEntityVersionFunction() {
+		return _versionEntityInformation.getVersionEntityVersionFunction();
 	}
 
 	@Override
@@ -176,11 +191,35 @@ public class CTConfigurationImpl<T, U>
 	}
 
 	@Override
+	public void setVersionEntitySiteNameFunction(
+		Function<U, String> versionEntitySiteNameFunction) {
+
+		_versionEntityInformation.setVersionEntitySiteNameFunction(
+			versionEntitySiteNameFunction);
+	}
+
+	@Override
 	public void setVersionEntityStatusFunction(
 		Function<U, Integer> versionEntityStatusFunction) {
 
 		_versionEntityInformation.setStatusFunction(
 			versionEntityStatusFunction);
+	}
+
+	@Override
+	public void setVersionEntityTitleFunction(
+		Function<U, String> versionEntityTitleFunction) {
+
+		_versionEntityInformation.setVersionEntityTitleFunction(
+			versionEntityTitleFunction);
+	}
+
+	@Override
+	public void setVersionEntityVersionFunction(
+		Function<U, Serializable> versionEntityVersionFunction) {
+
+		_versionEntityInformation.setVersionEntityVersionFunction(
+			versionEntityVersionFunction);
 	}
 
 	private String _contentType;
@@ -211,6 +250,18 @@ public class CTConfigurationImpl<T, U>
 
 		public Function<T, Integer> getStatusFunction() {
 			return _statusFunction;
+		}
+
+		public Function<T, String> getVersionEntitySiteNameFunction() {
+			return _versionEntitySiteNameFunction;
+		}
+
+		public Function<T, String> getVersionEntityTitleFunction() {
+			return _versionEntityTitleFunction;
+		}
+
+		public Function<T, Serializable> getVersionEntityVersionFunction() {
+			return _versionEntityVersionFunction;
 		}
 
 		public Function<T, Serializable> getVersionIdFunction() {
@@ -245,12 +296,33 @@ public class CTConfigurationImpl<T, U>
 			_versionEntityIdFunction = versionEntityIdFunction;
 		}
 
+		public void setVersionEntitySiteNameFunction(
+			Function<T, String> versionEntitySiteNameFunction) {
+
+			_versionEntitySiteNameFunction = versionEntitySiteNameFunction;
+		}
+
+		public void setVersionEntityTitleFunction(
+			Function<T, String> versionEntityTitleFunction) {
+
+			_versionEntityTitleFunction = versionEntityTitleFunction;
+		}
+
+		public void setVersionEntityVersionFunction(
+			Function<T, Serializable> versionEntityVersionFunction) {
+
+			_versionEntityVersionFunction = versionEntityVersionFunction;
+		}
+
 		private Integer[] _allowedStatuses;
 		private Class<T> _entityClass;
 		private Function<Long, T> _entityFunction;
 		private Function<T, Serializable> _resourceEntityIdFunction;
 		private Function<T, Integer> _statusFunction;
 		private Function<T, Serializable> _versionEntityIdFunction;
+		private Function<T, String> _versionEntitySiteNameFunction;
+		private Function<T, String> _versionEntityTitleFunction;
+		private Function<T, Serializable> _versionEntityVersionFunction;
 
 	}
 
