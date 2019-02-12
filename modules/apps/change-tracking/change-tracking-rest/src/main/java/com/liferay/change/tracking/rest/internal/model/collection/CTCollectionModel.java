@@ -14,9 +14,14 @@
 
 package com.liferay.change.tracking.rest.internal.model.collection;
 
-import com.liferay.change.tracking.model.CTCollection;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+import com.liferay.change.tracking.model.CTCollection;
+import com.liferay.change.tracking.rest.internal.model.links.ModelLinkModel;
+
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -75,6 +80,21 @@ public class CTCollectionModel {
 	@XmlElement
 	public String getDescription() {
 		return _description;
+	}
+
+	@JsonProperty("links")
+	public List<ModelLinkModel> getModelLinkModels() {
+		ModelLinkModel.Builder builder = new ModelLinkModel.Builder();
+
+		ModelLinkModel modelLinkModel = builder.setHref(
+			"/o/change-tracking/collections/" + _ctCollectionId + "/entries"
+		).setRel(
+			"entries"
+		).setType(
+			"GET"
+		).build();
+
+		return Collections.singletonList(modelLinkModel);
 	}
 
 	@XmlElement
