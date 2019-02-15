@@ -278,6 +278,12 @@ public class CTEntryLocalServiceUtil {
 			orderByComparator);
 	}
 
+	public static java.util.List<com.liferay.change.tracking.model.CTEntry> getCTCollectionCTEntriesByStatus(
+		long ctCollectionId, int status) {
+		return getService()
+				   .getCTCollectionCTEntriesByStatus(ctCollectionId, status);
+	}
+
 	public static int getCTCollectionCTEntriesCount(long ctCollectionId) {
 		return getService().getCTCollectionCTEntriesCount(ctCollectionId);
 	}
@@ -378,6 +384,11 @@ public class CTEntryLocalServiceUtil {
 	public static com.liferay.change.tracking.model.CTEntry updateCTEntry(
 		com.liferay.change.tracking.model.CTEntry ctEntry) {
 		return getService().updateCTEntry(ctEntry);
+	}
+
+	public static com.liferay.change.tracking.model.CTEntry updateStatus(
+		long ctEntryId, int status) {
+		return getService().updateStatus(ctEntryId, status);
 	}
 
 	public static CTEntryLocalService getService() {

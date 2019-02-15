@@ -16,6 +16,7 @@ package com.liferay.change.tracking.service.impl;
 
 import com.liferay.change.tracking.constants.CTConstants;
 import com.liferay.change.tracking.exception.DuplicateCTEntryException;
+import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.model.CTEntry;
 import com.liferay.change.tracking.service.base.CTEntryLocalServiceBaseImpl;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
@@ -23,6 +24,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.Date;
 import java.util.List;
@@ -85,6 +87,40 @@ public class CTEntryLocalServiceImpl extends CTEntryLocalServiceBaseImpl {
 		return ctEntryFinder.findByC_C_C(ctCollectionId, classNameId, classPK);
 	}
 
+	@Override
+	public List<CTEntry> getCTCollectionCTEntries(long ctCollectionId) {
+		if (_isProductionCTCollectionId(ctCollectionId)) {
+			return super.getCTCollectionCTEntries(ctCollectionId);
+		}
+
+		return getCTCollectionCTEntriesByStatus(
+			ctCollectionId, WorkflowConstants.STATUS_DRAFT);
+	}
+
+	@Override
+	public List<CTEntry> getCTCollectionCTEntriesByStatus(
+		long ctCollectionId, int status) {
+
+		return ctEntryFinder.findByC_S(
+			ctCollectionId, status, new QueryDefinition<>());
+	}
+
+	@Override
+	public CTEntry updateStatus(long ctEntryId, int status) {
+		if ((status != WorkflowConstants.STATUS_APPROVED) &&
+			(status != WorkflowConstants.STATUS_DRAFT)) {
+
+			throw new IllegalArgumentException(
+				"Change status value is invalid");
+		}
+
+		CTEntry ctEntry = ctEntryPersistence.fetchByPrimaryKey(ctEntryId);
+
+		ctEntry.setStatus(status);
+
+		return ctEntryPersistence.update(ctEntry);
+	}
+
 	private CTEntry _addCTEntry(
 		User user, long classNameId, long classPK, long resourcePrimKey,
 		int changeType, long ctCollectionId, ServiceContext serviceContext) {
@@ -107,12 +143,27 @@ public class CTEntryLocalServiceImpl extends CTEntryLocalServiceBaseImpl {
 		ctEntry.setResourcePrimKey(resourcePrimKey);
 		ctEntry.setChangeType(changeType);
 
+		int status = WorkflowConstants.STATUS_DRAFT;
+
+		if (_isProductionCTCollectionId(ctCollectionId)) {
+			status = WorkflowConstants.STATUS_APPROVED;
+		}
+
+		ctEntry.setStatus(status);
+
 		ctEntry = ctEntryPersistence.update(ctEntry);
 
 		ctCollectionLocalService.addCTEntryCTCollection(
 			ctEntry.getCtEntryId(), ctCollectionId);
 
 		return ctEntry;
+	}
+
+	private boolean _isProductionCTCollectionId(long ctCollectionId) {
+		CTCollection ctCollection = ctCollectionLocalService.fetchCTCollection(
+			ctCollectionId);
+
+		return ctCollection.isProduction();
 	}
 
 	private CTEntry _updateCTEntry(

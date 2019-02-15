@@ -300,6 +300,13 @@ public class CTEntryLocalServiceWrapper implements CTEntryLocalService,
 	}
 
 	@Override
+	public java.util.List<com.liferay.change.tracking.model.CTEntry> getCTCollectionCTEntriesByStatus(
+		long ctCollectionId, int status) {
+		return _ctEntryLocalService.getCTCollectionCTEntriesByStatus(ctCollectionId,
+			status);
+	}
+
+	@Override
 	public int getCTCollectionCTEntriesCount(long ctCollectionId) {
 		return _ctEntryLocalService.getCTCollectionCTEntriesCount(ctCollectionId);
 	}
@@ -410,6 +417,12 @@ public class CTEntryLocalServiceWrapper implements CTEntryLocalService,
 	public com.liferay.change.tracking.model.CTEntry updateCTEntry(
 		com.liferay.change.tracking.model.CTEntry ctEntry) {
 		return _ctEntryLocalService.updateCTEntry(ctEntry);
+	}
+
+	@Override
+	public com.liferay.change.tracking.model.CTEntry updateStatus(
+		long ctEntryId, int status) {
+		return _ctEntryLocalService.updateStatus(ctEntryId, status);
 	}
 
 	@Override
