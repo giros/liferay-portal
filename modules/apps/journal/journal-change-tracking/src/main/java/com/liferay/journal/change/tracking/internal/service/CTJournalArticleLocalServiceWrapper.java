@@ -88,7 +88,7 @@ public class CTJournalArticleLocalServiceWrapper
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		JournalArticle journalArticle = _ctManager.executeModelUpdate(
+		JournalArticle journalArticle = _ctManager.updateModelInContext(
 			() -> super.addArticle(
 				userId, groupId, folderId, classNameId, classPK, articleId,
 				autoArticleId, version, titleMap, descriptionMap,
@@ -126,7 +126,7 @@ public class CTJournalArticleLocalServiceWrapper
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		JournalArticle journalArticle = _ctManager.executeModelUpdate(
+		JournalArticle journalArticle = _ctManager.updateModelInContext(
 			() -> super.addArticle(
 				userId, groupId, folderId, classNameId, classPK, articleId,
 				autoArticleId, version, titleMap, descriptionMap, content,
@@ -153,7 +153,7 @@ public class CTJournalArticleLocalServiceWrapper
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		JournalArticle journalArticle = _ctManager.executeModelUpdate(
+		JournalArticle journalArticle = _ctManager.updateModelInContext(
 			() -> super.addArticle(
 				userId, groupId, folderId, titleMap, descriptionMap, content,
 				ddmStructureKey, ddmTemplateKey, serviceContext));
@@ -1203,7 +1203,7 @@ public class CTJournalArticleLocalServiceWrapper
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		JournalArticle journalArticle = _ctManager.executeModelUpdate(
+		JournalArticle journalArticle = _ctManager.updateModelInContext(
 			() -> super.updateArticle(
 				userId, groupId, folderId, articleId, version, titleMap,
 				descriptionMap, friendlyURLMap, content, ddmStructureKey,
@@ -1230,7 +1230,7 @@ public class CTJournalArticleLocalServiceWrapper
 			String layoutUuid, ServiceContext serviceContext)
 		throws PortalException {
 
-		JournalArticle journalArticle = _ctManager.executeModelUpdate(
+		JournalArticle journalArticle = _ctManager.updateModelInContext(
 			() -> super.updateArticle(
 				userId, groupId, folderId, articleId, version, titleMap,
 				descriptionMap, content, layoutUuid, serviceContext));
@@ -1259,7 +1259,7 @@ public class CTJournalArticleLocalServiceWrapper
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		JournalArticle journalArticle = _ctManager.executeModelUpdate(
+		JournalArticle journalArticle = _ctManager.updateModelInContext(
 			() -> super.updateArticle(
 				userId, groupId, folderId, articleId, version, titleMap,
 				descriptionMap, content, ddmStructureKey, ddmTemplateKey,
@@ -1283,7 +1283,7 @@ public class CTJournalArticleLocalServiceWrapper
 			double version, String content, ServiceContext serviceContext)
 		throws PortalException {
 
-		JournalArticle journalArticle = _ctManager.executeModelUpdate(
+		JournalArticle journalArticle = _ctManager.updateModelInContext(
 			() -> super.updateArticle(
 				userId, groupId, folderId, articleId, version, content,
 				serviceContext));
@@ -1298,7 +1298,7 @@ public class CTJournalArticleLocalServiceWrapper
 	public JournalArticle updateArticle(long id, String urlTitle)
 		throws PortalException {
 
-		JournalArticle journalArticle = _ctManager.executeModelUpdate(
+		JournalArticle journalArticle = _ctManager.updateModelInContext(
 			() -> super.updateArticle(id, urlTitle));
 
 		_registerChange(
