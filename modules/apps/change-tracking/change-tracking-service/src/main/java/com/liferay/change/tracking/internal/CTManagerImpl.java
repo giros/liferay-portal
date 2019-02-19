@@ -179,6 +179,52 @@ public class CTManagerImpl implements CTManager {
 	}
 
 	@Override
+	public Optional<CTEntryBag> getModelChangeCTEntryBagOptional(
+		long userId, long classNameId, long classPK) {
+
+		Optional<CTEntry> ctEntryOptional = getModelChangeCTEntryOptional(
+			userId, classNameId, classPK);
+
+		if (!ctEntryOptional.isPresent()) {
+			return Optional.empty();
+		}
+
+		long ctEntryId = ctEntryOptional.map(
+				CTEntry::getCtEntryId
+			).get();
+
+		Optional<CTCollection> ctCollectionOptional =
+			_ctEngineManager.getActiveCTCollectionOptional(userId);
+
+		long ctCollectionId = ctCollectionOptional.map(
+			CTCollection::getCtCollectionId
+		).orElse(
+			0L
+		);
+
+		CTEntryBag ctEntryBag = _ctEntryBagLocalService.fetchLatestCTEntryBag(
+			ctEntryId, ctCollectionId);
+
+		if (ctEntryBag != null) {
+			return Optional.of(ctEntryBag);
+		}
+
+		ctCollectionOptional =
+			_ctEngineManager.getProductionCTCollectionOptional(userId);
+
+		ctCollectionId = ctCollectionOptional.map(
+			CTCollection::getCtCollectionId
+		).orElse(
+			0L
+		);
+
+		ctEntryBag = _ctEntryBagLocalService.fetchLatestCTEntryBag(
+			ctEntryId, ctCollectionId);
+
+		return Optional.ofNullable(ctEntryBag);
+	}
+
+	@Override
 	public Optional<CTEntry> getModelChangeCTEntryOptional(
 		long userId, long classNameId, long classPK) {
 

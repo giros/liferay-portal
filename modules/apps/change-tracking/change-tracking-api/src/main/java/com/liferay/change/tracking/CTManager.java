@@ -91,6 +91,19 @@ public interface CTManager {
 		QueryDefinition<CTEntry> queryDefinition);
 
 	/**
+	 * Retrieves a model change's bag, first looking for it in the current
+	 * user's active change collection, and if it doesn't exist, looking for it
+	 * in the production change collection
+	 *
+	 * @param  userId the primary key of the user
+	 * @param  classNameId the primary key of the changed version model's class
+	 * @param  classPK the primary key of the changed version model
+	 * @return the change tracking entry representing the model change
+	 */
+	public Optional<CTEntryBag> getModelChangeCTEntryBagOptional(
+		long userId, long classNameId, long classPK);
+
+	/**
 	 * Retrieves a model change, first looking for it in the current user's
 	 * active change collection, and if it doesn't exist, looking for it in the
 	 * production change collection

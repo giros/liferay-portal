@@ -22,6 +22,7 @@ import com.liferay.change.tracking.constants.CTConstants;
 import com.liferay.change.tracking.exception.CTEntryException;
 import com.liferay.change.tracking.exception.CTException;
 import com.liferay.change.tracking.model.CTEntry;
+import com.liferay.change.tracking.model.CTEntryBag;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.journal.exception.NoSuchArticleException;
@@ -1418,13 +1419,13 @@ public class CTJournalArticleLocalServiceWrapper
 			return true;
 		}
 
-		Optional<CTEntry> ctEntryOptional =
-			_ctManager.getModelChangeCTEntryOptional(
+		Optional<CTEntryBag> ctEntryBagOptional =
+			_ctManager.getModelChangeCTEntryBagOptional(
 				PrincipalThreadLocal.getUserId(),
 				_portal.getClassNameId(JournalArticle.class.getName()),
 				journalArticle.getId());
 
-		return ctEntryOptional.isPresent();
+		return ctEntryBagOptional.isPresent();
 	}
 
 	private void _registerChange(JournalArticle journalArticle, int changeType)
