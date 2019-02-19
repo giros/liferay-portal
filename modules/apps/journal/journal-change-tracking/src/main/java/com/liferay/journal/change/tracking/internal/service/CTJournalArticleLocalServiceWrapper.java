@@ -14,12 +14,16 @@
 
 package com.liferay.journal.change.tracking.internal.service;
 
+import com.liferay.asset.kernel.model.AssetTag;
+import com.liferay.asset.kernel.service.AssetTagLocalService;
 import com.liferay.change.tracking.CTEngineManager;
 import com.liferay.change.tracking.CTManager;
 import com.liferay.change.tracking.constants.CTConstants;
 import com.liferay.change.tracking.exception.CTEntryException;
 import com.liferay.change.tracking.exception.CTException;
 import com.liferay.change.tracking.model.CTEntry;
+import com.liferay.dynamic.data.mapping.model.DDMStructure;
+import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.journal.exception.NoSuchArticleException;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.service.JournalArticleLocalService;
@@ -1443,6 +1447,8 @@ public class CTJournalArticleLocalServiceWrapper
 				_portal.getClassNameId(JournalArticle.class.getName()),
 				journalArticle.getId(), journalArticle.getResourcePrimKey(),
 				changeType, force);
+
+			_registerRelatedChanges(journalArticle);
 		}
 		catch (CTException cte) {
 			if (cte instanceof CTEntryException) {
@@ -1454,6 +1460,66 @@ public class CTJournalArticleLocalServiceWrapper
 				throw cte;
 			}
 		}
+	}
+
+	private void _registerRelatedChanges(JournalArticle journalArticle) {
+		Optional<CTEntry> journalArticleCTEntryOptional =
+			_ctManager.getModelChangeCTEntryOptional(
+				PrincipalThreadLocal.getUserId(),
+				_portal.getClassNameId(JournalArticle.class.getName()),
+				journalArticle.getId());
+
+		if (!journalArticleCTEntryOptional.isPresent()) {
+			return;
+		}
+
+		DDMStructure ddmStructure = journalArticle.getDDMStructure();
+
+		Optional<CTEntry> ddmStructureVersionCTEntryOptional =
+			_ctManager.getLatestModelChangeCTEntryOptional(
+				PrincipalThreadLocal.getUserId(),
+				ddmStructure.getStructureId());
+
+		ddmStructureVersionCTEntryOptional.ifPresent(
+			ddmStructureVersionCTEntry ->
+				_ctManager.addRelatedCTEntry(
+					PrincipalThreadLocal.getUserId(),
+					journalArticleCTEntryOptional.get(),
+					ddmStructureVersionCTEntry));
+
+		DDMTemplate ddmTemplate = journalArticle.getDDMTemplate();
+
+		Optional<CTEntry> ddmTemplateVersionCTEntryOptional =
+			_ctManager.getLatestModelChangeCTEntryOptional(
+				PrincipalThreadLocal.getUserId(), ddmTemplate.getTemplateId());
+
+		ddmTemplateVersionCTEntryOptional.ifPresent(
+			ddmTemplateVersionCTEntry ->
+				_ctManager.addRelatedCTEntry(
+					PrincipalThreadLocal.getUserId(),
+					journalArticleCTEntryOptional.get(),
+					ddmTemplateVersionCTEntry));
+
+		List<AssetTag> assetTags = _assetTagLocalService.getTags(
+			JournalArticle.class.getName(),
+			journalArticle.getResourcePrimKey());
+
+		assetTags.forEach(
+			assetTag -> {
+				Optional<CTEntry> assetTagCTEntryOptional =
+					_ctManager.getLatestModelChangeCTEntryOptional(
+						PrincipalThreadLocal.getUserId(), assetTag.getTagId());
+
+				assetTagCTEntryOptional.ifPresent(
+					assetTagCTEntry ->
+						_ctManager.addRelatedCTEntry(
+							PrincipalThreadLocal.getUserId(),
+							journalArticleCTEntryOptional.get(),
+							assetTagCTEntry));
+			});
+
+		// TODO The same for asset category versions
+
 	}
 
 	private void _unregisterChange(JournalArticle journalArticle) {
@@ -1473,6 +1539,9 @@ public class CTJournalArticleLocalServiceWrapper
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		CTJournalArticleLocalServiceWrapper.class);
+
+	@Reference
+	private AssetTagLocalService _assetTagLocalService;
 
 	@Reference
 	private CTEngineManager _ctEngineManager;
