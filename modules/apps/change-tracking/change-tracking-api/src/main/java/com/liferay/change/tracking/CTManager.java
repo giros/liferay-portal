@@ -37,8 +37,7 @@ import java.util.Optional;
 public interface CTManager {
 
 	public Optional<CTEntryBag> addRelatedCTEntry(
-			long userId, CTEntry ownerCTEntry, CTEntry relatedCTEntry)
-		throws PortalException;
+		long userId, CTEntry ownerCTEntry, CTEntry relatedCTEntry);
 
 	/**
 	 * Retrieves a model change in the context of the current user's active
