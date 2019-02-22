@@ -7,6 +7,7 @@ Export-Package:\
 	com.liferay.change.tracking.configuration.builder,\
 	com.liferay.change.tracking.constants,\
 	com.liferay.change.tracking.exception,\
+	com.liferay.change.tracking.function,\
 	com.liferay.change.tracking.model,\
 	com.liferay.change.tracking.service,\
 	com.liferay.change.tracking.service.persistence,\

@@ -19,6 +19,7 @@ import aQute.bnd.annotation.ProviderType;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.service.CTCollectionLocalService;
 import com.liferay.change.tracking.service.persistence.CTCollectionPersistence;
+import com.liferay.change.tracking.service.persistence.CTEntryBagPersistence;
 import com.liferay.change.tracking.service.persistence.CTEntryFinder;
 import com.liferay.change.tracking.service.persistence.CTEntryPersistence;
 import com.liferay.change.tracking.service.persistence.CTProcessPersistence;
@@ -544,6 +545,44 @@ public abstract class CTCollectionLocalServiceBaseImpl
 	}
 
 	/**
+	 * Returns the ct entry bag local service.
+	 *
+	 * @return the ct entry bag local service
+	 */
+	public com.liferay.change.tracking.service.CTEntryBagLocalService getCTEntryBagLocalService() {
+		return ctEntryBagLocalService;
+	}
+
+	/**
+	 * Sets the ct entry bag local service.
+	 *
+	 * @param ctEntryBagLocalService the ct entry bag local service
+	 */
+	public void setCTEntryBagLocalService(
+		com.liferay.change.tracking.service.CTEntryBagLocalService ctEntryBagLocalService) {
+		this.ctEntryBagLocalService = ctEntryBagLocalService;
+	}
+
+	/**
+	 * Returns the ct entry bag persistence.
+	 *
+	 * @return the ct entry bag persistence
+	 */
+	public CTEntryBagPersistence getCTEntryBagPersistence() {
+		return ctEntryBagPersistence;
+	}
+
+	/**
+	 * Sets the ct entry bag persistence.
+	 *
+	 * @param ctEntryBagPersistence the ct entry bag persistence
+	 */
+	public void setCTEntryBagPersistence(
+		CTEntryBagPersistence ctEntryBagPersistence) {
+		this.ctEntryBagPersistence = ctEntryBagPersistence;
+	}
+
+	/**
 	 * Returns the ct process local service.
 	 *
 	 * @return the ct process local service
@@ -756,6 +795,10 @@ public abstract class CTCollectionLocalServiceBaseImpl
 	protected CTEntryPersistence ctEntryPersistence;
 	@BeanReference(type = CTEntryFinder.class)
 	protected CTEntryFinder ctEntryFinder;
+	@BeanReference(type = com.liferay.change.tracking.service.CTEntryBagLocalService.class)
+	protected com.liferay.change.tracking.service.CTEntryBagLocalService ctEntryBagLocalService;
+	@BeanReference(type = CTEntryBagPersistence.class)
+	protected CTEntryBagPersistence ctEntryBagPersistence;
 	@BeanReference(type = com.liferay.change.tracking.service.CTProcessLocalService.class)
 	protected com.liferay.change.tracking.service.CTProcessLocalService ctProcessLocalService;
 	@BeanReference(type = CTProcessPersistence.class)
