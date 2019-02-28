@@ -59,6 +59,13 @@ public class CTManagerImpl implements CTManager {
 	public Optional<CTEntryAggregate> addRelatedCTEntry(
 		long userId, CTEntry ownerCTEntry, CTEntry relatedCTEntry) {
 
+		return addRelatedCTEntry(userId, ownerCTEntry, relatedCTEntry, false);
+	}
+
+	public Optional<CTEntryAggregate> addRelatedCTEntry(
+		long userId, CTEntry ownerCTEntry, CTEntry relatedCTEntry,
+		boolean force) {
+
 		Optional<CTCollection> activeCTCollectionOptional =
 			_ctEngineManager.getActiveCTCollectionOptional(userId);
 
@@ -78,7 +85,7 @@ public class CTManagerImpl implements CTManager {
 					_transactionConfig,
 					() -> _addCTEntryAggregate(
 						userId, activeCTCollectionId, ownerCTEntry,
-						relatedCTEntry));
+						relatedCTEntry, force));
 
 			return Optional.of(ctEntryctEntryAggregate);
 		}
@@ -407,7 +414,7 @@ public class CTManagerImpl implements CTManager {
 
 	private CTEntryAggregate _addCTEntryAggregate(
 			long userId, long activeCTCollectionId, CTEntry ownerCTEntry,
-			CTEntry relatedCTEntry)
+			CTEntry relatedCTEntry, boolean force)
 		throws PortalException {
 
 		CTEntryAggregate ctEntryAggregate =
@@ -430,8 +437,14 @@ public class CTManagerImpl implements CTManager {
 				ctEntryAggregate, relatedCTEntry);
 		}
 		else {
-			_updateCTEntryInCTEntryAggregate(
-				_copyCTEntryAggregate(ctEntryAggregate), relatedCTEntry);
+			if (force) {
+				_updateCTEntryInCTEntryAggregate(
+					ctEntryAggregate, relatedCTEntry);
+			}
+			else {
+				_updateCTEntryInCTEntryAggregate(
+					_copyCTEntryAggregate(ctEntryAggregate), relatedCTEntry);
+			}
 		}
 
 		return ctEntryAggregate;
