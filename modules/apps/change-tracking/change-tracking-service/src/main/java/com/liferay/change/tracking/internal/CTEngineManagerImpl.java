@@ -23,7 +23,9 @@ import com.liferay.change.tracking.exception.CTException;
 import com.liferay.change.tracking.internal.util.ChangeTrackingThreadLocal;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.model.CTEntry;
+import com.liferay.change.tracking.model.CTEntryAggregate;
 import com.liferay.change.tracking.service.CTCollectionLocalService;
+import com.liferay.change.tracking.service.CTEntryAggregateLocalService;
 import com.liferay.change.tracking.service.CTEntryLocalService;
 import com.liferay.change.tracking.service.CTProcessLocalService;
 import com.liferay.change.tracking.util.comparator.CTEntryCreateDateComparator;
@@ -354,6 +356,12 @@ public class CTEngineManagerImpl implements CTEngineManager {
 			ctCollectionId);
 	}
 
+	@Override
+	public List<CTEntryAggregate> getCTEntryAggregates(long ctCollectionId) {
+		return _ctEntryAggregateLocalService.getCTCollectionCTEntryAggregates(
+			ctCollectionId);
+	}
+
 	public Optional<CTCollection> getProductionCTCollectionOptional(
 		long companyId) {
 
@@ -473,6 +481,20 @@ public class CTEngineManagerImpl implements CTEngineManager {
 		for (CTEntry ctEntry : productionCTEntries) {
 			_ctCollectionLocalService.addCTEntryCTCollection(
 				ctEntry.getCtEntryId(), ctCollection);
+		}
+
+		List<CTEntryAggregate> productionCTEntryAggregates =
+			productionCTCollectionOptional.map(
+				CTCollection::getCtCollectionId
+			).map(
+				this::getCTEntryAggregates
+			).orElse(
+				Collections.emptyList()
+			);
+
+		for (CTEntryAggregate ctEntryAggregate : productionCTEntryAggregates) {
+			_ctCollectionLocalService.addCTEntryAggregateCTCollection(
+				ctEntryAggregate.getCtEntryAggregateId(), ctCollection);
 		}
 	}
 
@@ -700,6 +722,9 @@ public class CTEngineManagerImpl implements CTEngineManager {
 
 	@Reference
 	private CTConfigurationRegistry _ctConfigurationRegistry;
+
+	@Reference
+	private CTEntryAggregateLocalService _ctEntryAggregateLocalService;
 
 	@Reference
 	private CTEntryLocalService _ctEntryLocalService;
