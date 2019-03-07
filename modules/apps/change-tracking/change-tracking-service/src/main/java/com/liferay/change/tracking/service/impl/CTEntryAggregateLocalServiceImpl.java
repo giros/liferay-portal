@@ -14,13 +14,16 @@
 
 package com.liferay.change.tracking.service.impl;
 
+import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.model.CTEntry;
 import com.liferay.change.tracking.model.CTEntryAggregate;
 import com.liferay.change.tracking.service.base.CTEntryAggregateLocalServiceBaseImpl;
+import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -67,13 +70,23 @@ public class CTEntryAggregateLocalServiceImpl
 		ctEntryAggregate.setCreateDate(serviceContext.getCreateDate(now));
 		ctEntryAggregate.setModifiedDate(serviceContext.getModifiedDate(now));
 
-		ctEntryAggregate.setCtCollectionId(ctCollectionId);
 		ctEntryAggregate.setOwnerCTEntryId(ownerCTEntryId);
+
+		int status = WorkflowConstants.STATUS_DRAFT;
+
+		if (_isProductionCTCollectionId(ctCollectionId)) {
+			status = WorkflowConstants.STATUS_APPROVED;
+		}
+
+		ctEntryAggregate.setStatus(status);
 
 		ctEntryAggregatePersistence.update(ctEntryAggregate);
 
 		ctEntryAggregatePersistence.addCTEntry(
 			ctEntryAggregate.getCtEntryAggregateId(), ownerCTEntryId);
+
+		ctCollectionLocalService.addCTEntryAggregateCTCollection(
+			ctEntryAggregate.getCtEntryAggregateId(), ctCollectionId);
 
 		return ctEntryAggregate;
 	}
@@ -82,18 +95,30 @@ public class CTEntryAggregateLocalServiceImpl
 	public List<CTEntryAggregate> fetchCTEntryAggregates(
 		long ctCollectionId, long ownerCTEntryId) {
 
-		return ctEntryAggregatePersistence.findByC_O(
-			ctCollectionId, ownerCTEntryId);
+		return ctEntryAggregateFinder.findByC_O(
+			ctCollectionId, ownerCTEntryId, new QueryDefinition<>());
 	}
 
 	@Override
 	public CTEntryAggregate fetchLatestCTEntryAggregate(
 		long ctCollectionId, long ownerCTEntryId) {
 
-		return ctEntryAggregatePersistence.fetchByC_O_Last(
-			ctCollectionId, ownerCTEntryId,
+		QueryDefinition<CTEntryAggregate> queryDefinition =
+			new QueryDefinition<>();
+
+		queryDefinition.setOrderByComparator(
 			OrderByComparatorFactoryUtil.create(
 				"CTEntryAggregate", "createDate", false));
+
+		List<CTEntryAggregate> ctEntryAggregates =
+			ctEntryAggregateFinder.findByC_O(
+				ctCollectionId, ownerCTEntryId, queryDefinition);
+
+		if (!ctEntryAggregates.isEmpty()) {
+			return ctEntryAggregates.get(0);
+		}
+
+		return null;
 	}
 
 	@Override
@@ -123,6 +148,34 @@ public class CTEntryAggregateLocalServiceImpl
 
 		ctEntryAggregatePersistence.removeCTEntry(
 			ctEntryAggregate.getCtEntryAggregateId(), ctEntry.getCtEntryId());
+	}
+
+	@Override
+	public CTEntryAggregate updateStatus(long ctEntryAggregateId, int status) {
+		if ((status != WorkflowConstants.STATUS_APPROVED) &&
+			(status != WorkflowConstants.STATUS_DRAFT)) {
+
+			throw new IllegalArgumentException(
+				"Change status value is invalid");
+		}
+
+		CTEntryAggregate ctEntryAggregate =
+			ctEntryAggregatePersistence.fetchByPrimaryKey(ctEntryAggregateId);
+
+		ctEntryAggregate.setStatus(status);
+
+		return ctEntryAggregatePersistence.update(ctEntryAggregate);
+	}
+
+	private boolean _isProductionCTCollectionId(long ctCollectionId) {
+		CTCollection ctCollection = ctCollectionLocalService.fetchCTCollection(
+			ctCollectionId);
+
+		if (ctCollection == null) {
+			return false;
+		}
+
+		return ctCollection.isProduction();
 	}
 
 }

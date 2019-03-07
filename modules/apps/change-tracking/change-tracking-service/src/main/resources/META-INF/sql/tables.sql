@@ -13,6 +13,13 @@ create table CTCollection (
 	statusDate DATE null
 );
 
+create table CTCollection_CTEntryAggregate (
+	companyId LONG not null,
+	ctCollectionId LONG not null,
+	ctEntryAggregateId LONG not null,
+	primary key (ctCollectionId, ctEntryAggregateId)
+);
+
 create table CTCollections_CTEntries (
 	companyId LONG not null,
 	ctCollectionId LONG not null,
@@ -41,8 +48,8 @@ create table CTEntryAggregate (
 	userName VARCHAR(75) null,
 	createDate DATE null,
 	modifiedDate DATE null,
-	ctCollectionId LONG,
-	ownerCTEntryId LONG
+	ownerCTEntryId LONG,
+	status INTEGER
 );
 
 create table CTEntryAggregates_CTEntries (

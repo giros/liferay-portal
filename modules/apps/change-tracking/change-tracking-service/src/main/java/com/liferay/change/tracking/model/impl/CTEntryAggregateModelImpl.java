@@ -70,7 +70,7 @@ public class CTEntryAggregateModelImpl
 		{"ctEntryAggregateId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
 		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
-		{"ctCollectionId", Types.BIGINT}, {"ownerCTEntryId", Types.BIGINT}
+		{"ownerCTEntryId", Types.BIGINT}, {"status", Types.INTEGER}
 	};
 
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
@@ -83,12 +83,12 @@ public class CTEntryAggregateModelImpl
 		TABLE_COLUMNS_MAP.put("userName", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("createDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("modifiedDate", Types.TIMESTAMP);
-		TABLE_COLUMNS_MAP.put("ctCollectionId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("ownerCTEntryId", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("status", Types.INTEGER);
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table CTEntryAggregate (ctEntryAggregateId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,ctCollectionId LONG,ownerCTEntryId LONG)";
+		"create table CTEntryAggregate (ctEntryAggregateId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,ownerCTEntryId LONG,status INTEGER)";
 
 	public static final String TABLE_SQL_DROP = "drop table CTEntryAggregate";
 
@@ -119,11 +119,30 @@ public class CTEntryAggregateModelImpl
 			"value.object.column.bitmask.enabled.com.liferay.change.tracking.model.CTEntryAggregate"),
 		true);
 
-	public static final long CTCOLLECTIONID_COLUMN_BITMASK = 1L;
+	public static final long OWNERCTENTRYID_COLUMN_BITMASK = 1L;
 
-	public static final long OWNERCTENTRYID_COLUMN_BITMASK = 2L;
+	public static final long CTENTRYAGGREGATEID_COLUMN_BITMASK = 2L;
 
-	public static final long CTENTRYAGGREGATEID_COLUMN_BITMASK = 4L;
+	public static final String
+		MAPPING_TABLE_CTCOLLECTION_CTENTRYAGGREGATE_NAME =
+			"CTCollection_CTEntryAggregate";
+
+	public static final Object[][]
+		MAPPING_TABLE_CTCOLLECTION_CTENTRYAGGREGATE_COLUMNS = {
+			{"companyId", Types.BIGINT}, {"ctCollectionId", Types.BIGINT},
+			{"ctEntryAggregateId", Types.BIGINT}
+		};
+
+	public static final String
+		MAPPING_TABLE_CTCOLLECTION_CTENTRYAGGREGATE_SQL_CREATE =
+			"create table CTCollection_CTEntryAggregate (companyId LONG not null,ctCollectionId LONG not null,ctEntryAggregateId LONG not null,primary key (ctCollectionId, ctEntryAggregateId))";
+
+	public static final boolean
+		FINDER_CACHE_ENABLED_CTCOLLECTION_CTENTRYAGGREGATE =
+			GetterUtil.getBoolean(
+				com.liferay.change.tracking.service.util.ServiceProps.get(
+					"value.object.finder.cache.enabled.CTCollection_CTEntryAggregate"),
+				true);
 
 	public static final String MAPPING_TABLE_CTENTRYAGGREGATES_CTENTRIES_NAME =
 		"CTEntryAggregates_CTEntries";
@@ -283,17 +302,15 @@ public class CTEntryAggregateModelImpl
 			(BiConsumer<CTEntryAggregate, Date>)
 				CTEntryAggregate::setModifiedDate);
 		attributeGetterFunctions.put(
-			"ctCollectionId", CTEntryAggregate::getCtCollectionId);
-		attributeSetterBiConsumers.put(
-			"ctCollectionId",
-			(BiConsumer<CTEntryAggregate, Long>)
-				CTEntryAggregate::setCtCollectionId);
-		attributeGetterFunctions.put(
 			"ownerCTEntryId", CTEntryAggregate::getOwnerCTEntryId);
 		attributeSetterBiConsumers.put(
 			"ownerCTEntryId",
 			(BiConsumer<CTEntryAggregate, Long>)
 				CTEntryAggregate::setOwnerCTEntryId);
+		attributeGetterFunctions.put("status", CTEntryAggregate::getStatus);
+		attributeSetterBiConsumers.put(
+			"status",
+			(BiConsumer<CTEntryAggregate, Integer>)CTEntryAggregate::setStatus);
 
 		_attributeGetterFunctions = Collections.unmodifiableMap(
 			attributeGetterFunctions);
@@ -389,28 +406,6 @@ public class CTEntryAggregateModelImpl
 	}
 
 	@Override
-	public long getCtCollectionId() {
-		return _ctCollectionId;
-	}
-
-	@Override
-	public void setCtCollectionId(long ctCollectionId) {
-		_columnBitmask |= CTCOLLECTIONID_COLUMN_BITMASK;
-
-		if (!_setOriginalCtCollectionId) {
-			_setOriginalCtCollectionId = true;
-
-			_originalCtCollectionId = _ctCollectionId;
-		}
-
-		_ctCollectionId = ctCollectionId;
-	}
-
-	public long getOriginalCtCollectionId() {
-		return _originalCtCollectionId;
-	}
-
-	@Override
 	public long getOwnerCTEntryId() {
 		return _ownerCTEntryId;
 	}
@@ -430,6 +425,16 @@ public class CTEntryAggregateModelImpl
 
 	public long getOriginalOwnerCTEntryId() {
 		return _originalOwnerCTEntryId;
+	}
+
+	@Override
+	public int getStatus() {
+		return _status;
+	}
+
+	@Override
+	public void setStatus(int status) {
+		_status = status;
 	}
 
 	public long getColumnBitmask() {
@@ -470,8 +475,8 @@ public class CTEntryAggregateModelImpl
 		ctEntryAggregateImpl.setUserName(getUserName());
 		ctEntryAggregateImpl.setCreateDate(getCreateDate());
 		ctEntryAggregateImpl.setModifiedDate(getModifiedDate());
-		ctEntryAggregateImpl.setCtCollectionId(getCtCollectionId());
 		ctEntryAggregateImpl.setOwnerCTEntryId(getOwnerCTEntryId());
+		ctEntryAggregateImpl.setStatus(getStatus());
 
 		ctEntryAggregateImpl.resetOriginalValues();
 
@@ -536,11 +541,6 @@ public class CTEntryAggregateModelImpl
 
 		ctEntryAggregateModelImpl._setModifiedDate = false;
 
-		ctEntryAggregateModelImpl._originalCtCollectionId =
-			ctEntryAggregateModelImpl._ctCollectionId;
-
-		ctEntryAggregateModelImpl._setOriginalCtCollectionId = false;
-
 		ctEntryAggregateModelImpl._originalOwnerCTEntryId =
 			ctEntryAggregateModelImpl._ownerCTEntryId;
 
@@ -586,9 +586,9 @@ public class CTEntryAggregateModelImpl
 			ctEntryAggregateCacheModel.modifiedDate = Long.MIN_VALUE;
 		}
 
-		ctEntryAggregateCacheModel.ctCollectionId = getCtCollectionId();
-
 		ctEntryAggregateCacheModel.ownerCTEntryId = getOwnerCTEntryId();
+
+		ctEntryAggregateCacheModel.status = getStatus();
 
 		return ctEntryAggregateCacheModel;
 	}
@@ -669,12 +669,10 @@ public class CTEntryAggregateModelImpl
 	private Date _createDate;
 	private Date _modifiedDate;
 	private boolean _setModifiedDate;
-	private long _ctCollectionId;
-	private long _originalCtCollectionId;
-	private boolean _setOriginalCtCollectionId;
 	private long _ownerCTEntryId;
 	private long _originalOwnerCTEntryId;
 	private boolean _setOriginalOwnerCTEntryId;
+	private int _status;
 	private long _columnBitmask;
 	private CTEntryAggregate _escapedModel;
 
