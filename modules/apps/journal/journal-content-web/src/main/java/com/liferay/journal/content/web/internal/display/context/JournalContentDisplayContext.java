@@ -1046,18 +1046,16 @@ public class JournalContentDisplayContext {
 			JournalContentDisplayContext.class);
 
 		ServiceTracker<CTEngineManager, CTEngineManager>
-			ctEngineManagerServiceTracker =
-				new ServiceTracker<>(
-					bundle.getBundleContext(), CTEngineManager.class, null);
+			ctEngineManagerServiceTracker = new ServiceTracker<>(
+				bundle.getBundleContext(), CTEngineManager.class, null);
 
 		ctEngineManagerServiceTracker.open();
 
 		_ctEngineManager = ctEngineManagerServiceTracker.getService();
 
-		ServiceTracker<CTManager, CTManager>
-			ctManagerServiceTracker =
-				new ServiceTracker<>(
-					bundle.getBundleContext(), CTManager.class, null);
+		ServiceTracker<CTManager, CTManager> ctManagerServiceTracker =
+			new ServiceTracker<>(
+				bundle.getBundleContext(), CTManager.class, null);
 
 		ctManagerServiceTracker.open();
 

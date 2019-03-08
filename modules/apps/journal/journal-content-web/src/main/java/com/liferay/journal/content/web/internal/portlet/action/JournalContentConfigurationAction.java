@@ -200,8 +200,7 @@ public class JournalContentConfigurationAction
 			WebKeys.THEME_DISPLAY);
 
 		Optional<CTCollection> activeCTCollectionOptional =
-			_ctManager.getActiveCTCollectionOptional(
-				themeDisplay.getUserId());
+			_ctManager.getActiveCTCollectionOptional(themeDisplay.getUserId());
 
 		return activeCTCollectionOptional.map(
 			CTCollectionModel::getCtCollectionId
@@ -225,13 +224,13 @@ public class JournalContentConfigurationAction
 		JournalContentConfigurationAction.class);
 
 	@Reference
-	private CTManager _ctManager;
-
-	@Reference
 	private AssetEntryLocalService _assetEntryLocalService;
 
 	@Reference
 	private CTEngineManager _ctEngineManager;
+
+	@Reference
+	private CTManager _ctManager;
 
 	@Reference(
 		target = "(model.class.name=com.liferay.dynamic.data.mapping.model.DDMTemplate)"
