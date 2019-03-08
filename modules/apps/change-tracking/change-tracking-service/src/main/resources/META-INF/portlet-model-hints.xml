@@ -22,9 +22,9 @@
 		<field name="userName" type="String" />
 		<field name="createDate" type="Date" />
 		<field name="modifiedDate" type="Date" />
-		<field name="classNameId" type="long" />
-		<field name="classPK" type="long" />
-		<field name="resourcePrimKey" type="long" />
+		<field name="modelClassNameId" type="long" />
+		<field name="modelClassPK" type="long" />
+		<field name="modelResourcePrimKey" type="long" />
 		<field name="changeType" type="int" />
 		<field name="status" type="int" />
 	</model>
@@ -36,6 +36,7 @@
 		<field name="createDate" type="Date" />
 		<field name="modifiedDate" type="Date" />
 		<field name="ownerCTEntryId" type="long" />
+		<field name="status" type="int" />
 	</model>
 	<model name="com.liferay.change.tracking.model.CTProcess">
 		<field name="ctProcessId" type="long" />

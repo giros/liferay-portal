@@ -58,7 +58,9 @@ import java.io.Serializable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -83,10 +85,10 @@ public class CTEngineManagerImpl implements CTEngineManager {
 			return;
 		}
 
-		Optional<CTCollection> ctCollectionOptional = getCTCollectionOptional(
+		CTCollection ctCollection = _ctCollectionLocalService.fetchCTCollection(
 			ctCollectionId);
 
-		if (!ctCollectionOptional.isPresent()) {
+		if (ctCollection == null) {
 			_log.error(
 				"Unable to checkout change tracking collection " +
 					ctCollectionId);
@@ -130,18 +132,16 @@ public class CTEngineManagerImpl implements CTEngineManager {
 
 	@Override
 	public void deleteCTCollection(long ctCollectionId) {
-		Optional<CTCollection> ctCollectionOptional = getCTCollectionOptional(
+		CTCollection ctCollection = _ctCollectionLocalService.fetchCTCollection(
 			ctCollectionId);
 
-		if (!ctCollectionOptional.isPresent()) {
+		if (ctCollection == null) {
 			_log.error(
 				"Unable to delete change tracking collection " +
 					ctCollectionId);
 
 			return;
 		}
-
-		CTCollection ctCollection = ctCollectionOptional.get();
 
 		if (ctCollection.isProduction()) {
 			if (_log.isWarnEnabled()) {
@@ -154,8 +154,7 @@ public class CTEngineManagerImpl implements CTEngineManager {
 		}
 
 		try {
-			_ctCollectionLocalService.deleteCTCollection(
-				ctCollectionOptional.get());
+			_ctCollectionLocalService.deleteCTCollection(ctCollection);
 		}
 		catch (PortalException pe) {
 			_log.error(
@@ -177,7 +176,7 @@ public class CTEngineManagerImpl implements CTEngineManager {
 					_ctCollectionLocalService.deleteCompanyCTCollections(
 						companyId);
 
-					_productionCTCollection = null;
+					_productionCTCollections.remove(companyId);
 
 					return null;
 				});
@@ -255,7 +254,7 @@ public class CTEngineManagerImpl implements CTEngineManager {
 
 		for (CTEntry ctEntry : sourceCTEntries) {
 			Optional<CTEntry> latestTargetCTEntryOptional = _getLatestCTEntry(
-				targetCTCollectionId, ctEntry.getResourcePrimKey());
+				targetCTCollectionId, ctEntry.getModelResourcePrimKey());
 
 			if (!latestTargetCTEntryOptional.isPresent()) {
 				continue;
@@ -332,18 +331,25 @@ public class CTEngineManagerImpl implements CTEngineManager {
 			companyId, queryDefinition, false);
 	}
 
+	@Override
 	public Optional<CTCollection> getProductionCTCollectionOptional(
 		long companyId) {
 
-		if (_productionCTCollection == null) {
-			_productionCTCollection =
+		CTCollection productionCTCollection = _productionCTCollections.get(
+			companyId);
+
+		if (productionCTCollection == null) {
+			productionCTCollection =
 				_ctCollectionLocalService.fetchCTCollection(
 					companyId, CTConstants.CT_COLLECTION_NAME_PRODUCTION);
+
+			_productionCTCollections.put(companyId, productionCTCollection);
 		}
 
-		return Optional.ofNullable(_productionCTCollection);
+		return Optional.ofNullable(productionCTCollection);
 	}
 
+	@Override
 	public long getRecentCTCollectionId(long userId) {
 		User user = _userLocalService.fetchUser(userId);
 
@@ -523,19 +529,22 @@ public class CTEngineManagerImpl implements CTEngineManager {
 			userId, CTConstants.CT_COLLECTION_NAME_PRODUCTION,
 			StringPool.BLANK);
 
-		_productionCTCollection = ctCollectionOptional.orElseThrow(
+		long companyId = _getCompanyId(userId);
+
+		CTCollection productionCTCollection = ctCollectionOptional.orElseThrow(
 			() -> new CTException(
-				_getCompanyId(userId),
+				companyId,
 				"Unable to create production change tracking collection"));
 
+		_productionCTCollections.put(companyId, productionCTCollection);
+
 		_generateCTEntriesForAllCTConfigurations(
-			userId, _productionCTCollection);
+			userId, productionCTCollection);
 
 		checkoutCTCollection(
-			userId, _productionCTCollection.getCtCollectionId());
+			userId, productionCTCollection.getCtCollectionId());
 	}
 
-	@SuppressWarnings("unchecked")
 	private void _generateCTEntriesForAllCTConfigurations(
 		long userId, CTCollection ctCollection) {
 
@@ -661,7 +670,7 @@ public class CTEngineManagerImpl implements CTEngineManager {
 	}
 
 	private boolean _isColliding(CTEntry ctEntry, CTEntry productionCTEntry) {
-		if (ctEntry.getClassPK() < productionCTEntry.getClassPK()) {
+		if (ctEntry.getModelClassPK() < productionCTEntry.getModelClassPK()) {
 			return true;
 		}
 
@@ -708,7 +717,8 @@ public class CTEngineManagerImpl implements CTEngineManager {
 	@Reference
 	private Portal _portal;
 
-	private CTCollection _productionCTCollection;
+	private final Map<Long, CTCollection> _productionCTCollections =
+		new HashMap<>();
 	private final TransactionConfig _transactionConfig =
 		TransactionConfig.Factory.create(
 			Propagation.REQUIRED, new Class<?>[] {Exception.class});

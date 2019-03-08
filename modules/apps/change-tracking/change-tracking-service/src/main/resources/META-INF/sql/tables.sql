@@ -34,9 +34,9 @@ create table CTEntry (
 	userName VARCHAR(75) null,
 	createDate DATE null,
 	modifiedDate DATE null,
-	classNameId LONG,
-	classPK LONG,
-	resourcePrimKey LONG,
+	modelClassNameId LONG,
+	modelClassPK LONG,
+	modelResourcePrimKey LONG,
 	changeType INTEGER,
 	status INTEGER
 );
@@ -48,7 +48,8 @@ create table CTEntryAggregate (
 	userName VARCHAR(75) null,
 	createDate DATE null,
 	modifiedDate DATE null,
-	ownerCTEntryId LONG
+	ownerCTEntryId LONG,
+	status INTEGER
 );
 
 create table CTEntryAggregates_CTEntries (

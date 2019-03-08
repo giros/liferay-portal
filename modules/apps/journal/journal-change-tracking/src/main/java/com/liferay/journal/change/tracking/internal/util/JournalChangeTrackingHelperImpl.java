@@ -16,14 +16,18 @@ package com.liferay.journal.change.tracking.internal.util;
 
 import com.liferay.change.tracking.CTManager;
 import com.liferay.change.tracking.model.CTCollection;
+import com.liferay.change.tracking.model.CTCollectionModel;
 import com.liferay.change.tracking.model.CTEntry;
+import com.liferay.change.tracking.service.CTCollectionLocalService;
 import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.journal.util.JournalChangeTrackingHelper;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -34,6 +38,34 @@ import org.osgi.service.component.annotations.Reference;
 @Component(immediate = true, service = JournalChangeTrackingHelper.class)
 public class JournalChangeTrackingHelperImpl
 	implements JournalChangeTrackingHelper {
+
+	@Override
+	public String getJournalArticleCTCollectionName(long userId, long id) {
+		long classNameId = _portal.getClassNameId(
+			JournalArticle.class.getName());
+
+		Optional<CTEntry> ctEntryOptional =
+			_ctManager.getModelChangeCTEntryOptional(userId, classNameId, id);
+
+		Stream<CTCollection> stream = ctEntryOptional.map(
+			CTEntry::getCtEntryId
+		).map(
+			_ctCollectionLocalService::getCTEntryCTCollections
+		).map(
+			List::stream
+		).orElse(
+			Stream.empty()
+		);
+
+		return stream.filter(
+			ctCollection -> !ctCollection.isProduction()
+		).map(
+			CTCollectionModel::getName
+		).findFirst(
+		).orElse(
+			StringPool.BLANK
+		);
+	}
 
 	@Override
 	public boolean hasActiveCTCollection(long companyId, long userId) {
@@ -56,17 +88,17 @@ public class JournalChangeTrackingHelperImpl
 			_ctManager.getActiveCTCollectionCTEntryOptional(
 				userId, classNameId, id);
 
-		return ctEntryOptional.map(
-			CTEntry::getStatus
-		).map(
-			status -> Objects.equals(status, WorkflowConstants.STATUS_DRAFT)
-		).orElse(
-			false
-		);
+		return ctEntryOptional.isPresent();
 	}
 
 	@Reference
+	private CTCollectionLocalService _ctCollectionLocalService;
+
+	@Reference
 	private CTManager _ctManager;
+
+	@Reference
+	private JournalArticleLocalService _journalArticleLocalService;
 
 	@Reference
 	private Portal _portal;
