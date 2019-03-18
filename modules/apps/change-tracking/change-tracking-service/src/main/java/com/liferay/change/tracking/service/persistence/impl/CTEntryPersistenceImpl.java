@@ -90,71 +90,71 @@ public class CTEntryPersistenceImpl
 	private FinderPath _finderPathWithPaginationFindAll;
 	private FinderPath _finderPathWithoutPaginationFindAll;
 	private FinderPath _finderPathCountAll;
-	private FinderPath _finderPathWithPaginationFindByResourcePrimKey;
-	private FinderPath _finderPathWithoutPaginationFindByResourcePrimKey;
-	private FinderPath _finderPathCountByResourcePrimKey;
+	private FinderPath _finderPathWithPaginationFindByModelClassNameId;
+	private FinderPath _finderPathWithoutPaginationFindByModelClassNameId;
+	private FinderPath _finderPathCountByModelClassNameId;
 
 	/**
-	 * Returns all the ct entries where resourcePrimKey = &#63;.
+	 * Returns all the ct entries where modelClassNameId = &#63;.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @return the matching ct entries
 	 */
 	@Override
-	public List<CTEntry> findByResourcePrimKey(long resourcePrimKey) {
-		return findByResourcePrimKey(
-			resourcePrimKey, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+	public List<CTEntry> findByModelClassNameId(long modelClassNameId) {
+		return findByModelClassNameId(
+			modelClassNameId, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 	}
 
 	/**
-	 * Returns a range of all the ct entries where resourcePrimKey = &#63;.
+	 * Returns a range of all the ct entries where modelClassNameId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param start the lower bound of the range of ct entries
 	 * @param end the upper bound of the range of ct entries (not inclusive)
 	 * @return the range of matching ct entries
 	 */
 	@Override
-	public List<CTEntry> findByResourcePrimKey(
-		long resourcePrimKey, int start, int end) {
+	public List<CTEntry> findByModelClassNameId(
+		long modelClassNameId, int start, int end) {
 
-		return findByResourcePrimKey(resourcePrimKey, start, end, null);
+		return findByModelClassNameId(modelClassNameId, start, end, null);
 	}
 
 	/**
-	 * Returns an ordered range of all the ct entries where resourcePrimKey = &#63;.
+	 * Returns an ordered range of all the ct entries where modelClassNameId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param start the lower bound of the range of ct entries
 	 * @param end the upper bound of the range of ct entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @return the ordered range of matching ct entries
 	 */
 	@Override
-	public List<CTEntry> findByResourcePrimKey(
-		long resourcePrimKey, int start, int end,
+	public List<CTEntry> findByModelClassNameId(
+		long modelClassNameId, int start, int end,
 		OrderByComparator<CTEntry> orderByComparator) {
 
-		return findByResourcePrimKey(
-			resourcePrimKey, start, end, orderByComparator, true);
+		return findByModelClassNameId(
+			modelClassNameId, start, end, orderByComparator, true);
 	}
 
 	/**
-	 * Returns an ordered range of all the ct entries where resourcePrimKey = &#63;.
+	 * Returns an ordered range of all the ct entries where modelClassNameId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param start the lower bound of the range of ct entries
 	 * @param end the upper bound of the range of ct entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -162,8 +162,8 @@ public class CTEntryPersistenceImpl
 	 * @return the ordered range of matching ct entries
 	 */
 	@Override
-	public List<CTEntry> findByResourcePrimKey(
-		long resourcePrimKey, int start, int end,
+	public List<CTEntry> findByModelClassNameId(
+		long modelClassNameId, int start, int end,
 		OrderByComparator<CTEntry> orderByComparator,
 		boolean retrieveFromCache) {
 
@@ -175,13 +175,13 @@ public class CTEntryPersistenceImpl
 			(orderByComparator == null)) {
 
 			pagination = false;
-			finderPath = _finderPathWithoutPaginationFindByResourcePrimKey;
-			finderArgs = new Object[] {resourcePrimKey};
+			finderPath = _finderPathWithoutPaginationFindByModelClassNameId;
+			finderArgs = new Object[] {modelClassNameId};
 		}
 		else {
-			finderPath = _finderPathWithPaginationFindByResourcePrimKey;
+			finderPath = _finderPathWithPaginationFindByModelClassNameId;
 			finderArgs = new Object[] {
-				resourcePrimKey, start, end, orderByComparator
+				modelClassNameId, start, end, orderByComparator
 			};
 		}
 
@@ -193,7 +193,7 @@ public class CTEntryPersistenceImpl
 
 			if ((list != null) && !list.isEmpty()) {
 				for (CTEntry ctEntry : list) {
-					if ((resourcePrimKey != ctEntry.getResourcePrimKey())) {
+					if ((modelClassNameId != ctEntry.getModelClassNameId())) {
 						list = null;
 
 						break;
@@ -215,7 +215,7 @@ public class CTEntryPersistenceImpl
 
 			query.append(_SQL_SELECT_CTENTRY_WHERE);
 
-			query.append(_FINDER_COLUMN_RESOURCEPRIMKEY_RESOURCEPRIMKEY_2);
+			query.append(_FINDER_COLUMN_MODELCLASSNAMEID_MODELCLASSNAMEID_2);
 
 			if (orderByComparator != null) {
 				appendOrderByComparator(
@@ -236,7 +236,7 @@ public class CTEntryPersistenceImpl
 
 				QueryPos qPos = QueryPos.getInstance(q);
 
-				qPos.add(resourcePrimKey);
+				qPos.add(modelClassNameId);
 
 				if (!pagination) {
 					list = (List<CTEntry>)QueryUtil.list(
@@ -269,20 +269,20 @@ public class CTEntryPersistenceImpl
 	}
 
 	/**
-	 * Returns the first ct entry in the ordered set where resourcePrimKey = &#63;.
+	 * Returns the first ct entry in the ordered set where modelClassNameId = &#63;.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching ct entry
 	 * @throws NoSuchEntryException if a matching ct entry could not be found
 	 */
 	@Override
-	public CTEntry findByResourcePrimKey_First(
-			long resourcePrimKey, OrderByComparator<CTEntry> orderByComparator)
+	public CTEntry findByModelClassNameId_First(
+			long modelClassNameId, OrderByComparator<CTEntry> orderByComparator)
 		throws NoSuchEntryException {
 
-		CTEntry ctEntry = fetchByResourcePrimKey_First(
-			resourcePrimKey, orderByComparator);
+		CTEntry ctEntry = fetchByModelClassNameId_First(
+			modelClassNameId, orderByComparator);
 
 		if (ctEntry != null) {
 			return ctEntry;
@@ -292,8 +292,8 @@ public class CTEntryPersistenceImpl
 
 		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
 
-		msg.append("resourcePrimKey=");
-		msg.append(resourcePrimKey);
+		msg.append("modelClassNameId=");
+		msg.append(modelClassNameId);
 
 		msg.append("}");
 
@@ -301,18 +301,18 @@ public class CTEntryPersistenceImpl
 	}
 
 	/**
-	 * Returns the first ct entry in the ordered set where resourcePrimKey = &#63;.
+	 * Returns the first ct entry in the ordered set where modelClassNameId = &#63;.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
 	@Override
-	public CTEntry fetchByResourcePrimKey_First(
-		long resourcePrimKey, OrderByComparator<CTEntry> orderByComparator) {
+	public CTEntry fetchByModelClassNameId_First(
+		long modelClassNameId, OrderByComparator<CTEntry> orderByComparator) {
 
-		List<CTEntry> list = findByResourcePrimKey(
-			resourcePrimKey, 0, 1, orderByComparator);
+		List<CTEntry> list = findByModelClassNameId(
+			modelClassNameId, 0, 1, orderByComparator);
 
 		if (!list.isEmpty()) {
 			return list.get(0);
@@ -322,20 +322,20 @@ public class CTEntryPersistenceImpl
 	}
 
 	/**
-	 * Returns the last ct entry in the ordered set where resourcePrimKey = &#63;.
+	 * Returns the last ct entry in the ordered set where modelClassNameId = &#63;.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching ct entry
 	 * @throws NoSuchEntryException if a matching ct entry could not be found
 	 */
 	@Override
-	public CTEntry findByResourcePrimKey_Last(
-			long resourcePrimKey, OrderByComparator<CTEntry> orderByComparator)
+	public CTEntry findByModelClassNameId_Last(
+			long modelClassNameId, OrderByComparator<CTEntry> orderByComparator)
 		throws NoSuchEntryException {
 
-		CTEntry ctEntry = fetchByResourcePrimKey_Last(
-			resourcePrimKey, orderByComparator);
+		CTEntry ctEntry = fetchByModelClassNameId_Last(
+			modelClassNameId, orderByComparator);
 
 		if (ctEntry != null) {
 			return ctEntry;
@@ -345,8 +345,8 @@ public class CTEntryPersistenceImpl
 
 		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
 
-		msg.append("resourcePrimKey=");
-		msg.append(resourcePrimKey);
+		msg.append("modelClassNameId=");
+		msg.append(modelClassNameId);
 
 		msg.append("}");
 
@@ -354,24 +354,24 @@ public class CTEntryPersistenceImpl
 	}
 
 	/**
-	 * Returns the last ct entry in the ordered set where resourcePrimKey = &#63;.
+	 * Returns the last ct entry in the ordered set where modelClassNameId = &#63;.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
 	@Override
-	public CTEntry fetchByResourcePrimKey_Last(
-		long resourcePrimKey, OrderByComparator<CTEntry> orderByComparator) {
+	public CTEntry fetchByModelClassNameId_Last(
+		long modelClassNameId, OrderByComparator<CTEntry> orderByComparator) {
 
-		int count = countByResourcePrimKey(resourcePrimKey);
+		int count = countByModelClassNameId(modelClassNameId);
 
 		if (count == 0) {
 			return null;
 		}
 
-		List<CTEntry> list = findByResourcePrimKey(
-			resourcePrimKey, count - 1, count, orderByComparator);
+		List<CTEntry> list = findByModelClassNameId(
+			modelClassNameId, count - 1, count, orderByComparator);
 
 		if (!list.isEmpty()) {
 			return list.get(0);
@@ -381,17 +381,17 @@ public class CTEntryPersistenceImpl
 	}
 
 	/**
-	 * Returns the ct entries before and after the current ct entry in the ordered set where resourcePrimKey = &#63;.
+	 * Returns the ct entries before and after the current ct entry in the ordered set where modelClassNameId = &#63;.
 	 *
 	 * @param ctEntryId the primary key of the current ct entry
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next ct entry
 	 * @throws NoSuchEntryException if a ct entry with the primary key could not be found
 	 */
 	@Override
-	public CTEntry[] findByResourcePrimKey_PrevAndNext(
-			long ctEntryId, long resourcePrimKey,
+	public CTEntry[] findByModelClassNameId_PrevAndNext(
+			long ctEntryId, long modelClassNameId,
 			OrderByComparator<CTEntry> orderByComparator)
 		throws NoSuchEntryException {
 
@@ -404,13 +404,13 @@ public class CTEntryPersistenceImpl
 
 			CTEntry[] array = new CTEntryImpl[3];
 
-			array[0] = getByResourcePrimKey_PrevAndNext(
-				session, ctEntry, resourcePrimKey, orderByComparator, true);
+			array[0] = getByModelClassNameId_PrevAndNext(
+				session, ctEntry, modelClassNameId, orderByComparator, true);
 
 			array[1] = ctEntry;
 
-			array[2] = getByResourcePrimKey_PrevAndNext(
-				session, ctEntry, resourcePrimKey, orderByComparator, false);
+			array[2] = getByModelClassNameId_PrevAndNext(
+				session, ctEntry, modelClassNameId, orderByComparator, false);
 
 			return array;
 		}
@@ -422,8 +422,8 @@ public class CTEntryPersistenceImpl
 		}
 	}
 
-	protected CTEntry getByResourcePrimKey_PrevAndNext(
-		Session session, CTEntry ctEntry, long resourcePrimKey,
+	protected CTEntry getByModelClassNameId_PrevAndNext(
+		Session session, CTEntry ctEntry, long modelClassNameId,
 		OrderByComparator<CTEntry> orderByComparator, boolean previous) {
 
 		StringBundler query = null;
@@ -439,7 +439,7 @@ public class CTEntryPersistenceImpl
 
 		query.append(_SQL_SELECT_CTENTRY_WHERE);
 
-		query.append(_FINDER_COLUMN_RESOURCEPRIMKEY_RESOURCEPRIMKEY_2);
+		query.append(_FINDER_COLUMN_MODELCLASSNAMEID_MODELCLASSNAMEID_2);
 
 		if (orderByComparator != null) {
 			String[] orderByConditionFields =
@@ -510,7 +510,7 @@ public class CTEntryPersistenceImpl
 
 		QueryPos qPos = QueryPos.getInstance(q);
 
-		qPos.add(resourcePrimKey);
+		qPos.add(modelClassNameId);
 
 		if (orderByComparator != null) {
 			for (Object orderByConditionValue :
@@ -531,15 +531,15 @@ public class CTEntryPersistenceImpl
 	}
 
 	/**
-	 * Removes all the ct entries where resourcePrimKey = &#63; from the database.
+	 * Removes all the ct entries where modelClassNameId = &#63; from the database.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 */
 	@Override
-	public void removeByResourcePrimKey(long resourcePrimKey) {
+	public void removeByModelClassNameId(long modelClassNameId) {
 		for (CTEntry ctEntry :
-				findByResourcePrimKey(
-					resourcePrimKey, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				findByModelClassNameId(
+					modelClassNameId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
 					null)) {
 
 			remove(ctEntry);
@@ -547,16 +547,16 @@ public class CTEntryPersistenceImpl
 	}
 
 	/**
-	 * Returns the number of ct entries where resourcePrimKey = &#63;.
+	 * Returns the number of ct entries where modelClassNameId = &#63;.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @return the number of matching ct entries
 	 */
 	@Override
-	public int countByResourcePrimKey(long resourcePrimKey) {
-		FinderPath finderPath = _finderPathCountByResourcePrimKey;
+	public int countByModelClassNameId(long modelClassNameId) {
+		FinderPath finderPath = _finderPathCountByModelClassNameId;
 
-		Object[] finderArgs = new Object[] {resourcePrimKey};
+		Object[] finderArgs = new Object[] {modelClassNameId};
 
 		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
@@ -565,7 +565,7 @@ public class CTEntryPersistenceImpl
 
 			query.append(_SQL_COUNT_CTENTRY_WHERE);
 
-			query.append(_FINDER_COLUMN_RESOURCEPRIMKEY_RESOURCEPRIMKEY_2);
+			query.append(_FINDER_COLUMN_MODELCLASSNAMEID_MODELCLASSNAMEID_2);
 
 			String sql = query.toString();
 
@@ -578,7 +578,7 @@ public class CTEntryPersistenceImpl
 
 				QueryPos qPos = QueryPos.getInstance(q);
 
-				qPos.add(resourcePrimKey);
+				qPos.add(modelClassNameId);
 
 				count = (Long)q.uniqueResult();
 
@@ -598,36 +598,36 @@ public class CTEntryPersistenceImpl
 	}
 
 	private static final String
-		_FINDER_COLUMN_RESOURCEPRIMKEY_RESOURCEPRIMKEY_2 =
-			"ctEntry.resourcePrimKey = ?";
+		_FINDER_COLUMN_MODELCLASSNAMEID_MODELCLASSNAMEID_2 =
+			"ctEntry.modelClassNameId = ?";
 
 	private FinderPath _finderPathFetchByC_C;
 	private FinderPath _finderPathCountByC_C;
 
 	/**
-	 * Returns the ct entry where classNameId = &#63; and classPK = &#63; or throws a <code>NoSuchEntryException</code> if it could not be found.
+	 * Returns the ct entry where modelClassNameId = &#63; and modelClassPK = &#63; or throws a <code>NoSuchEntryException</code> if it could not be found.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
+	 * @param modelClassNameId the model class name ID
+	 * @param modelClassPK the model class pk
 	 * @return the matching ct entry
 	 * @throws NoSuchEntryException if a matching ct entry could not be found
 	 */
 	@Override
-	public CTEntry findByC_C(long classNameId, long classPK)
+	public CTEntry findByC_C(long modelClassNameId, long modelClassPK)
 		throws NoSuchEntryException {
 
-		CTEntry ctEntry = fetchByC_C(classNameId, classPK);
+		CTEntry ctEntry = fetchByC_C(modelClassNameId, modelClassPK);
 
 		if (ctEntry == null) {
 			StringBundler msg = new StringBundler(6);
 
 			msg.append(_NO_SUCH_ENTITY_WITH_KEY);
 
-			msg.append("classNameId=");
-			msg.append(classNameId);
+			msg.append("modelClassNameId=");
+			msg.append(modelClassNameId);
 
-			msg.append(", classPK=");
-			msg.append(classPK);
+			msg.append(", modelClassPK=");
+			msg.append(modelClassPK);
 
 			msg.append("}");
 
@@ -642,30 +642,30 @@ public class CTEntryPersistenceImpl
 	}
 
 	/**
-	 * Returns the ct entry where classNameId = &#63; and classPK = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 * Returns the ct entry where modelClassNameId = &#63; and modelClassPK = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
+	 * @param modelClassNameId the model class name ID
+	 * @param modelClassPK the model class pk
 	 * @return the matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
 	@Override
-	public CTEntry fetchByC_C(long classNameId, long classPK) {
-		return fetchByC_C(classNameId, classPK, true);
+	public CTEntry fetchByC_C(long modelClassNameId, long modelClassPK) {
+		return fetchByC_C(modelClassNameId, modelClassPK, true);
 	}
 
 	/**
-	 * Returns the ct entry where classNameId = &#63; and classPK = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 * Returns the ct entry where modelClassNameId = &#63; and modelClassPK = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
+	 * @param modelClassNameId the model class name ID
+	 * @param modelClassPK the model class pk
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
 	@Override
 	public CTEntry fetchByC_C(
-		long classNameId, long classPK, boolean retrieveFromCache) {
+		long modelClassNameId, long modelClassPK, boolean retrieveFromCache) {
 
-		Object[] finderArgs = new Object[] {classNameId, classPK};
+		Object[] finderArgs = new Object[] {modelClassNameId, modelClassPK};
 
 		Object result = null;
 
@@ -677,8 +677,8 @@ public class CTEntryPersistenceImpl
 		if (result instanceof CTEntry) {
 			CTEntry ctEntry = (CTEntry)result;
 
-			if ((classNameId != ctEntry.getClassNameId()) ||
-				(classPK != ctEntry.getClassPK())) {
+			if ((modelClassNameId != ctEntry.getModelClassNameId()) ||
+				(modelClassPK != ctEntry.getModelClassPK())) {
 
 				result = null;
 			}
@@ -689,9 +689,9 @@ public class CTEntryPersistenceImpl
 
 			query.append(_SQL_SELECT_CTENTRY_WHERE);
 
-			query.append(_FINDER_COLUMN_C_C_CLASSNAMEID_2);
+			query.append(_FINDER_COLUMN_C_C_MODELCLASSNAMEID_2);
 
-			query.append(_FINDER_COLUMN_C_C_CLASSPK_2);
+			query.append(_FINDER_COLUMN_C_C_MODELCLASSPK_2);
 
 			String sql = query.toString();
 
@@ -704,9 +704,9 @@ public class CTEntryPersistenceImpl
 
 				QueryPos qPos = QueryPos.getInstance(q);
 
-				qPos.add(classNameId);
+				qPos.add(modelClassNameId);
 
-				qPos.add(classPK);
+				qPos.add(modelClassPK);
 
 				List<CTEntry> list = q.list();
 
@@ -741,33 +741,33 @@ public class CTEntryPersistenceImpl
 	}
 
 	/**
-	 * Removes the ct entry where classNameId = &#63; and classPK = &#63; from the database.
+	 * Removes the ct entry where modelClassNameId = &#63; and modelClassPK = &#63; from the database.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
+	 * @param modelClassNameId the model class name ID
+	 * @param modelClassPK the model class pk
 	 * @return the ct entry that was removed
 	 */
 	@Override
-	public CTEntry removeByC_C(long classNameId, long classPK)
+	public CTEntry removeByC_C(long modelClassNameId, long modelClassPK)
 		throws NoSuchEntryException {
 
-		CTEntry ctEntry = findByC_C(classNameId, classPK);
+		CTEntry ctEntry = findByC_C(modelClassNameId, modelClassPK);
 
 		return remove(ctEntry);
 	}
 
 	/**
-	 * Returns the number of ct entries where classNameId = &#63; and classPK = &#63;.
+	 * Returns the number of ct entries where modelClassNameId = &#63; and modelClassPK = &#63;.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
+	 * @param modelClassNameId the model class name ID
+	 * @param modelClassPK the model class pk
 	 * @return the number of matching ct entries
 	 */
 	@Override
-	public int countByC_C(long classNameId, long classPK) {
+	public int countByC_C(long modelClassNameId, long modelClassPK) {
 		FinderPath finderPath = _finderPathCountByC_C;
 
-		Object[] finderArgs = new Object[] {classNameId, classPK};
+		Object[] finderArgs = new Object[] {modelClassNameId, modelClassPK};
 
 		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
@@ -776,9 +776,9 @@ public class CTEntryPersistenceImpl
 
 			query.append(_SQL_COUNT_CTENTRY_WHERE);
 
-			query.append(_FINDER_COLUMN_C_C_CLASSNAMEID_2);
+			query.append(_FINDER_COLUMN_C_C_MODELCLASSNAMEID_2);
 
-			query.append(_FINDER_COLUMN_C_C_CLASSPK_2);
+			query.append(_FINDER_COLUMN_C_C_MODELCLASSPK_2);
 
 			String sql = query.toString();
 
@@ -791,9 +791,9 @@ public class CTEntryPersistenceImpl
 
 				QueryPos qPos = QueryPos.getInstance(q);
 
-				qPos.add(classNameId);
+				qPos.add(modelClassNameId);
 
-				qPos.add(classPK);
+				qPos.add(modelClassPK);
 
 				count = (Long)q.uniqueResult();
 
@@ -812,11 +812,11 @@ public class CTEntryPersistenceImpl
 		return count.intValue();
 	}
 
-	private static final String _FINDER_COLUMN_C_C_CLASSNAMEID_2 =
-		"ctEntry.classNameId = ? AND ";
+	private static final String _FINDER_COLUMN_C_C_MODELCLASSNAMEID_2 =
+		"ctEntry.modelClassNameId = ? AND ";
 
-	private static final String _FINDER_COLUMN_C_C_CLASSPK_2 =
-		"ctEntry.classPK = ?";
+	private static final String _FINDER_COLUMN_C_C_MODELCLASSPK_2 =
+		"ctEntry.modelClassPK = ?";
 
 	public CTEntryPersistenceImpl() {
 		setModelClass(CTEntry.class);
@@ -839,7 +839,9 @@ public class CTEntryPersistenceImpl
 
 		finderCache.putResult(
 			_finderPathFetchByC_C,
-			new Object[] {ctEntry.getClassNameId(), ctEntry.getClassPK()},
+			new Object[] {
+				ctEntry.getModelClassNameId(), ctEntry.getModelClassPK()
+			},
 			ctEntry);
 
 		ctEntry.resetOriginalValues();
@@ -916,7 +918,8 @@ public class CTEntryPersistenceImpl
 
 	protected void cacheUniqueFindersCache(CTEntryModelImpl ctEntryModelImpl) {
 		Object[] args = new Object[] {
-			ctEntryModelImpl.getClassNameId(), ctEntryModelImpl.getClassPK()
+			ctEntryModelImpl.getModelClassNameId(),
+			ctEntryModelImpl.getModelClassPK()
 		};
 
 		finderCache.putResult(
@@ -930,7 +933,8 @@ public class CTEntryPersistenceImpl
 
 		if (clearCurrent) {
 			Object[] args = new Object[] {
-				ctEntryModelImpl.getClassNameId(), ctEntryModelImpl.getClassPK()
+				ctEntryModelImpl.getModelClassNameId(),
+				ctEntryModelImpl.getModelClassPK()
 			};
 
 			finderCache.removeResult(_finderPathCountByC_C, args);
@@ -941,8 +945,8 @@ public class CTEntryPersistenceImpl
 			 _finderPathFetchByC_C.getColumnBitmask()) != 0) {
 
 			Object[] args = new Object[] {
-				ctEntryModelImpl.getOriginalClassNameId(),
-				ctEntryModelImpl.getOriginalClassPK()
+				ctEntryModelImpl.getOriginalModelClassNameId(),
+				ctEntryModelImpl.getOriginalModelClassPK()
 			};
 
 			finderCache.removeResult(_finderPathCountByC_C, args);
@@ -1128,12 +1132,12 @@ public class CTEntryPersistenceImpl
 		}
 		else if (isNew) {
 			Object[] args = new Object[] {
-				ctEntryModelImpl.getResourcePrimKey()
+				ctEntryModelImpl.getModelClassNameId()
 			};
 
-			finderCache.removeResult(_finderPathCountByResourcePrimKey, args);
+			finderCache.removeResult(_finderPathCountByModelClassNameId, args);
 			finderCache.removeResult(
-				_finderPathWithoutPaginationFindByResourcePrimKey, args);
+				_finderPathWithoutPaginationFindByModelClassNameId, args);
 
 			finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
 			finderCache.removeResult(
@@ -1141,24 +1145,24 @@ public class CTEntryPersistenceImpl
 		}
 		else {
 			if ((ctEntryModelImpl.getColumnBitmask() &
-				 _finderPathWithoutPaginationFindByResourcePrimKey.
+				 _finderPathWithoutPaginationFindByModelClassNameId.
 					 getColumnBitmask()) != 0) {
 
 				Object[] args = new Object[] {
-					ctEntryModelImpl.getOriginalResourcePrimKey()
+					ctEntryModelImpl.getOriginalModelClassNameId()
 				};
 
 				finderCache.removeResult(
-					_finderPathCountByResourcePrimKey, args);
+					_finderPathCountByModelClassNameId, args);
 				finderCache.removeResult(
-					_finderPathWithoutPaginationFindByResourcePrimKey, args);
+					_finderPathWithoutPaginationFindByModelClassNameId, args);
 
-				args = new Object[] {ctEntryModelImpl.getResourcePrimKey()};
+				args = new Object[] {ctEntryModelImpl.getModelClassNameId()};
 
 				finderCache.removeResult(
-					_finderPathCountByResourcePrimKey, args);
+					_finderPathCountByModelClassNameId, args);
 				finderCache.removeResult(
-					_finderPathWithoutPaginationFindByResourcePrimKey, args);
+					_finderPathWithoutPaginationFindByModelClassNameId, args);
 			}
 		}
 
@@ -2133,35 +2137,35 @@ public class CTEntryPersistenceImpl
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
 			new String[0]);
 
-		_finderPathWithPaginationFindByResourcePrimKey = new FinderPath(
+		_finderPathWithPaginationFindByModelClassNameId = new FinderPath(
 			CTEntryModelImpl.ENTITY_CACHE_ENABLED,
 			CTEntryModelImpl.FINDER_CACHE_ENABLED, CTEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByResourcePrimKey",
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByModelClassNameId",
 			new String[] {
 				Long.class.getName(), Integer.class.getName(),
 				Integer.class.getName(), OrderByComparator.class.getName()
 			});
 
-		_finderPathWithoutPaginationFindByResourcePrimKey = new FinderPath(
+		_finderPathWithoutPaginationFindByModelClassNameId = new FinderPath(
 			CTEntryModelImpl.ENTITY_CACHE_ENABLED,
 			CTEntryModelImpl.FINDER_CACHE_ENABLED, CTEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByResourcePrimKey",
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByModelClassNameId",
 			new String[] {Long.class.getName()},
-			CTEntryModelImpl.RESOURCEPRIMKEY_COLUMN_BITMASK);
+			CTEntryModelImpl.MODELCLASSNAMEID_COLUMN_BITMASK);
 
-		_finderPathCountByResourcePrimKey = new FinderPath(
+		_finderPathCountByModelClassNameId = new FinderPath(
 			CTEntryModelImpl.ENTITY_CACHE_ENABLED,
 			CTEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByResourcePrimKey",
-			new String[] {Long.class.getName()});
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"countByModelClassNameId", new String[] {Long.class.getName()});
 
 		_finderPathFetchByC_C = new FinderPath(
 			CTEntryModelImpl.ENTITY_CACHE_ENABLED,
 			CTEntryModelImpl.FINDER_CACHE_ENABLED, CTEntryImpl.class,
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_C",
 			new String[] {Long.class.getName(), Long.class.getName()},
-			CTEntryModelImpl.CLASSNAMEID_COLUMN_BITMASK |
-			CTEntryModelImpl.CLASSPK_COLUMN_BITMASK);
+			CTEntryModelImpl.MODELCLASSNAMEID_COLUMN_BITMASK |
+			CTEntryModelImpl.MODELCLASSPK_COLUMN_BITMASK);
 
 		_finderPathCountByC_C = new FinderPath(
 			CTEntryModelImpl.ENTITY_CACHE_ENABLED,

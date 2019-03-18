@@ -79,13 +79,13 @@ public class CTEntryLocalServiceUtil {
 	}
 
 	public static com.liferay.change.tracking.model.CTEntry addCTEntry(
-			long userId, long classNameId, long classPK, long resourcePrimKey,
-			int changeType, long ctCollectionId,
+			long userId, long modelClassNameId, long modelClassPK,
+			long resourcePrimKey, int changeType, long ctCollectionId,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return getService().addCTEntry(
-			userId, classNameId, classPK, resourcePrimKey, changeType,
+			userId, modelClassNameId, modelClassPK, resourcePrimKey, changeType,
 			ctCollectionId, serviceContext);
 	}
 
@@ -315,6 +315,12 @@ public class CTEntryLocalServiceUtil {
 	}
 
 	public static java.util.List<com.liferay.change.tracking.model.CTEntry>
+		fetchCTEntries(long modelClassNameId) {
+
+		return getService().fetchCTEntries(modelClassNameId);
+	}
+
+	public static java.util.List<com.liferay.change.tracking.model.CTEntry>
 		fetchCTEntries(
 			long ctCollectionId, long resourcePrimKey,
 			com.liferay.portal.kernel.dao.orm.QueryDefinition
@@ -333,6 +339,12 @@ public class CTEntryLocalServiceUtil {
 		return getService().fetchCTEntries(ctCollectionId, queryDefinition);
 	}
 
+	public static java.util.List<com.liferay.change.tracking.model.CTEntry>
+		fetchCTEntries(String modelClassName) {
+
+		return getService().fetchCTEntries(modelClassName);
+	}
+
 	public static com.liferay.change.tracking.model.CTEntry fetchCTEntry(
 		long ctEntryId) {
 
@@ -340,15 +352,16 @@ public class CTEntryLocalServiceUtil {
 	}
 
 	public static com.liferay.change.tracking.model.CTEntry fetchCTEntry(
-		long classNameId, long classPK) {
+		long modelClassNameId, long modelClassPK) {
 
-		return getService().fetchCTEntry(classNameId, classPK);
+		return getService().fetchCTEntry(modelClassNameId, modelClassPK);
 	}
 
 	public static com.liferay.change.tracking.model.CTEntry fetchCTEntry(
-		long ctCollectionId, long classNameId, long classPK) {
+		long ctCollectionId, long modelClassNameId, long modelClassPK) {
 
-		return getService().fetchCTEntry(ctCollectionId, classNameId, classPK);
+		return getService().fetchCTEntry(
+			ctCollectionId, modelClassNameId, modelClassPK);
 	}
 
 	public static com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery
@@ -495,14 +508,6 @@ public class CTEntryLocalServiceUtil {
 		return getService().getOSGiServiceIdentifier();
 	}
 
-	public static java.util.List
-		<? extends com.liferay.portal.kernel.model.PersistedModel>
-				getPersistedModel(long resourcePrimKey)
-			throws com.liferay.portal.kernel.exception.PortalException {
-
-		return getService().getPersistedModel(resourcePrimKey);
-	}
-
 	public static com.liferay.portal.kernel.model.PersistedModel
 			getPersistedModel(java.io.Serializable primaryKeyObj)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -547,6 +552,31 @@ public class CTEntryLocalServiceUtil {
 
 		return getService().hasCTEntryAggregateCTEntry(
 			ctEntryAggregateId, ctEntryId);
+	}
+
+	public static java.util.List<com.liferay.change.tracking.model.CTEntry>
+		search(
+			com.liferay.change.tracking.model.CTCollection ctCollection,
+			long[] groupIds, long[] userIds, long[] classNameIds,
+			int[] changeTypes, boolean collision, long otherCTCollectionId,
+			com.liferay.portal.kernel.dao.orm.QueryDefinition
+				<com.liferay.change.tracking.model.CTEntry> queryDefinition) {
+
+		return getService().search(
+			ctCollection, groupIds, userIds, classNameIds, changeTypes,
+			collision, otherCTCollectionId, queryDefinition);
+	}
+
+	public static long searchCount(
+		com.liferay.change.tracking.model.CTCollection ctCollection,
+		long[] groupIds, long[] userIds, long[] classNameIds, int[] changeTypes,
+		boolean collision, long otherCTCollectionId,
+		com.liferay.portal.kernel.dao.orm.QueryDefinition
+			<com.liferay.change.tracking.model.CTEntry> queryDefinition) {
+
+		return getService().searchCount(
+			ctCollection, groupIds, userIds, classNameIds, changeTypes,
+			collision, otherCTCollectionId, queryDefinition);
 	}
 
 	public static void setCTCollectionCTEntries(

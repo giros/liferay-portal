@@ -22,13 +22,13 @@ import com.liferay.change.tracking.constants.CTPortletKeys;
 import com.liferay.change.tracking.exception.CTException;
 import com.liferay.change.tracking.internal.util.ChangeTrackingThreadLocal;
 import com.liferay.change.tracking.model.CTCollection;
+import com.liferay.change.tracking.model.CTCollectionModel;
 import com.liferay.change.tracking.model.CTEntry;
 import com.liferay.change.tracking.model.CTEntryAggregate;
 import com.liferay.change.tracking.service.CTCollectionLocalService;
 import com.liferay.change.tracking.service.CTEntryAggregateLocalService;
 import com.liferay.change.tracking.service.CTEntryLocalService;
 import com.liferay.change.tracking.service.CTProcessLocalService;
-import com.liferay.change.tracking.util.comparator.CTEntryCreateDateComparator;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
@@ -57,7 +57,6 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.io.Serializable;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -223,56 +222,6 @@ public class CTEngineManagerImpl implements CTEngineManager {
 	}
 
 	@Override
-	public List<CTEntry> getCollidingCTEntries(long ctCollectionId) {
-		CTCollection ctCollection = _ctCollectionLocalService.fetchCTCollection(
-			ctCollectionId);
-
-		Optional<CTCollection> productionCTCollectionOptional =
-			getProductionCTCollectionOptional(ctCollection.getCompanyId());
-
-		return productionCTCollectionOptional.map(
-			CTCollection::getCtCollectionId
-		).map(
-			productionCTCollectionID -> getCollidingCTEntries(
-				ctCollectionId, productionCTCollectionID)
-		).orElse(
-			Collections.emptyList()
-		);
-	}
-
-	@Override
-	public List<CTEntry> getCollidingCTEntries(
-		long sourceCTCollectionId, long targetCTCollectionId) {
-
-		List<CTEntry> sourceCTEntries = _ctEntryLocalService.fetchCTEntries(
-			sourceCTCollectionId, new QueryDefinition<>());
-
-		if (ListUtil.isEmpty(sourceCTEntries)) {
-			return Collections.emptyList();
-		}
-
-		List<CTEntry> collidingCTEntries = new ArrayList<>();
-
-		for (CTEntry ctEntry : sourceCTEntries) {
-			Optional<CTEntry> latestTargetCTEntryOptional = _getLatestCTEntry(
-				targetCTCollectionId, ctEntry.getResourcePrimKey());
-
-			if (!latestTargetCTEntryOptional.isPresent()) {
-				continue;
-			}
-
-			latestTargetCTEntryOptional.filter(
-				latestTargetCTEntry -> _isColliding(
-					ctEntry, latestTargetCTEntry)
-			).ifPresent(
-				latestTargetCTEntry -> collidingCTEntries.add(ctEntry)
-			);
-		}
-
-		return collidingCTEntries;
-	}
-
-	@Override
 	public Optional<CTCollection> getCTCollectionOptional(long ctCollectionId) {
 		CTCollection ctCollection = _ctCollectionLocalService.fetchCTCollection(
 			ctCollectionId);
@@ -287,6 +236,31 @@ public class CTEngineManagerImpl implements CTEngineManager {
 		}
 
 		return _ctCollectionLocalService.getCTCollections(companyId, null);
+	}
+
+	@Override
+	public List<CTEntry> getCTEntries(
+		CTCollection ctCollection, long[] groupIds, long[] userIds,
+		long[] classNameIds, int[] changeTypes, Boolean collision,
+		QueryDefinition<CTEntry> queryDefinition) {
+
+		long otherCTCollectionId = 0L;
+
+		if (collision != null) {
+			Optional<CTCollection> productionCTCollectionOptional =
+				getProductionCTCollectionOptional(ctCollection.getCompanyId());
+
+			otherCTCollectionId = productionCTCollectionOptional.map(
+				CTCollectionModel::getCtCollectionId
+			).orElse(
+				0L
+			);
+		}
+
+		return _ctEntryLocalService.search(
+			ctCollection, groupIds, userIds, classNameIds, changeTypes,
+			Boolean.TRUE.equals(collision), otherCTCollectionId,
+			queryDefinition);
 	}
 
 	@Override
@@ -309,9 +283,28 @@ public class CTEngineManagerImpl implements CTEngineManager {
 	}
 
 	@Override
-	public int getCTEntriesCount(long ctCollectionId) {
-		return _ctEntryLocalService.getCTCollectionCTEntriesCount(
-			ctCollectionId);
+	public int getCTEntriesCount(
+		CTCollection ctCollection, long[] groupIds, long[] userIds,
+		long[] classNameIds, int[] changeTypes, Boolean collision,
+		QueryDefinition<CTEntry> queryDefinition) {
+
+		long otherCTCollectionId = 0L;
+
+		if (collision != null) {
+			Optional<CTCollection> productionCTCollectionOptional =
+				getProductionCTCollectionOptional(ctCollection.getCompanyId());
+
+			otherCTCollectionId = productionCTCollectionOptional.map(
+				CTCollectionModel::getCtCollectionId
+			).orElse(
+				0L
+			);
+		}
+
+		return (int)_ctEntryLocalService.searchCount(
+			ctCollection, groupIds, userIds, classNameIds, changeTypes,
+			Boolean.TRUE.equals(collision), otherCTCollectionId,
+			queryDefinition);
 	}
 
 	@Override
@@ -545,14 +538,14 @@ public class CTEngineManagerImpl implements CTEngineManager {
 
 		_productionCTCollections.put(companyId, productionCTCollection);
 
-		_generateCTEntriesForAllCTConfigurations(
+		_generateCTEntriesAndCTEntryAggregatesForAllCTConfigurations(
 			userId, productionCTCollection);
 
 		checkoutCTCollection(
 			userId, productionCTCollection.getCtCollectionId());
 	}
 
-	private void _generateCTEntriesForAllCTConfigurations(
+	private void _generateCTEntriesAndCTEntryAggregatesForAllCTConfigurations(
 		long userId, CTCollection ctCollection) {
 
 		List<CTConfiguration<?, ?>> ctConfigurations =
@@ -560,6 +553,10 @@ public class CTEngineManagerImpl implements CTEngineManager {
 
 		ctConfigurations.forEach(
 			ctConfiguration -> _generateCTEntriesForCTConfiguration(
+				userId, ctConfiguration, ctCollection));
+
+		ctConfigurations.forEach(
+			ctConfiguration -> _generateCTEntryAggregatesForCTConfiguration(
 				userId, ctConfiguration, ctCollection));
 	}
 
@@ -636,6 +633,105 @@ public class CTEngineManagerImpl implements CTEngineManager {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private <V extends BaseModel, R extends BaseModel> void
+		_generateCTEntryAggregateForCTEntry(
+			long userId, CTConfiguration ctConfiguration,
+			CTCollection ctCollection, CTEntry ctEntry,
+			List<Function<V, R>> versionEntityRelatedEntityFunctions) {
+
+		Function<Long, V> versionEntityByVersionEntityIdFunction =
+			ctConfiguration.getVersionEntityByVersionEntityIdFunction();
+
+		V versionEntity = versionEntityByVersionEntityIdFunction.apply(
+			ctEntry.getModelClassPK());
+
+		versionEntityRelatedEntityFunctions.forEach(
+			relatedEntityFunction -> _generateCTEntryAggregateForVersionEntity(
+				userId, ctCollection, ctEntry, versionEntity,
+				relatedEntityFunction));
+	}
+
+	private <V extends BaseModel, R extends BaseModel> void
+		_generateCTEntryAggregateForVersionEntity(
+			long userId, CTCollection ctCollection, CTEntry ctEntry,
+			V versionEntity,
+			Function<V, R> versionEntityRelatedEntityFunction) {
+
+		R relatedEntity = versionEntityRelatedEntityFunction.apply(
+			versionEntity);
+
+		if (relatedEntity == null) {
+			return;
+		}
+
+		long relatedEntityClassPK = (Long)relatedEntity.getPrimaryKeyObj();
+
+		CTEntry relatedCTEntry = _ctEntryLocalService.fetchCTEntry(
+			_portal.getClassNameId(relatedEntity.getModelClassName()),
+			relatedEntityClassPK);
+
+		if (relatedCTEntry == null) {
+			List<CTEntry> relatedCTEntries =
+				_ctEntryLocalService.fetchCTEntries(
+					ctCollection.getCtCollectionId(), relatedEntityClassPK,
+					new QueryDefinition<>());
+
+			if (ListUtil.isEmpty(relatedCTEntries)) {
+				return;
+			}
+
+			relatedCTEntry = relatedCTEntries.get(0);
+		}
+
+		CTEntryAggregate ctEntryAggregate =
+			_ctEntryAggregateLocalService.fetchLatestCTEntryAggregate(
+				ctCollection.getCtCollectionId(), ctEntry.getCtEntryId());
+
+		if (ctEntryAggregate == null) {
+			try {
+				ctEntryAggregate =
+					_ctEntryAggregateLocalService.addCTEntryAggregate(
+						userId, ctCollection.getCtCollectionId(),
+						ctEntry.getCtEntryId(), new ServiceContext());
+			}
+			catch (PortalException pe) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Unable to add CTEntryAggregate: " +
+							pe.getLocalizedMessage());
+				}
+			}
+		}
+
+		_ctEntryAggregateLocalService.addCTEntry(
+			ctEntryAggregate, relatedCTEntry);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <V extends BaseModel, R extends BaseModel> void
+		_generateCTEntryAggregatesForCTConfiguration(
+			long userId, CTConfiguration ctConfiguration,
+			CTCollection ctCollection) {
+
+		List<Function<V, R>> versionEntityRelatedEntityFunctions =
+			ctConfiguration.getVersionEntityRelatedEntityFunctions();
+
+		if (ListUtil.isEmpty(versionEntityRelatedEntityFunctions)) {
+			return;
+		}
+
+		Class<V> versionEntityClass = ctConfiguration.getVersionEntityClass();
+
+		List<CTEntry> ctEntries = _ctEntryLocalService.fetchCTEntries(
+			versionEntityClass.getName());
+
+		ctEntries.forEach(
+			ctEntry -> _generateCTEntryAggregateForCTEntry(
+				userId, ctConfiguration, ctCollection, ctEntry,
+				versionEntityRelatedEntityFunctions));
+	}
+
 	private long _getCompanyId(long userId) {
 		long companyId = 0;
 
@@ -657,35 +753,16 @@ public class CTEngineManagerImpl implements CTEngineManager {
 		return companyId;
 	}
 
-	private Optional<CTEntry> _getLatestCTEntry(
-		long ctCollectionId, long resourcePrimKey) {
-
-		QueryDefinition<CTEntry> queryDefinition = new QueryDefinition<>();
-
-		queryDefinition.setEnd(1);
-		queryDefinition.setOrderByComparator(new CTEntryCreateDateComparator());
-		queryDefinition.setStart(0);
-
-		List<CTEntry> ctEntries = _ctEntryLocalService.fetchCTEntries(
-			ctCollectionId, resourcePrimKey, queryDefinition);
-
-		if (ListUtil.isEmpty(ctEntries)) {
-			return Optional.empty();
-		}
-
-		return Optional.of(ctEntries.get(0));
-	}
-
-	private boolean _isColliding(CTEntry ctEntry, CTEntry productionCTEntry) {
-		if (ctEntry.getClassPK() < productionCTEntry.getClassPK()) {
-			return true;
-		}
-
-		return false;
-	}
-
 	private void _updateRecentCTCollectionId(long userId, long ctCollectionId) {
 		User user = _userLocalService.fetchUser(userId);
+
+		if (user == null) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to find user " + userId);
+			}
+
+			return;
+		}
 
 		PortalPreferences portalPreferences =
 			PortletPreferencesFactoryUtil.getPortalPreferences(
