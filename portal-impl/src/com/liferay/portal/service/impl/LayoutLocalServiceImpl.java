@@ -45,6 +45,7 @@ import com.liferay.portal.kernel.model.LayoutType;
 import com.liferay.portal.kernel.model.LayoutTypePortlet;
 import com.liferay.portal.kernel.model.LayoutVersion;
 import com.liferay.portal.kernel.model.PortletConstants;
+import com.liferay.portal.kernel.model.PortletPreferences;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.ResourcePermission;
 import com.liferay.portal.kernel.model.SystemEventConstants;
@@ -69,6 +70,7 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.LayoutVersioningThreadLocal;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -2219,6 +2221,36 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			layoutSetPrototype, layoutUuid);
 	}
 
+	@Override
+	public Layout publishDraft(Layout draftLayout) throws PortalException {
+		boolean layoutUpgradeInProgress =
+			LayoutVersioningThreadLocal.isLayoutUpgradeInProgres();
+
+		LayoutVersioningThreadLocal.setLayoutUpgradeInProgress(true);
+
+		Layout layout = null;
+
+		try {
+			LayoutVersion oldLayoutVersion = fetchLatestVersion(draftLayout);
+
+			if (oldLayoutVersion == null) {
+				return super.publishDraft(draftLayout);
+			}
+
+			layout = super.publishDraft(draftLayout);
+
+			LayoutVersion newLayoutVersion = fetchLatestVersion(layout);
+
+			_copyPortletPreferences(oldLayoutVersion, newLayoutVersion);
+		}
+		finally {
+			LayoutVersioningThreadLocal.setLayoutUpgradeInProgress(
+				layoutUpgradeInProgress);
+		}
+
+		return layout;
+	}
+
 	/**
 	 * Sets the layouts for the group, replacing and prioritizing all layouts of
 	 * the parent layout.
@@ -3232,6 +3264,24 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		queryConfig.setScoreEnabled(false);
 
 		return searchContext;
+	}
+
+	private void _copyPortletPreferences(
+		LayoutVersion oldLayoutVersion, LayoutVersion newLayoutVersion) {
+
+		List<PortletPreferences> portletPreferencesList =
+			portletPreferencesLocalService.getPortletPreferencesByPlid(
+				oldLayoutVersion.getLayoutVersionId());
+
+		for (PortletPreferences portletPreferences : portletPreferencesList) {
+			portletPreferencesLocalService.addPortletPreferences(
+				newLayoutVersion.getCompanyId(),
+				portletPreferences.getOwnerId(),
+				portletPreferences.getOwnerType(),
+				newLayoutVersion.getLayoutVersionId(),
+				portletPreferences.getPortletId(), null,
+				portletPreferences.getPreferences());
+		}
 	}
 
 	private List<Layout> _getChildLayouts(
