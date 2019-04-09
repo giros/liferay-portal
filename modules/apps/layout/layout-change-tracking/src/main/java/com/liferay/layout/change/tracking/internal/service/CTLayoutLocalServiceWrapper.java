@@ -20,10 +20,12 @@ import com.liferay.change.tracking.constants.CTConstants;
 import com.liferay.change.tracking.exception.CTEntryException;
 import com.liferay.change.tracking.exception.CTException;
 import com.liferay.change.tracking.model.CTEntry;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.NoSuchLayoutException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutVersion;
@@ -553,6 +555,77 @@ public class CTLayoutLocalServiceWrapper extends LayoutLocalServiceWrapper {
 		layouts.removeIf(layout -> !_isRetrievable(layout));
 
 		return layouts;
+	}
+
+	@Override
+	public int getLayoutsCount(
+		Group group, boolean privateLayout, long parentLayoutId) {
+
+		super.getLayoutsCount(group, privateLayout, parentLayoutId);
+
+		List<Layout> layouts = getLayouts(
+			group.getGroupId(), privateLayout, parentLayoutId);
+
+		return layouts.size();
+	}
+
+	@Override
+	public int getLayoutsCount(
+		Group group, boolean privateLayout, long[] layoutIds) {
+
+		super.getLayoutsCount(group, privateLayout, layoutIds);
+
+		try {
+			List<Layout> layouts = getLayouts(
+				group.getGroupId(), privateLayout, layoutIds);
+
+			return layouts.size();
+		}
+		catch (PortalException pe) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(pe, pe);
+			}
+
+			return 0;
+		}
+	}
+
+	@Override
+	public int getLayoutsCount(
+			Group group, boolean privateLayout, String keywords, String[] types)
+		throws PortalException {
+
+		super.getLayoutsCount(group, privateLayout, keywords, types);
+
+		List<Layout> layouts = getLayouts(
+			group.getGroupId(), privateLayout, keywords, types,
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+
+		return layouts.size();
+	}
+
+	@Override
+	public int getLayoutsCount(long groupId) {
+		super.getLayoutsCount(groupId);
+
+		List<Layout> layouts = getLayouts(groupId, false);
+
+		layouts.addAll(getLayouts(groupId, true));
+
+		return layouts.size();
+	}
+
+	@Override
+	public int getLayoutsCount(long groupId, String keywords, String[] types)
+		throws PortalException {
+
+		super.getLayoutsCount(groupId, keywords, types);
+
+		List<Layout> layouts = getLayouts(
+			groupId, keywords, types, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			null);
+
+		return layouts.size();
 	}
 
 	@Override
