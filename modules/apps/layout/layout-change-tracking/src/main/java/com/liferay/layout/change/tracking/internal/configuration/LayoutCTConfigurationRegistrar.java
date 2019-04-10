@@ -17,12 +17,16 @@ package com.liferay.layout.change.tracking.internal.configuration;
 import com.liferay.change.tracking.configuration.CTConfigurationRegistrar;
 import com.liferay.change.tracking.configuration.builder.CTConfigurationBuilder;
 import com.liferay.change.tracking.function.CTFunctions;
+import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.Property;
+import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutVersion;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -45,7 +49,7 @@ public class LayoutCTConfigurationRegistrar {
 			).setEntityClasses(
 				Layout.class, LayoutVersion.class
 			).setResourceEntitiesByCompanyIdFunction(
-				_layoutLocalService::getLayouts
+				this::_fetchLayouts
 			).setResourceEntityByResourceEntityIdFunction(
 				_layoutLocalService::fetchLayout
 			).setEntityIdsFromResourceEntityFunctions(
@@ -70,6 +74,16 @@ public class LayoutCTConfigurationRegistrar {
 			layout);
 
 		return layoutVersion.getLayoutVersionId();
+	}
+
+	private List<Layout> _fetchLayouts(long companyId) {
+		DynamicQuery dynamicQuery = _layoutLocalService.dynamicQuery();
+
+		Property companyIdProperty = PropertyFactoryUtil.forName("companyId");
+
+		dynamicQuery.add(companyIdProperty.eq(companyId));
+
+		return _layoutLocalService.dynamicQuery(dynamicQuery);
 	}
 
 	@Reference(scope = ReferenceScope.PROTOTYPE_REQUIRED)
