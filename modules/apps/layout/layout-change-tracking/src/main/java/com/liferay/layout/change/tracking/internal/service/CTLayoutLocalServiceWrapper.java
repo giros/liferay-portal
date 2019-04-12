@@ -179,6 +179,84 @@ public class CTLayoutLocalServiceWrapper extends LayoutLocalServiceWrapper {
 	}
 
 	@Override
+	public Layout deleteLayout(Layout layout) throws PortalException {
+		List<LayoutVersion> layoutVersions = getVersions(layout);
+
+		layoutVersions.forEach(this::_unregisterChange);
+
+		return super.deleteLayout(layout);
+	}
+
+	@Override
+	public void deleteLayout(
+			Layout layout, boolean updateLayoutSet,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		List<LayoutVersion> layoutVersions = getVersions(layout);
+
+		layoutVersions.forEach(this::_unregisterChange);
+
+		super.deleteLayout(layout, updateLayoutSet, serviceContext);
+	}
+
+	@Override
+	public Layout deleteLayout(long plid) throws PortalException {
+		Layout layout = fetchLayout(plid);
+
+		List<LayoutVersion> layoutVersions = getVersions(layout);
+
+		layoutVersions.forEach(this::_unregisterChange);
+
+		return super.deleteLayout(plid);
+	}
+
+	@Override
+	public void deleteLayout(
+			long groupId, boolean privateLayout, long layoutId,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		Layout layout = fetchLayout(groupId, privateLayout, layoutId);
+
+		List<LayoutVersion> layoutVersions = getVersions(layout);
+
+		layoutVersions.forEach(this::_unregisterChange);
+
+		super.deleteLayout(groupId, privateLayout, layoutId, serviceContext);
+	}
+
+	@Override
+	public void deleteLayout(long plid, ServiceContext serviceContext)
+		throws PortalException {
+
+		Layout layout = fetchLayout(plid);
+
+		List<LayoutVersion> layoutVersions = getVersions(layout);
+
+		layoutVersions.forEach(this::_unregisterChange);
+
+		super.deleteLayout(plid, serviceContext);
+	}
+
+	@Override
+	public void deleteLayouts(
+			long groupId, boolean privateLayout, ServiceContext serviceContext)
+		throws PortalException {
+
+		List<Layout> layouts = getLayouts(groupId, privateLayout);
+
+		super.deleteLayouts(groupId, privateLayout, serviceContext);
+
+		layouts.forEach(
+			layout -> {
+				List<LayoutVersion> layoutVersions = getVersions(layout);
+
+				layoutVersions.forEach(this::_unregisterChange);
+			});
+	}
+
+	@Override
 	public Layout fetchDefaultLayout(long groupId, boolean privateLayout) {
 		Layout layout = super.fetchDefaultLayout(groupId, privateLayout);
 
@@ -983,6 +1061,17 @@ public class CTLayoutLocalServiceWrapper extends LayoutLocalServiceWrapper {
 				throw cte;
 			}
 		}
+	}
+
+	private void _unregisterChange(LayoutVersion layoutVersion) {
+		if (layoutVersion == null) {
+			return;
+		}
+
+		_ctManager.unregisterModelChange(
+			PrincipalThreadLocal.getUserId(),
+			_portal.getClassNameId(LayoutVersion.class.getName()),
+			layoutVersion.getLayoutVersionId());
 	}
 
 	private static final String _NO_SUCH_LAYOUT_IN_CURRENT_CHANGE_COLLECTION =
