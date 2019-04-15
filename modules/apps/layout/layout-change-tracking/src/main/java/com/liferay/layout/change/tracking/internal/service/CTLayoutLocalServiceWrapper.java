@@ -348,6 +348,25 @@ public class CTLayoutLocalServiceWrapper extends LayoutLocalServiceWrapper {
 	}
 
 	@Override
+	public long getDefaultPlid(long groupId) {
+		return _getDefaultPlid(super.getDefaultPlid(groupId));
+	}
+
+	@Override
+	public long getDefaultPlid(long groupId, boolean privateLayout) {
+		return _getDefaultPlid(super.getDefaultPlid(groupId, privateLayout));
+	}
+
+	@Override
+	public long getDefaultPlid(
+			long groupId, boolean privateLayout, String portletId)
+		throws PortalException {
+
+		return _getDefaultPlid(
+			super.getDefaultPlid(groupId, privateLayout, portletId));
+	}
+
+	@Override
 	public Layout getFriendlyURLLayout(
 			long groupId, boolean privateLayout, String friendlyURL)
 		throws PortalException {
@@ -1012,6 +1031,23 @@ public class CTLayoutLocalServiceWrapper extends LayoutLocalServiceWrapper {
 
 		// Needed for synchronization
 
+	}
+
+	private long _getDefaultPlid(long originalPlid) {
+		try {
+			Layout layout = getLayout(originalPlid);
+
+			if (layout.getPlid() != LayoutConstants.DEFAULT_PLID) {
+				return layout.getPlid();
+			}
+		}
+		catch (PortalException pe) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(pe, pe);
+			}
+		}
+
+		return LayoutConstants.DEFAULT_PLID;
 	}
 
 	private boolean _isRetrievable(Layout layout) {
