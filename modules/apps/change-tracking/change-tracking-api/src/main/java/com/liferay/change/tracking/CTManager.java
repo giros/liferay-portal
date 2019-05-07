@@ -261,12 +261,31 @@ public interface CTManager {
 	public boolean isModelUpdateInProgress();
 
 	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
+	public Optional<CTEntry> registerModelChange(
+			long userId, long modelClassNameId, long modelClassPK,
+			long modelResourcePrimKey, int changeType)
+		throws CTException;
+
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
+	public Optional<CTEntry> registerModelChange(
+			long userId, long modelClassNameId, long modelClassPK,
+			long modelResourcePrimKey, int changeType, boolean force)
+		throws CTException;
+
+	/**
 	 * Registers the model change into the change tracking framework for the
 	 * current user's active change collection. A
 	 * <code>DuplicateCTEntryException</code> is thrown if the change tracking
 	 * entry already exists with the same model class name ID and model class
 	 * primary key.
 	 *
+	 * @param  companyId the company id
 	 * @param  userId the primary key of the user
 	 * @param  modelClassNameId the primary key of the changed version model's
 	 *         class
@@ -278,8 +297,8 @@ public interface CTManager {
 	 *         change
 	 */
 	public Optional<CTEntry> registerModelChange(
-			long userId, long modelClassNameId, long modelClassPK,
-			long modelResourcePrimKey, int changeType)
+			long companyId, long userId, long modelClassNameId,
+			long modelClassPK, long modelResourcePrimKey, int changeType)
 		throws CTException;
 
 	/**
@@ -289,6 +308,7 @@ public interface CTManager {
 	 * entry already exists with the same model class name ID and model class
 	 * primary key, unless you force the override of the existing change entry.
 	 *
+	 * @param  companyId the company id
 	 * @param  userId the primary key of the user
 	 * @param  modelClassNameId the primary key of the changed version model's
 	 *         class
@@ -301,21 +321,37 @@ public interface CTManager {
 	 *         change
 	 */
 	public Optional<CTEntry> registerModelChange(
-			long userId, long modelClassNameId, long modelClassPK,
-			long modelResourcePrimKey, int changeType, boolean force)
+			long companyId, long userId, long modelClassNameId,
+			long modelClassPK, long modelResourcePrimKey, int changeType,
+			boolean force)
 		throws CTException;
+
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
+	public <V extends BaseModel> void registerRelatedChanges(
+		long userId, long classNameId, long classPK);
+
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
+	public <V extends BaseModel> void registerRelatedChanges(
+		long userId, long classNameId, long classPK, boolean force);
 
 	/**
 	 * Assigns all related model changes to a change entry aggregate associated
 	 * with the owner model change. A new aggregate is created if the related
 	 * entry was already part of the aggregate.
 	 *
+	 * @param companyId the company id
 	 * @param userId the primary key of the user
 	 * @param classNameId the primary key of the owner version model's class
 	 * @param classPK the primary key of the owner version model
 	 */
 	public <V extends BaseModel> void registerRelatedChanges(
-		long userId, long classNameId, long classPK);
+		long companyId, long userId, long classNameId, long classPK);
 
 	/**
 	 * Assigns all related model changes to a change entry aggregate associated
@@ -323,17 +359,27 @@ public interface CTManager {
 	 * entry was already part of the aggregate, unless you force the override of
 	 * the existing change entry aggregate.
 	 *
+	 * @param companyId the company id
 	 * @param userId the primary key of the user
 	 * @param classNameId the primary key of the owner version model's class
 	 * @param classPK the primary key of the owner version model
 	 * @param force whether to override the existing change entry aggregate
 	 */
 	public <V extends BaseModel> void registerRelatedChanges(
-		long userId, long classNameId, long classPK, boolean force);
+		long companyId, long userId, long classNameId, long classPK,
+		boolean force);
+
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
+	public Optional<CTEntry> unregisterModelChange(
+		long userId, long modelClassNameId, long modelClassPK);
 
 	/**
 	 * Unregisters a model change from the change tracking framework.
 	 *
+	 * @param  companyId the company id
 	 * @param  userId the primary key of the user
 	 * @param  modelClassNameId the primary key of the changed version model's
 	 *         class
@@ -341,6 +387,6 @@ public interface CTManager {
 	 * @return the change tracking entry that was deleted
 	 */
 	public Optional<CTEntry> unregisterModelChange(
-		long userId, long modelClassNameId, long modelClassPK);
+		long companyId, long userId, long modelClassNameId, long modelClassPK);
 
 }
