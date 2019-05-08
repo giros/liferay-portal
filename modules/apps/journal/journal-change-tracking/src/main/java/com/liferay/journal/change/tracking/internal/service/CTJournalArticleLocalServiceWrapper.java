@@ -1949,13 +1949,13 @@ public class CTJournalArticleLocalServiceWrapper
 
 		try {
 			_ctManager.registerModelChange(
-				PrincipalThreadLocal.getUserId(),
+				journalArticle.getCompanyId(), PrincipalThreadLocal.getUserId(),
 				_portal.getClassNameId(JournalArticle.class.getName()),
 				journalArticle.getId(), journalArticle.getResourcePrimKey(),
 				changeType, force);
 
 			_ctManager.registerRelatedChanges(
-				PrincipalThreadLocal.getUserId(),
+				journalArticle.getCompanyId(), PrincipalThreadLocal.getUserId(),
 				_portal.getClassNameId(JournalArticle.class.getName()),
 				journalArticle.getId(), force);
 		}
@@ -1977,7 +1977,7 @@ public class CTJournalArticleLocalServiceWrapper
 		}
 
 		_ctManager.unregisterModelChange(
-			PrincipalThreadLocal.getUserId(),
+			journalArticle.getCompanyId(), PrincipalThreadLocal.getUserId(),
 			_portal.getClassNameId(JournalArticle.class.getName()),
 			journalArticle.getId());
 	}
