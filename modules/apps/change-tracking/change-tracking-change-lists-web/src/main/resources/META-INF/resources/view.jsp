@@ -192,7 +192,7 @@ renderResponse.setTitle(title);
 
 					<c:if test="<%= (productionCTCollection != null) && (ctCollectionSearchContainer.getCur() == 1) && Validator.isNull(displayTerms.getKeywords()) %>">
 						<div class="col-sm-4">
-							<div class="border-left-green card select-card-sheet">
+							<div class="<%= changeListsDisplayContext.isChangeListActive(productionCTCollection.getCtCollectionId()) ? "border-left-green" : "border-left-gray" %> card select-card-sheet">
 								<div class="card-row card-row-layout-fixed card-row-padded card-row-valign-top select-card-header">
 									<div class="card-col-content lfr-card-details-column production-details-column">
 										<a href="<%= checkoutProductionURL.toString() %>">
@@ -230,7 +230,7 @@ renderResponse.setTitle(title);
 
 						<c:if test="<%= !production %>">
 							<div class="col-sm-4">
-								<div class="border-left-blue card select-card-sheet">
+								<div class="<%= changeListsDisplayContext.isChangeListActive(curCTCollection.getCtCollectionId()) ? "border-left-blue" : "border-left-gray" %> card select-card-sheet">
 									<div class="card-row card-row-layout-fixed card-row-padded card-row-valign-top select-card-header">
 										<div class="card-col-content lfr-card-details-column">
 											<a href="<%= checkoutCollectionURL.toString() %>">
