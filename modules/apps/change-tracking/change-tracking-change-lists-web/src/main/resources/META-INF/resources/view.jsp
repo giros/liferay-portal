@@ -202,8 +202,6 @@ renderResponse.setTitle(title);
 										</a>
 
 										<div class="select-card-sheet-block">
-											<span class="card-h4"><liferay-ui:message key="description" /></span>
-
 											<div class="card-text" data-qa-id="description">
 												<span class="work-on-production-description"><liferay-ui:message key="your-changes-will-be-added-to-the-live-site-immediately" /></span>
 											</div>
@@ -241,8 +239,6 @@ renderResponse.setTitle(title);
 
 											<c:if test="<%= Validator.isNotNull(curCTCollection.getDescription()) %>">
 												<div class="select-card-sheet-block">
-													<span class="card-h4"><liferay-ui:message key="description" /></span>
-
 													<div class="card-text" data-qa-id="description">
 														<%= HtmlUtil.escape(curCTCollection.getDescription()) %>
 													</div>
