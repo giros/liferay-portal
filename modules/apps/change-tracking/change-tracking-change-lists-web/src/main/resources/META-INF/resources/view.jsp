@@ -253,7 +253,7 @@ renderResponse.setTitle(title);
 												<span class="card-h4"><liferay-ui:message key="created-by" /> & <liferay-ui:message key="modified-date" /></span>
 
 												<div class="card-text" data-qa-id="created-by-modified-date">
-													<%= curCTCollection.getUserName() + " - " + curCTCollection.getModifiedDate() %>
+													<%= curCTCollection.getUserName() + " - " %> <liferay-ui:message arguments="<%= LanguageUtil.getTimeDescription(request, System.currentTimeMillis() - curCTCollection.getModifiedDate().getTime(), true) %>" key="x-ago" />
 												</div>
 											</div>
 
