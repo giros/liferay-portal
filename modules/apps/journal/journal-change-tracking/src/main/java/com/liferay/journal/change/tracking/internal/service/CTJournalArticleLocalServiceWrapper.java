@@ -1791,6 +1791,7 @@ public class CTJournalArticleLocalServiceWrapper
 	private DynamicQuery _getChangeTrackingAwareDynamicQuery() {
 		Optional<CTCollection> activeCTCollectionOptional =
 			_ctManager.getActiveCTCollectionOptional(
+				CompanyThreadLocal.getCompanyId(),
 				PrincipalThreadLocal.getUserId());
 
 		long activeCTCollectionId = activeCTCollectionOptional.map(

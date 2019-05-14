@@ -177,7 +177,8 @@ public class CTDDMTemplateLocalServiceWrapper
 
 		Optional<CTEntry> ctEntryOptional =
 			_ctManager.getLatestModelChangeCTEntryOptional(
-				PrincipalThreadLocal.getUserId(), ddmTemplate.getTemplateId());
+				ddmTemplate.getCompanyId(), PrincipalThreadLocal.getUserId(),
+				ddmTemplate.getTemplateId());
 
 		return ctEntryOptional.isPresent();
 	}
@@ -185,7 +186,8 @@ public class CTDDMTemplateLocalServiceWrapper
 	private DDMTemplate _populateDDMTemplate(DDMTemplate ddmTemplate) {
 		Optional<CTEntry> ctEntryOptional =
 			_ctManager.getLatestModelChangeCTEntryOptional(
-				PrincipalThreadLocal.getUserId(), ddmTemplate.getTemplateId());
+				ddmTemplate.getCompanyId(), PrincipalThreadLocal.getUserId(),
+				ddmTemplate.getTemplateId());
 
 		if (!ctEntryOptional.isPresent()) {
 			return ddmTemplate;

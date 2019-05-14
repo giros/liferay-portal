@@ -978,6 +978,7 @@ public class JournalDisplayContext {
 						visible =
 							_journalChangeTrackingHelper.
 								isJournalArticleInChangeList(
+									_themeDisplay.getCompanyId(),
 									_themeDisplay.getUserId(), article.getId());
 					}
 
@@ -1111,7 +1112,8 @@ public class JournalDisplayContext {
 		}
 
 		return _journalChangeTrackingHelper.isJournalArticleInChangeList(
-			_themeDisplay.getUserId(), journalArticle.getId());
+			_themeDisplay.getCompanyId(), _themeDisplay.getUserId(),
+			journalArticle.getId());
 	}
 
 	public boolean isNavigationHome() {
