@@ -78,7 +78,7 @@ public class CTEntryLocalServiceImpl extends CTEntryLocalServiceBaseImpl {
 		boolean force = GetterUtil.getBoolean(
 			serviceContext.getAttribute("force"));
 
-		CTEntry ctEntry = ctEntryPersistence.fetchByC_C(
+		CTEntry ctEntry = ctEntryPersistence.fetchByMCNI_MCPK(
 			modelClassNameId, modelClassPK);
 
 		_validate(ctEntry, changeType, ctCollectionId, force);
@@ -104,7 +104,7 @@ public class CTEntryLocalServiceImpl extends CTEntryLocalServiceBaseImpl {
 		long ctCollectionId, long modelResourcePrimKey,
 		QueryDefinition<CTEntry> queryDefinition) {
 
-		return ctEntryFinder.findByC_R(
+		return ctEntryFinder.findByCTCI_MRPK(
 			ctCollectionId, modelResourcePrimKey, queryDefinition);
 	}
 
@@ -112,7 +112,8 @@ public class CTEntryLocalServiceImpl extends CTEntryLocalServiceBaseImpl {
 	public List<CTEntry> fetchCTEntries(
 		long ctCollectionId, QueryDefinition<CTEntry> queryDefinition) {
 
-		return ctEntryFinder.findByC_R(ctCollectionId, 0, queryDefinition);
+		return ctEntryFinder.findByCTCI_MRPK(
+			ctCollectionId, 0, queryDefinition);
 	}
 
 	@Override
@@ -120,25 +121,39 @@ public class CTEntryLocalServiceImpl extends CTEntryLocalServiceBaseImpl {
 		return fetchCTEntries(_portal.getClassNameId(modelClassName));
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
 	@Override
 	public List<CTEntry> fetchCTEntriesByClassNameId(
 		long ctCollectionId, long modelClassNameId,
 		QueryDefinition<CTEntry> queryDefinition) {
 
-		return ctEntryFinder.findByC_C(
+		return fetchCTEntriesByModelClassNameId(
+			ctCollectionId, modelClassNameId, queryDefinition);
+	}
+
+	@Override
+	public List<CTEntry> fetchCTEntriesByModelClassNameId(
+		long ctCollectionId, long modelClassNameId,
+		QueryDefinition<CTEntry> queryDefinition) {
+
+		return ctEntryFinder.findByCTCI_MCNI(
 			ctCollectionId, modelClassNameId, queryDefinition);
 	}
 
 	@Override
 	public CTEntry fetchCTEntry(long modelClassNameId, long modelClassPK) {
-		return ctEntryPersistence.fetchByC_C(modelClassNameId, modelClassPK);
+		return ctEntryPersistence.fetchByMCNI_MCPK(
+			modelClassNameId, modelClassPK);
 	}
 
 	@Override
 	public CTEntry fetchCTEntry(
 		long ctCollectionId, long modelClassNameId, long modelClassPK) {
 
-		return ctEntryFinder.findByC_C_C(
+		return ctEntryFinder.findByCTCI_MCNI_MCPK(
 			ctCollectionId, modelClassNameId, modelClassPK);
 	}
 

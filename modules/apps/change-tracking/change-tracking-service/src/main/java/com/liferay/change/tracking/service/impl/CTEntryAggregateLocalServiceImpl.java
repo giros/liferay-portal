@@ -100,7 +100,7 @@ public class CTEntryAggregateLocalServiceImpl
 	public List<CTEntryAggregate> fetchCTEntryAggregates(
 		long ctCollectionId, long ownerCTEntryId) {
 
-		return ctEntryAggregateFinder.findByC_O(
+		return ctEntryAggregateFinder.findByCTCI_OCTEI(
 			ctCollectionId, ownerCTEntryId, new QueryDefinition<>());
 	}
 
@@ -116,7 +116,7 @@ public class CTEntryAggregateLocalServiceImpl
 				"CTEntryAggregate", "createDate", false));
 
 		List<CTEntryAggregate> ctEntryAggregates =
-			ctEntryAggregateFinder.findByC_O(
+			ctEntryAggregateFinder.findByCTCI_OCTEI(
 				ctCollectionId, ownerCTEntryId, queryDefinition);
 
 		if (!ctEntryAggregates.isEmpty()) {

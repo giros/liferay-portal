@@ -209,7 +209,7 @@ public class CTManagerImpl implements CTManager {
 			return Collections.emptyList();
 		}
 
-		return _ctEntryLocalService.fetchCTEntriesByClassNameId(
+		return _ctEntryLocalService.fetchCTEntriesByModelClassNameId(
 			ctCollectionId, classNameId, new QueryDefinition<>());
 	}
 
