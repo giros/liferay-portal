@@ -610,8 +610,8 @@ public class CTEntryPersistenceImpl
 		_FINDER_COLUMN_MODELCLASSNAMEID_MODELCLASSNAMEID_2 =
 			"ctEntry.modelClassNameId = ?";
 
-	private FinderPath _finderPathFetchByC_C;
-	private FinderPath _finderPathCountByC_C;
+	private FinderPath _finderPathFetchByMCNI_MCPK;
+	private FinderPath _finderPathCountByMCNI_MCPK;
 
 	/**
 	 * Returns the ct entry where modelClassNameId = &#63; and modelClassPK = &#63; or throws a <code>NoSuchEntryException</code> if it could not be found.
@@ -622,10 +622,10 @@ public class CTEntryPersistenceImpl
 	 * @throws NoSuchEntryException if a matching ct entry could not be found
 	 */
 	@Override
-	public CTEntry findByC_C(long modelClassNameId, long modelClassPK)
+	public CTEntry findByMCNI_MCPK(long modelClassNameId, long modelClassPK)
 		throws NoSuchEntryException {
 
-		CTEntry ctEntry = fetchByC_C(modelClassNameId, modelClassPK);
+		CTEntry ctEntry = fetchByMCNI_MCPK(modelClassNameId, modelClassPK);
 
 		if (ctEntry == null) {
 			StringBundler msg = new StringBundler(6);
@@ -658,8 +658,8 @@ public class CTEntryPersistenceImpl
 	 * @return the matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
 	@Override
-	public CTEntry fetchByC_C(long modelClassNameId, long modelClassPK) {
-		return fetchByC_C(modelClassNameId, modelClassPK, true);
+	public CTEntry fetchByMCNI_MCPK(long modelClassNameId, long modelClassPK) {
+		return fetchByMCNI_MCPK(modelClassNameId, modelClassPK, true);
 	}
 
 	/**
@@ -671,7 +671,7 @@ public class CTEntryPersistenceImpl
 	 * @return the matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
 	@Override
-	public CTEntry fetchByC_C(
+	public CTEntry fetchByMCNI_MCPK(
 		long modelClassNameId, long modelClassPK, boolean retrieveFromCache) {
 
 		Object[] finderArgs = new Object[] {modelClassNameId, modelClassPK};
@@ -680,7 +680,7 @@ public class CTEntryPersistenceImpl
 
 		if (retrieveFromCache) {
 			result = finderCache.getResult(
-				_finderPathFetchByC_C, finderArgs, this);
+				_finderPathFetchByMCNI_MCPK, finderArgs, this);
 		}
 
 		if (result instanceof CTEntry) {
@@ -698,9 +698,9 @@ public class CTEntryPersistenceImpl
 
 			query.append(_SQL_SELECT_CTENTRY_WHERE);
 
-			query.append(_FINDER_COLUMN_C_C_MODELCLASSNAMEID_2);
+			query.append(_FINDER_COLUMN_MCNI_MCPK_MODELCLASSNAMEID_2);
 
-			query.append(_FINDER_COLUMN_C_C_MODELCLASSPK_2);
+			query.append(_FINDER_COLUMN_MCNI_MCPK_MODELCLASSPK_2);
 
 			String sql = query.toString();
 
@@ -721,7 +721,7 @@ public class CTEntryPersistenceImpl
 
 				if (list.isEmpty()) {
 					finderCache.putResult(
-						_finderPathFetchByC_C, finderArgs, list);
+						_finderPathFetchByMCNI_MCPK, finderArgs, list);
 				}
 				else {
 					CTEntry ctEntry = list.get(0);
@@ -732,7 +732,8 @@ public class CTEntryPersistenceImpl
 				}
 			}
 			catch (Exception e) {
-				finderCache.removeResult(_finderPathFetchByC_C, finderArgs);
+				finderCache.removeResult(
+					_finderPathFetchByMCNI_MCPK, finderArgs);
 
 				throw processException(e);
 			}
@@ -757,10 +758,10 @@ public class CTEntryPersistenceImpl
 	 * @return the ct entry that was removed
 	 */
 	@Override
-	public CTEntry removeByC_C(long modelClassNameId, long modelClassPK)
+	public CTEntry removeByMCNI_MCPK(long modelClassNameId, long modelClassPK)
 		throws NoSuchEntryException {
 
-		CTEntry ctEntry = findByC_C(modelClassNameId, modelClassPK);
+		CTEntry ctEntry = findByMCNI_MCPK(modelClassNameId, modelClassPK);
 
 		return remove(ctEntry);
 	}
@@ -773,8 +774,8 @@ public class CTEntryPersistenceImpl
 	 * @return the number of matching ct entries
 	 */
 	@Override
-	public int countByC_C(long modelClassNameId, long modelClassPK) {
-		FinderPath finderPath = _finderPathCountByC_C;
+	public int countByMCNI_MCPK(long modelClassNameId, long modelClassPK) {
+		FinderPath finderPath = _finderPathCountByMCNI_MCPK;
 
 		Object[] finderArgs = new Object[] {modelClassNameId, modelClassPK};
 
@@ -785,9 +786,9 @@ public class CTEntryPersistenceImpl
 
 			query.append(_SQL_COUNT_CTENTRY_WHERE);
 
-			query.append(_FINDER_COLUMN_C_C_MODELCLASSNAMEID_2);
+			query.append(_FINDER_COLUMN_MCNI_MCPK_MODELCLASSNAMEID_2);
 
-			query.append(_FINDER_COLUMN_C_C_MODELCLASSPK_2);
+			query.append(_FINDER_COLUMN_MCNI_MCPK_MODELCLASSPK_2);
 
 			String sql = query.toString();
 
@@ -821,10 +822,10 @@ public class CTEntryPersistenceImpl
 		return count.intValue();
 	}
 
-	private static final String _FINDER_COLUMN_C_C_MODELCLASSNAMEID_2 =
+	private static final String _FINDER_COLUMN_MCNI_MCPK_MODELCLASSNAMEID_2 =
 		"ctEntry.modelClassNameId = ? AND ";
 
-	private static final String _FINDER_COLUMN_C_C_MODELCLASSPK_2 =
+	private static final String _FINDER_COLUMN_MCNI_MCPK_MODELCLASSPK_2 =
 		"ctEntry.modelClassPK = ?";
 
 	public CTEntryPersistenceImpl() {
@@ -846,7 +847,7 @@ public class CTEntryPersistenceImpl
 			ctEntry);
 
 		finderCache.putResult(
-			_finderPathFetchByC_C,
+			_finderPathFetchByMCNI_MCPK,
 			new Object[] {
 				ctEntry.getModelClassNameId(), ctEntry.getModelClassPK()
 			},
@@ -929,9 +930,9 @@ public class CTEntryPersistenceImpl
 		};
 
 		finderCache.putResult(
-			_finderPathCountByC_C, args, Long.valueOf(1), false);
+			_finderPathCountByMCNI_MCPK, args, Long.valueOf(1), false);
 		finderCache.putResult(
-			_finderPathFetchByC_C, args, ctEntryModelImpl, false);
+			_finderPathFetchByMCNI_MCPK, args, ctEntryModelImpl, false);
 	}
 
 	protected void clearUniqueFindersCache(
@@ -943,20 +944,20 @@ public class CTEntryPersistenceImpl
 				ctEntryModelImpl.getModelClassPK()
 			};
 
-			finderCache.removeResult(_finderPathCountByC_C, args);
-			finderCache.removeResult(_finderPathFetchByC_C, args);
+			finderCache.removeResult(_finderPathCountByMCNI_MCPK, args);
+			finderCache.removeResult(_finderPathFetchByMCNI_MCPK, args);
 		}
 
 		if ((ctEntryModelImpl.getColumnBitmask() &
-			 _finderPathFetchByC_C.getColumnBitmask()) != 0) {
+			 _finderPathFetchByMCNI_MCPK.getColumnBitmask()) != 0) {
 
 			Object[] args = new Object[] {
 				ctEntryModelImpl.getOriginalModelClassNameId(),
 				ctEntryModelImpl.getOriginalModelClassPK()
 			};
 
-			finderCache.removeResult(_finderPathCountByC_C, args);
-			finderCache.removeResult(_finderPathFetchByC_C, args);
+			finderCache.removeResult(_finderPathCountByMCNI_MCPK, args);
+			finderCache.removeResult(_finderPathFetchByMCNI_MCPK, args);
 		}
 	}
 
@@ -2127,16 +2128,16 @@ public class CTEntryPersistenceImpl
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 			"countByModelClassNameId", new String[] {Long.class.getName()});
 
-		_finderPathFetchByC_C = new FinderPath(
+		_finderPathFetchByMCNI_MCPK = new FinderPath(
 			entityCacheEnabled, finderCacheEnabled, CTEntryImpl.class,
-			FINDER_CLASS_NAME_ENTITY, "fetchByC_C",
+			FINDER_CLASS_NAME_ENTITY, "fetchByMCNI_MCPK",
 			new String[] {Long.class.getName(), Long.class.getName()},
 			CTEntryModelImpl.MODELCLASSNAMEID_COLUMN_BITMASK |
 			CTEntryModelImpl.MODELCLASSPK_COLUMN_BITMASK);
 
-		_finderPathCountByC_C = new FinderPath(
+		_finderPathCountByMCNI_MCPK = new FinderPath(
 			entityCacheEnabled, finderCacheEnabled, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_C",
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByMCNI_MCPK",
 			new String[] {Long.class.getName(), Long.class.getName()});
 	}
 

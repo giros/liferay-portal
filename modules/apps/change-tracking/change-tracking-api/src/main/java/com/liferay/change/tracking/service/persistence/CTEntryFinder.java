@@ -55,7 +55,22 @@ public interface CTEntryFinder {
 		com.liferay.portal.kernel.dao.orm.QueryDefinition
 			<com.liferay.change.tracking.model.CTEntry> queryDefinition);
 
+	public java.util.List<com.liferay.change.tracking.model.CTEntry>
+		findByCTCI_MCNI(
+			long ctCollectionId, long modelClassNameId,
+			com.liferay.portal.kernel.dao.orm.QueryDefinition
+				<com.liferay.change.tracking.model.CTEntry> queryDefinition);
+
+	public java.util.List<com.liferay.change.tracking.model.CTEntry>
+		findByCTCI_MRPK(
+			long ctCollectionId, long modelResourcePrimKey,
+			com.liferay.portal.kernel.dao.orm.QueryDefinition
+				<com.liferay.change.tracking.model.CTEntry> queryDefinition);
+
 	public com.liferay.change.tracking.model.CTEntry findByC_C_C(
+		long ctCollectionId, long modelClassNameId, long modelClassPK);
+
+	public com.liferay.change.tracking.model.CTEntry findByCTCI_MCNI_MCPK(
 		long ctCollectionId, long modelClassNameId, long modelClassPK);
 
 }

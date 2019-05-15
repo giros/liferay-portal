@@ -243,8 +243,17 @@ public interface CTEntryLocalService
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<CTEntry> fetchCTEntries(String modelClassName);
 
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<CTEntry> fetchCTEntriesByClassNameId(
+		long ctCollectionId, long modelClassNameId,
+		QueryDefinition<CTEntry> queryDefinition);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<CTEntry> fetchCTEntriesByModelClassNameId(
 		long ctCollectionId, long modelClassNameId,
 		QueryDefinition<CTEntry> queryDefinition);
 

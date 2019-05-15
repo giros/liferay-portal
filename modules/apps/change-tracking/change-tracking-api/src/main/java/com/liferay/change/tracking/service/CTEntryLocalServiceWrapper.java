@@ -374,6 +374,10 @@ public class CTEntryLocalServiceWrapper
 		return _ctEntryLocalService.fetchCTEntries(modelClassName);
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
 	@Override
 	public java.util.List<com.liferay.change.tracking.model.CTEntry>
 		fetchCTEntriesByClassNameId(
@@ -382,6 +386,17 @@ public class CTEntryLocalServiceWrapper
 				<com.liferay.change.tracking.model.CTEntry> queryDefinition) {
 
 		return _ctEntryLocalService.fetchCTEntriesByClassNameId(
+			ctCollectionId, modelClassNameId, queryDefinition);
+	}
+
+	@Override
+	public java.util.List<com.liferay.change.tracking.model.CTEntry>
+		fetchCTEntriesByModelClassNameId(
+			long ctCollectionId, long modelClassNameId,
+			com.liferay.portal.kernel.dao.orm.QueryDefinition
+				<com.liferay.change.tracking.model.CTEntry> queryDefinition) {
+
+		return _ctEntryLocalService.fetchCTEntriesByModelClassNameId(
 			ctCollectionId, modelClassNameId, queryDefinition);
 	}
 

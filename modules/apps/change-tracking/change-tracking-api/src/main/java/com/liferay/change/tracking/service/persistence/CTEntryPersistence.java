@@ -192,7 +192,7 @@ public interface CTEntryPersistence extends BasePersistence<CTEntry> {
 	 * @return the matching ct entry
 	 * @throws NoSuchEntryException if a matching ct entry could not be found
 	 */
-	public CTEntry findByC_C(long modelClassNameId, long modelClassPK)
+	public CTEntry findByMCNI_MCPK(long modelClassNameId, long modelClassPK)
 		throws NoSuchEntryException;
 
 	/**
@@ -202,7 +202,7 @@ public interface CTEntryPersistence extends BasePersistence<CTEntry> {
 	 * @param modelClassPK the model class pk
 	 * @return the matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
-	public CTEntry fetchByC_C(long modelClassNameId, long modelClassPK);
+	public CTEntry fetchByMCNI_MCPK(long modelClassNameId, long modelClassPK);
 
 	/**
 	 * Returns the ct entry where modelClassNameId = &#63; and modelClassPK = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
@@ -212,7 +212,7 @@ public interface CTEntryPersistence extends BasePersistence<CTEntry> {
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
-	public CTEntry fetchByC_C(
+	public CTEntry fetchByMCNI_MCPK(
 		long modelClassNameId, long modelClassPK, boolean retrieveFromCache);
 
 	/**
@@ -222,7 +222,7 @@ public interface CTEntryPersistence extends BasePersistence<CTEntry> {
 	 * @param modelClassPK the model class pk
 	 * @return the ct entry that was removed
 	 */
-	public CTEntry removeByC_C(long modelClassNameId, long modelClassPK)
+	public CTEntry removeByMCNI_MCPK(long modelClassNameId, long modelClassPK)
 		throws NoSuchEntryException;
 
 	/**
@@ -232,7 +232,7 @@ public interface CTEntryPersistence extends BasePersistence<CTEntry> {
 	 * @param modelClassPK the model class pk
 	 * @return the number of matching ct entries
 	 */
-	public int countByC_C(long modelClassNameId, long modelClassPK);
+	public int countByMCNI_MCPK(long modelClassNameId, long modelClassPK);
 
 	/**
 	 * Caches the ct entry in the entity cache if it is enabled.

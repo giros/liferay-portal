@@ -30,4 +30,11 @@ public interface CTEntryAggregateFinder {
 				<com.liferay.change.tracking.model.CTEntryAggregate>
 					queryDefinition);
 
+	public java.util.List<com.liferay.change.tracking.model.CTEntryAggregate>
+		findByCTCI_OCTEI(
+			long ctCollectionId, long ownerCTEntryId,
+			com.liferay.portal.kernel.dao.orm.QueryDefinition
+				<com.liferay.change.tracking.model.CTEntryAggregate>
+					queryDefinition);
+
 }

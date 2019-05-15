@@ -303,10 +303,11 @@ public class CTEntryUtil {
 	 * @return the matching ct entry
 	 * @throws NoSuchEntryException if a matching ct entry could not be found
 	 */
-	public static CTEntry findByC_C(long modelClassNameId, long modelClassPK)
+	public static CTEntry findByMCNI_MCPK(
+			long modelClassNameId, long modelClassPK)
 		throws com.liferay.change.tracking.exception.NoSuchEntryException {
 
-		return getPersistence().findByC_C(modelClassNameId, modelClassPK);
+		return getPersistence().findByMCNI_MCPK(modelClassNameId, modelClassPK);
 	}
 
 	/**
@@ -316,8 +317,11 @@ public class CTEntryUtil {
 	 * @param modelClassPK the model class pk
 	 * @return the matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
-	public static CTEntry fetchByC_C(long modelClassNameId, long modelClassPK) {
-		return getPersistence().fetchByC_C(modelClassNameId, modelClassPK);
+	public static CTEntry fetchByMCNI_MCPK(
+		long modelClassNameId, long modelClassPK) {
+
+		return getPersistence().fetchByMCNI_MCPK(
+			modelClassNameId, modelClassPK);
 	}
 
 	/**
@@ -328,10 +332,10 @@ public class CTEntryUtil {
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
-	public static CTEntry fetchByC_C(
+	public static CTEntry fetchByMCNI_MCPK(
 		long modelClassNameId, long modelClassPK, boolean retrieveFromCache) {
 
-		return getPersistence().fetchByC_C(
+		return getPersistence().fetchByMCNI_MCPK(
 			modelClassNameId, modelClassPK, retrieveFromCache);
 	}
 
@@ -342,10 +346,12 @@ public class CTEntryUtil {
 	 * @param modelClassPK the model class pk
 	 * @return the ct entry that was removed
 	 */
-	public static CTEntry removeByC_C(long modelClassNameId, long modelClassPK)
+	public static CTEntry removeByMCNI_MCPK(
+			long modelClassNameId, long modelClassPK)
 		throws com.liferay.change.tracking.exception.NoSuchEntryException {
 
-		return getPersistence().removeByC_C(modelClassNameId, modelClassPK);
+		return getPersistence().removeByMCNI_MCPK(
+			modelClassNameId, modelClassPK);
 	}
 
 	/**
@@ -355,8 +361,11 @@ public class CTEntryUtil {
 	 * @param modelClassPK the model class pk
 	 * @return the number of matching ct entries
 	 */
-	public static int countByC_C(long modelClassNameId, long modelClassPK) {
-		return getPersistence().countByC_C(modelClassNameId, modelClassPK);
+	public static int countByMCNI_MCPK(
+		long modelClassNameId, long modelClassPK) {
+
+		return getPersistence().countByMCNI_MCPK(
+			modelClassNameId, modelClassPK);
 	}
 
 	/**

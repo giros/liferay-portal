@@ -344,6 +344,10 @@ public class CTEntryLocalServiceUtil {
 		return getService().fetchCTEntries(modelClassName);
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
 	public static java.util.List<com.liferay.change.tracking.model.CTEntry>
 		fetchCTEntriesByClassNameId(
 			long ctCollectionId, long modelClassNameId,
@@ -351,6 +355,16 @@ public class CTEntryLocalServiceUtil {
 				<com.liferay.change.tracking.model.CTEntry> queryDefinition) {
 
 		return getService().fetchCTEntriesByClassNameId(
+			ctCollectionId, modelClassNameId, queryDefinition);
+	}
+
+	public static java.util.List<com.liferay.change.tracking.model.CTEntry>
+		fetchCTEntriesByModelClassNameId(
+			long ctCollectionId, long modelClassNameId,
+			com.liferay.portal.kernel.dao.orm.QueryDefinition
+				<com.liferay.change.tracking.model.CTEntry> queryDefinition) {
+
+		return getService().fetchCTEntriesByModelClassNameId(
 			ctCollectionId, modelClassNameId, queryDefinition);
 	}
 
