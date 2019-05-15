@@ -266,9 +266,35 @@ public class CTEntryFinderImpl
 		}
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
+	@Override
+	public List<CTEntry> findByC_C(
+		long ctCollectionId, long modelClassNameId,
+		QueryDefinition<CTEntry> queryDefinition) {
+
+		return findByCTCI_MCNI(
+			ctCollectionId, modelClassNameId, queryDefinition);
+	}
+
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
+	@Override
+	public List<CTEntry> findByC_R(
+		long ctCollectionId, long modelResourcePrimKey,
+		QueryDefinition<CTEntry> queryDefinition) {
+
+		return findByCTCI_MRPK(
+			ctCollectionId, modelResourcePrimKey, queryDefinition);
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<CTEntry> findByC_C(
+	public List<CTEntry> findByCTCI_MCNI(
 		long ctCollectionId, long modelClassNameId,
 		QueryDefinition<CTEntry> queryDefinition) {
 
@@ -320,7 +346,7 @@ public class CTEntryFinderImpl
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<CTEntry> findByC_R(
+	public List<CTEntry> findByCTCI_MRPK(
 		long ctCollectionId, long modelResourcePrimKey,
 		QueryDefinition<CTEntry> queryDefinition) {
 
@@ -363,9 +389,21 @@ public class CTEntryFinderImpl
 		}
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
+	@Override
+	public CTEntry findByC_C_C(
+		long ctCollectionId, long modelClassNameId, long modelClassPK) {
+
+		return findByCTCI_MCNI_MCPK(
+			ctCollectionId, modelClassNameId, modelClassPK);
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
-	public CTEntry findByC_C_C(
+	public CTEntry findByCTCI_MCNI_MCPK(
 		long ctCollectionId, long modelClassNameId, long modelClassPK) {
 
 		Session session = null;

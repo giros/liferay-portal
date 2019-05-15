@@ -40,8 +40,21 @@ public class CTEntryAggregateFinderImpl
 	public static final String FIND_BY_C_O =
 		CTEntryAggregateFinder.class.getName() + ".findByC_O";
 
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
 	@Override
 	public List<CTEntryAggregate> findByC_O(
+		long ctCollectionId, long ownerCTEntryId,
+		QueryDefinition<CTEntryAggregate> queryDefinition) {
+
+		return findByCTCI_OCTEI(
+			ctCollectionId, ownerCTEntryId, queryDefinition);
+	}
+
+	@Override
+	public List<CTEntryAggregate> findByCTCI_OCTEI(
 		long ctCollectionId, long ownerCTEntryId,
 		QueryDefinition<CTEntryAggregate> queryDefinition) {
 
