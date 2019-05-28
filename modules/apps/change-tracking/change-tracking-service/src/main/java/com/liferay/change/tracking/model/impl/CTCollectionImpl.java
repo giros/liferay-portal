@@ -28,12 +28,4 @@ public class CTCollectionImpl extends CTCollectionBaseImpl {
 	public CTCollectionImpl() {
 	}
 
-	public boolean isProduction() {
-		if (CTConstants.CT_COLLECTION_NAME_PRODUCTION.equals(getName())) {
-			return true;
-		}
-
-		return false;
-	}
-
 }

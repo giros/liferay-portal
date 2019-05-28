@@ -21,10 +21,8 @@ import com.liferay.change.tracking.engine.CTEngineManager;
 import com.liferay.change.tracking.engine.exception.CTCollectionDescriptionCTEngineException;
 import com.liferay.change.tracking.engine.exception.CTCollectionNameCTEngineException;
 import com.liferay.change.tracking.engine.exception.CTEngineException;
-import com.liferay.change.tracking.engine.exception.CTEngineSystemException;
 import com.liferay.change.tracking.exception.CTCollectionDescriptionException;
 import com.liferay.change.tracking.exception.CTCollectionNameException;
-import com.liferay.change.tracking.internal.util.ChangeTrackingThreadLocal;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.model.CTEntry;
 import com.liferay.change.tracking.model.CTEntryAggregate;
@@ -34,7 +32,6 @@ import com.liferay.change.tracking.service.CTEntryLocalService;
 import com.liferay.change.tracking.service.CTProcessLocalService;
 import com.liferay.change.tracking.settings.CTSettingsManager;
 import com.liferay.petra.string.CharPool;
-import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.kernel.dao.orm.Disjunction;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
@@ -59,7 +56,6 @@ import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -88,15 +84,17 @@ public class CTEngineManagerImpl implements CTEngineManager {
 			return;
 		}
 
-		CTCollection ctCollection = _ctCollectionLocalService.fetchCTCollection(
-			ctCollectionId);
+		if (ctCollectionId != CTConstants.CT_COLLECTION_ID_PRODUCTION) {
+			CTCollection ctCollection =
+				_ctCollectionLocalService.fetchCTCollection(ctCollectionId);
 
-		if (ctCollection == null) {
-			_log.error(
-				"Unable to checkout change tracking collection " +
+			if (ctCollection == null) {
+				_log.error(
+					"Unable to checkout change tracking collection " +
 					ctCollectionId);
 
-			return;
+				return;
+			}
 		}
 
 		try {
@@ -135,9 +133,7 @@ public class CTEngineManagerImpl implements CTEngineManager {
 			return Optional.empty();
 		}
 
-		if (CTConstants.CT_COLLECTION_NAME_PRODUCTION.equals(name) ||
-			!isChangeTrackingEnabled(companyId)) {
-
+		if (!isChangeTrackingEnabled(companyId)) {
 			return Optional.empty();
 		}
 
@@ -153,16 +149,6 @@ public class CTEngineManagerImpl implements CTEngineManager {
 			_log.error(
 				"Unable to delete change tracking collection " +
 					ctCollectionId);
-
-			return;
-		}
-
-		if (ctCollection.isProduction()) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					"Deleting the production change tracking collection is " +
-						"not allowed");
-			}
 
 			return;
 		}
@@ -189,8 +175,6 @@ public class CTEngineManagerImpl implements CTEngineManager {
 				() -> {
 					_ctCollectionLocalService.deleteCompanyCTCollections(
 						companyId);
-
-					_productionCTCollections.remove(companyId);
 
 					_ctSettingsManager.setGlobalCTSetting(
 						companyId, _CHANGE_TRACKING_ENABLED,
@@ -229,23 +213,8 @@ public class CTEngineManagerImpl implements CTEngineManager {
 			return;
 		}
 
-		try {
-			ChangeTrackingThreadLocal.setModelUpdateInProgress(true);
-
-			TransactionInvokerUtil.invoke(
-				_transactionConfig,
-				() -> {
-					_enableChangeTracking(userId);
-
-					return null;
-				});
-		}
-		catch (Throwable t) {
-			_log.error("Unable to enable change tracking", t);
-		}
-		finally {
-			ChangeTrackingThreadLocal.setModelUpdateInProgress(false);
-		}
+		_ctSettingsManager.setGlobalCTSetting(
+			companyId, _CHANGE_TRACKING_ENABLED, String.valueOf(Boolean.TRUE));
 	}
 
 	@Override
@@ -332,24 +301,6 @@ public class CTEngineManagerImpl implements CTEngineManager {
 	public List<CTEntryAggregate> getCTEntryAggregates(long ctCollectionId) {
 		return _ctEntryAggregateLocalService.getCTCollectionCTEntryAggregates(
 			ctCollectionId);
-	}
-
-	@Override
-	public Optional<CTCollection> getProductionCTCollectionOptional(
-		long companyId) {
-
-		CTCollection productionCTCollection = _productionCTCollections.get(
-			companyId);
-
-		if (productionCTCollection == null) {
-			productionCTCollection =
-				_ctCollectionLocalService.fetchCTCollection(
-					companyId, CTConstants.CT_COLLECTION_NAME_PRODUCTION);
-
-			_productionCTCollections.put(companyId, productionCTCollection);
-		}
-
-		return Optional.ofNullable(productionCTCollection);
 	}
 
 	@Override
@@ -488,27 +439,6 @@ public class CTEngineManagerImpl implements CTEngineManager {
 		return Optional.ofNullable(ctCollection);
 	}
 
-	private void _enableChangeTracking(long userId) throws PortalException {
-		Optional<CTCollection> ctCollectionOptional = _createCTCollection(
-			userId, CTConstants.CT_COLLECTION_NAME_PRODUCTION,
-			StringPool.BLANK);
-
-		long companyId = _getCompanyId(userId);
-
-		CTCollection productionCTCollection = ctCollectionOptional.orElseThrow(
-			() -> new CTEngineSystemException(
-				companyId,
-				"Unable to create production change tracking collection"));
-
-		_productionCTCollections.put(companyId, productionCTCollection);
-
-		_ctSettingsManager.setGlobalCTSetting(
-			companyId, _CHANGE_TRACKING_ENABLED, String.valueOf(Boolean.TRUE));
-
-		checkoutCTCollection(
-			userId, productionCTCollection.getCtCollectionId());
-	}
-
 	private long _getCompanyId(long userId) {
 		long companyId = 0;
 
@@ -536,9 +466,6 @@ public class CTEngineManagerImpl implements CTEngineManager {
 		DynamicQuery dynamicQuery = _ctCollectionLocalService.dynamicQuery();
 
 		dynamicQuery.add(RestrictionsFactoryUtil.eq("companyId", companyId));
-		dynamicQuery.add(
-			RestrictionsFactoryUtil.ne(
-				"name", CTConstants.CT_COLLECTION_NAME_PRODUCTION));
 		dynamicQuery.add(
 			RestrictionsFactoryUtil.ne(
 				"status", WorkflowConstants.STATUS_APPROVED));
@@ -599,8 +526,6 @@ public class CTEngineManagerImpl implements CTEngineManager {
 	@Reference
 	private Portal _portal;
 
-	private final Map<Long, CTCollection> _productionCTCollections =
-		new HashMap<>();
 	private final TransactionConfig _transactionConfig =
 		TransactionConfig.Factory.create(
 			Propagation.REQUIRED, new Class<?>[] {Exception.class});

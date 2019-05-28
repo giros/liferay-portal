@@ -16,6 +16,7 @@ package com.liferay.change.tracking.internal.engine;
 
 import com.liferay.change.tracking.configuration.CTConfiguration;
 import com.liferay.change.tracking.configuration.CTConfigurationRegistry;
+import com.liferay.change.tracking.constants.CTConstants;
 import com.liferay.change.tracking.engine.CTEngineManager;
 import com.liferay.change.tracking.engine.CTManager;
 import com.liferay.change.tracking.engine.exception.CTEngineException;
@@ -179,16 +180,8 @@ public class CTManagerImpl implements CTManager {
 			userId);
 
 		if (recentCTCollectionId == 0L) {
-			Optional<CTCollection> productionCTCollectionOptional =
-				_ctEngineManager.getProductionCTCollectionOptional(companyId);
-
-			recentCTCollectionId = productionCTCollectionOptional.map(
-				CTCollection::getCtCollectionId
-			).orElse(
-				0L
-			);
-
-			_ctEngineManager.checkoutCTCollection(userId, recentCTCollectionId);
+			_ctEngineManager.checkoutCTCollection(
+				userId, CTConstants.CT_COLLECTION_ID_PRODUCTION);
 		}
 
 		return _ctEngineManager.getCTCollectionOptional(recentCTCollectionId);

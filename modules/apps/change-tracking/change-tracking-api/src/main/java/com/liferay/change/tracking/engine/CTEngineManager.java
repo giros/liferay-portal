@@ -200,16 +200,6 @@ public interface CTEngineManager {
 	public List<CTEntryAggregate> getCTEntryAggregates(long ctCollectionId);
 
 	/**
-	 * Returns the production change tracking collection that contains all the
-	 * changes published before.
-	 *
-	 * @param  companyId the primary key of the company
-	 * @return the production change tracking collection
-	 */
-	public Optional<CTCollection> getProductionCTCollectionOptional(
-		long companyId);
-
-	/**
 	 * Returns the recent change tracking collection ID for the user.
 	 *
 	 * @param  userId the user's ID
