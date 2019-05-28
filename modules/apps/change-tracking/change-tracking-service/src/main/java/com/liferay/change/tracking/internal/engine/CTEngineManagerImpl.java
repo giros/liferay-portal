@@ -35,7 +35,6 @@ import com.liferay.change.tracking.service.CTEntryLocalService;
 import com.liferay.change.tracking.service.CTProcessLocalService;
 import com.liferay.change.tracking.settings.CTSettingsManager;
 import com.liferay.petra.string.CharPool;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.kernel.dao.orm.Disjunction;
@@ -57,19 +56,14 @@ import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.TransactionConfig;
 import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-
-import java.io.Serializable;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -524,213 +518,11 @@ public class CTEngineManagerImpl implements CTEngineManager {
 
 		_productionCTCollections.put(companyId, productionCTCollection);
 
-		_generateCTEntriesAndCTEntryAggregatesForAllCTConfigurations(
-			userId, productionCTCollection);
-
 		_ctSettingsManager.setGlobalCTSetting(
 			companyId, _CHANGE_TRACKING_ENABLED, String.valueOf(Boolean.TRUE));
 
 		checkoutCTCollection(
 			userId, productionCTCollection.getCtCollectionId());
-	}
-
-	private void _generateCTEntriesAndCTEntryAggregatesForAllCTConfigurations(
-		long userId, CTCollection ctCollection) {
-
-		List<CTConfiguration<?, ?>> ctConfigurations =
-			_ctConfigurationRegistry.getAllCTConfigurations();
-
-		ctConfigurations.forEach(
-			ctConfiguration -> _generateCTEntriesForCTConfiguration(
-				userId, ctConfiguration, ctCollection));
-
-		ctConfigurations.forEach(
-			ctConfiguration -> _generateCTEntryAggregatesForCTConfiguration(
-				userId, ctConfiguration, ctCollection));
-	}
-
-	@SuppressWarnings("unchecked")
-	private void _generateCTEntriesForCTConfiguration(
-		long userId, CTConfiguration ctConfiguration,
-		CTCollection ctCollection) {
-
-		Function<Long, List> resourceEntitiesByCompanyIdFunction =
-			ctConfiguration.getResourceEntitiesByCompanyIdFunction();
-
-		List<BaseModel> resourceEntitiesByCompanyId =
-			resourceEntitiesByCompanyIdFunction.apply(
-				ctCollection.getCompanyId());
-
-		Function<BaseModel, Serializable>
-			resourceEntityIdFromResourceEntityFunction =
-				ctConfiguration.getResourceEntityIdFromResourceEntityFunction();
-
-		for (BaseModel resourceEntity : resourceEntitiesByCompanyId) {
-			Serializable resourcePrimKey =
-				resourceEntityIdFromResourceEntityFunction.apply(
-					resourceEntity);
-
-			_generateCTEntriesForResourceEntity(
-				userId, ctConfiguration, ctCollection, resourceEntity,
-				resourcePrimKey);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private void _generateCTEntriesForResourceEntity(
-		long userId, CTConfiguration ctConfiguration, CTCollection ctCollection,
-		BaseModel resourceEntity, Serializable resourcePrimKey) {
-
-		Function<BaseModel, List> versionEntitiesFromResourceEntityFunction =
-			ctConfiguration.getVersionEntitiesFromResourceEntityFunction();
-
-		List<BaseModel> versionEntities =
-			versionEntitiesFromResourceEntityFunction.apply(resourceEntity);
-
-		for (BaseModel versionEntity : versionEntities) {
-			Function<BaseModel, Serializable>
-				versionEntityIdFromVersionEntityFunction =
-					ctConfiguration.
-						getVersionEntityIdFromVersionEntityFunction();
-
-			Serializable versionEntityId =
-				versionEntityIdFromVersionEntityFunction.apply(versionEntity);
-
-			try {
-				_ctEntryLocalService.addCTEntry(
-					userId,
-					_portal.getClassNameId(
-						ctConfiguration.getVersionEntityClass()),
-					GetterUtil.getLong(versionEntityId),
-					GetterUtil.getLong(resourcePrimKey),
-					CTConstants.CT_CHANGE_TYPE_ADDITION,
-					ctCollection.getCtCollectionId(), new ServiceContext());
-			}
-			catch (PortalException pe) {
-				if (_log.isWarnEnabled()) {
-					StringBundler sb = new StringBundler(5);
-
-					sb.append("Unable to add change tracking entry to ");
-					sb.append(ctConfiguration.getContentType());
-					sb.append(" {");
-					sb.append(versionEntityId);
-					sb.append("}");
-
-					_log.warn(sb.toString(), pe);
-				}
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private <V extends BaseModel, R extends BaseModel> void
-		_generateCTEntryAggregateForCTEntry(
-			long userId, CTConfiguration ctConfiguration,
-			CTCollection ctCollection, CTEntry ctEntry,
-			List<Function<V, List<R>>> versionEntityRelatedEntitiesFunctions) {
-
-		Function<Long, V> versionEntityByVersionEntityIdFunction =
-			ctConfiguration.getVersionEntityByVersionEntityIdFunction();
-
-		V versionEntity = versionEntityByVersionEntityIdFunction.apply(
-			ctEntry.getModelClassPK());
-
-		versionEntityRelatedEntitiesFunctions.forEach(
-			relatedEntitiesFunction ->
-				_generateCTEntryAggregateForRelatedEntity(
-					userId, ctCollection, ctEntry, versionEntity,
-					relatedEntitiesFunction));
-	}
-
-	private <R extends BaseModel> void
-		_generateCTEntryAggregateForRelatedEntity(
-			long userId, CTCollection ctCollection, CTEntry ctEntry,
-			R relatedEntity) {
-
-		long relatedEntityClassPK = (Long)relatedEntity.getPrimaryKeyObj();
-
-		CTEntry relatedCTEntry = _ctEntryLocalService.fetchCTEntry(
-			_portal.getClassNameId(relatedEntity.getModelClassName()),
-			relatedEntityClassPK);
-
-		if (relatedCTEntry == null) {
-			List<CTEntry> relatedCTEntries =
-				_ctEntryLocalService.fetchCTEntries(
-					ctCollection.getCtCollectionId(), relatedEntityClassPK,
-					new QueryDefinition<>());
-
-			if (ListUtil.isEmpty(relatedCTEntries)) {
-				return;
-			}
-
-			relatedCTEntry = relatedCTEntries.get(0);
-		}
-
-		CTEntryAggregate ctEntryAggregate =
-			_ctEntryAggregateLocalService.fetchLatestCTEntryAggregate(
-				ctCollection.getCtCollectionId(), ctEntry.getCtEntryId());
-
-		if (ctEntryAggregate == null) {
-			try {
-				ctEntryAggregate =
-					_ctEntryAggregateLocalService.addCTEntryAggregate(
-						userId, ctCollection.getCtCollectionId(),
-						ctEntry.getCtEntryId(), new ServiceContext());
-			}
-			catch (PortalException pe) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(
-						"Unable to add CTEntryAggregate: " +
-							pe.getLocalizedMessage());
-				}
-			}
-		}
-
-		_ctEntryAggregateLocalService.addCTEntry(
-			ctEntryAggregate, relatedCTEntry);
-	}
-
-	private <V extends BaseModel, R extends BaseModel> void
-		_generateCTEntryAggregateForRelatedEntity(
-			long userId, CTCollection ctCollection, CTEntry ctEntry,
-			V versionEntity,
-			Function<V, List<R>> versionEntityRelatedEntityFunction) {
-
-		List<R> relatedEntities = versionEntityRelatedEntityFunction.apply(
-			versionEntity);
-
-		Stream<R> relatedEntityStream = relatedEntities.stream();
-
-		relatedEntityStream.filter(
-			Objects::nonNull
-		).forEach(
-			relatedEntity -> _generateCTEntryAggregateForRelatedEntity(
-				userId, ctCollection, ctEntry, relatedEntity)
-		);
-	}
-
-	@SuppressWarnings("unchecked")
-	private <V extends BaseModel, R extends BaseModel> void
-		_generateCTEntryAggregatesForCTConfiguration(
-			long userId, CTConfiguration ctConfiguration,
-			CTCollection ctCollection) {
-
-		List<Function<V, List<R>>> versionEntityRelatedEntitiesFunctions =
-			ctConfiguration.getVersionEntityRelatedEntitiesFunctions();
-
-		if (ListUtil.isEmpty(versionEntityRelatedEntitiesFunctions)) {
-			return;
-		}
-
-		Class<V> versionEntityClass = ctConfiguration.getVersionEntityClass();
-
-		List<CTEntry> ctEntries = _ctEntryLocalService.fetchCTEntries(
-			versionEntityClass.getName());
-
-		ctEntries.forEach(
-			ctEntry -> _generateCTEntryAggregateForCTEntry(
-				userId, ctConfiguration, ctCollection, ctEntry,
-				versionEntityRelatedEntitiesFunctions));
 	}
 
 	private long _getCompanyId(long userId) {
