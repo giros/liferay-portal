@@ -319,7 +319,7 @@ class Overview extends PortletBase {
 				method: 'DELETE'
 			};
 
-			let url = this.urlCollectionsBase + '/' + this.activeCTCollectionId;
+			let url = this.urlCollectionsBase + '/' + this.activeCTCollectionId + '?companyId=' + Liferay.ThemeDisplay.getCompanyId();
 
 			fetch(url, body)
 				.then(response => {
@@ -461,7 +461,7 @@ class Overview extends PortletBase {
 					foundEntriesLink.type
 				);
 				this._fetchChangeEntries(
-					foundEntriesLink.href,
+					foundEntriesLink.href + '?companyId=' + Liferay.ThemeDisplay.getCompanyId(),
 					foundEntriesLink.type
 				);
 			}
