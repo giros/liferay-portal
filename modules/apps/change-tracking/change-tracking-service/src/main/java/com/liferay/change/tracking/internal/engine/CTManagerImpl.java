@@ -507,6 +507,9 @@ public class CTManagerImpl implements CTManager {
 		CTCollection ctCollection = ctCollectionOptional.get();
 
 		if (ctCollection.isProduction()) {
+			CTEntryCollisionUtil.checkCollidingCTEntries(
+				companyId, modelClassPK, modelResourcePrimKey);
+
 			return Optional.empty();
 		}
 
@@ -640,14 +643,6 @@ public class CTManagerImpl implements CTManager {
 		return ctEntryAggregate;
 	}
 
-	private void _checkCollisions(CTCollection ctCollection, CTEntry ctEntry) {
-		if (!ctCollection.isProduction()) {
-			return;
-		}
-
-		CTEntryCollisionUtil.checkCollidingCTEntries(ctEntry);
-	}
-
 	private boolean _containsResource(
 		CTEntryAggregate ctEntryAggregate, long resourcePrimKey) {
 
@@ -730,8 +725,6 @@ public class CTManagerImpl implements CTManager {
 			CTEntry ctEntry = _ctEntryLocalService.addCTEntry(
 				userId, modelClassNameId, modelClassPK, modelResourcePrimKey,
 				changeType, ctCollection.getCtCollectionId(), serviceContext);
-
-			_checkCollisions(ctCollection, ctEntry);
 
 			// Updating existing related change tracking entry aggregate
 
