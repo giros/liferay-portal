@@ -138,8 +138,16 @@ JournalArticle article = journalDisplayContext.getArticle();
 							/>
 
 							<c:if test="<%= journalDisplayContext.isChangeListColumnVisible() %>">
+
+								<%
+								PortletURL viewChangeListURL = journalDisplayContext.getChangeListURL(articleVersion);
+
+								viewChangeListURL.setParameter("backURL", portletURL.toString());
+								%>
+
 								<liferay-ui:search-container-column-text
 									cssClass="change-list-title table-cell-content"
+									href="<%= viewChangeListURL.toString() %>"
 									name="change-list"
 									value="<%= HtmlUtil.escape(journalDisplayContext.getChangeListName(articleVersion)) %>"
 								/>
