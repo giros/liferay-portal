@@ -14,6 +14,9 @@
 
 package com.liferay.journal.util;
 
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletURL;
+
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -32,6 +35,9 @@ public interface JournalChangeTrackingHelper {
 
 	public String getJournalArticleCTCollectionName(
 		long companyId, long userId, long classPK);
+
+	public PortletURL getJournalArticleCTCollectionURL(
+		PortletRequest portletRequest, long companyId, long userId, long id);
 
 	public boolean hasActiveCTCollection(long companyId, long userId);
 

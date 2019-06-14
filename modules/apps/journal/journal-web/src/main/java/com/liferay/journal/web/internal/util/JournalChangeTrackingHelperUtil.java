@@ -17,6 +17,9 @@ package com.liferay.journal.web.internal.util;
 import com.liferay.journal.util.JournalChangeTrackingHelper;
 import com.liferay.petra.string.StringPool;
 
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletURL;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -35,6 +38,17 @@ public class JournalChangeTrackingHelperUtil {
 
 		return _journalChangeTrackingHelper.getJournalArticleCTCollectionName(
 			companyId, userId, classPK);
+	}
+
+	public static PortletURL getJournalArticleCTCollectionURL(
+		PortletRequest portletRequest, long companyId, long userId, long id) {
+
+		if (_journalChangeTrackingHelper == null) {
+			return null;
+		}
+
+		return _journalChangeTrackingHelper.getJournalArticleCTCollectionURL(
+			portletRequest, companyId, userId, id);
 	}
 
 	public static boolean hasActiveCTCollection(long companyId, long userId) {
