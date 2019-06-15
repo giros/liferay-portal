@@ -60,7 +60,9 @@ public class JournalChangeTrackingHelperImpl
 		Optional<CTCollection> originalCTCollectionOptional =
 			_getOriginalCTCollectionOptional(companyId, userId, id);
 
-		return originalCTCollectionOptional.map(
+		return originalCTCollectionOptional.filter(
+			ctCollection -> !ctCollection.isProduction()
+		).map(
 			CTCollectionModel::getName
 		).orElse(
 			StringPool.BLANK
