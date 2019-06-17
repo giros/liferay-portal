@@ -86,6 +86,20 @@ public class JournalChangeTrackingHelperImpl
 			return null;
 		}
 
+		Optional<CTCollection> activeCTCollectionOptional =
+			_ctManager.getActiveCTCollectionOptional(companyId, userId);
+
+		boolean active = activeCTCollectionOptional.filter(
+			activeCTCollection ->
+				activeCTCollection.getCtCollectionId() == originalCTCollectionId
+		).isPresent();
+
+		if (active) {
+			return PortletURLFactoryUtil.create(
+				portletRequest, CTPortletKeys.CHANGE_LISTS,
+				PortletRequest.RENDER_PHASE);
+		}
+
 		PortletURL portletURL = PortletURLFactoryUtil.create(
 			portletRequest, CTPortletKeys.CHANGE_LISTS_HISTORY,
 			PortletRequest.RENDER_PHASE);
