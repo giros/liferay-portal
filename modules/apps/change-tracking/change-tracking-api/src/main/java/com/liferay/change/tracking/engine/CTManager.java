@@ -288,6 +288,12 @@ public interface CTManager {
 	 */
 	public boolean isModelUpdateInProgress();
 
+	public Optional<CTEntry> registerModelChange(
+			CTCollection ctCollection, long userId, long modelClassNameId,
+			long modelClassPK, long modelResourcePrimKey, int changeType,
+			boolean force)
+		throws CTEngineException;
+
 	/**
 	 * Returns <code>true</code> if there is no active change collection
 	 * currently and the changes take place directly on production.
