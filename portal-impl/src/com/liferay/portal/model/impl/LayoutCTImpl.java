@@ -12,14 +12,13 @@
  * details.
  */
 
-package com.liferay.change.tracking.constants;
+package com.liferay.portal.model.impl;
+
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * @author Gergely Mathe
+ * @author Brian Wing Shun Chan
  */
-public interface CTSettingsKeys {
-
-	public static final String CHECKOUT_CT_COLLECTION_CONFIRMATION_ENABLED =
-		"checkoutCTCollectionConfirmationEnabled";
-
+@ProviderType
+public class LayoutCTImpl extends LayoutCTBaseImpl {
 }

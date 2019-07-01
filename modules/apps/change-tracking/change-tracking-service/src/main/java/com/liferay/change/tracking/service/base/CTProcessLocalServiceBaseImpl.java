@@ -17,10 +17,10 @@ package com.liferay.change.tracking.service.base;
 import com.liferay.change.tracking.model.CTProcess;
 import com.liferay.change.tracking.service.CTProcessLocalService;
 import com.liferay.change.tracking.service.persistence.CTCollectionPersistence;
-import com.liferay.change.tracking.service.persistence.CTEntryAggregateFinder;
 import com.liferay.change.tracking.service.persistence.CTEntryAggregatePersistence;
 import com.liferay.change.tracking.service.persistence.CTEntryFinder;
 import com.liferay.change.tracking.service.persistence.CTEntryPersistence;
+import com.liferay.change.tracking.service.persistence.CTPreferencesPersistence;
 import com.liferay.change.tracking.service.persistence.CTProcessFinder;
 import com.liferay.change.tracking.service.persistence.CTProcessPersistence;
 import com.liferay.portal.aop.AopService;
@@ -400,7 +400,7 @@ public abstract class CTProcessLocalServiceBaseImpl
 	protected CTEntryAggregatePersistence ctEntryAggregatePersistence;
 
 	@Reference
-	protected CTEntryAggregateFinder ctEntryAggregateFinder;
+	protected CTPreferencesPersistence ctPreferencesPersistence;
 
 	protected CTProcessLocalService ctProcessLocalService;
 

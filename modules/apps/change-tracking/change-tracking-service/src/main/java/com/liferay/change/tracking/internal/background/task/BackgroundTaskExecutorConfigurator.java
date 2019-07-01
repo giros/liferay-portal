@@ -14,6 +14,10 @@
 
 package com.liferay.change.tracking.internal.background.task;
 
+import com.liferay.change.tracking.engine.CTEngineManager;
+import com.liferay.change.tracking.internal.adapter.CTAdapterHelper;
+import com.liferay.change.tracking.service.CTEntryAggregateLocalService;
+import com.liferay.change.tracking.service.CTEntryLocalService;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 
@@ -26,6 +30,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Zoltan Csaszi
@@ -36,7 +41,9 @@ public class BackgroundTaskExecutorConfigurator {
 	@Activate
 	protected void activate(BundleContext bundleContext) {
 		BackgroundTaskExecutor ctPublishBackgroundTaskExecutor =
-			new CTPublishBackgroundTaskExecutor();
+			new CTPublishBackgroundTaskExecutor(
+				_ctAdapterHelper, _ctEngineManager, _ctEntryLocalService,
+				_ctEntryAggregateLocalService);
 
 		_registerBackgroundTaskExecutor(
 			bundleContext, ctPublishBackgroundTaskExecutor);
@@ -68,6 +75,18 @@ public class BackgroundTaskExecutorConfigurator {
 
 		_serviceRegistrations.add(serviceRegistration);
 	}
+
+	@Reference
+	private CTAdapterHelper _ctAdapterHelper;
+
+	@Reference
+	private CTEngineManager _ctEngineManager;
+
+	@Reference
+	private CTEntryAggregateLocalService _ctEntryAggregateLocalService;
+
+	@Reference
+	private CTEntryLocalService _ctEntryLocalService;
 
 	private final Set<ServiceRegistration<BackgroundTaskExecutor>>
 		_serviceRegistrations = new HashSet<>();

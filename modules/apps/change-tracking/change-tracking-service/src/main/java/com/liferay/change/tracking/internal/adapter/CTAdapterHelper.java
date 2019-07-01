@@ -12,22 +12,21 @@
  * details.
  */
 
-package com.liferay.change.tracking.service.persistence;
+package com.liferay.change.tracking.internal.adapter;
 
-import org.osgi.annotation.versioning.ProviderType;
+import com.liferay.petra.function.UnsafeSupplier;
+import com.liferay.portal.kernel.model.BaseModel;
 
 /**
- * @author Brian Wing Shun Chan
- * @generated
+ * @author Daniel Kocsis
  */
-@ProviderType
-public interface CTEntryAggregateFinder {
+public interface CTAdapterHelper {
 
-	public java.util.List<com.liferay.change.tracking.model.CTEntryAggregate>
-		findByCTCI_OCTEI(
-			long ctCollectionId, long ownerCTEntryId,
-			com.liferay.portal.kernel.dao.orm.QueryDefinition
-				<com.liferay.change.tracking.model.CTEntryAggregate>
-					queryDefinition);
+	public <T extends BaseModel<T>, C extends BaseModel<C>> CTAdapterBag<T, C>
+		getCTAdapterBag(long classNameId);
+
+	public <T, E extends Throwable> T getInProduction(
+			UnsafeSupplier<T, E> unsafeSupplier)
+		throws E;
 
 }

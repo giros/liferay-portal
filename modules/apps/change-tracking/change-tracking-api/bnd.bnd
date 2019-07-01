@@ -6,6 +6,7 @@ Export-Package:\
 	com.liferay.change.tracking.constants,\
 	com.liferay.change.tracking.definition,\
 	com.liferay.change.tracking.definition.builder,\
+	com.liferay.change.tracking.display,\
 	com.liferay.change.tracking.engine,\
 	com.liferay.change.tracking.engine.exception,\
 	com.liferay.change.tracking.exception,\
@@ -13,5 +14,4 @@ Export-Package:\
 	com.liferay.change.tracking.model,\
 	com.liferay.change.tracking.service,\
 	com.liferay.change.tracking.service.persistence,\
-	com.liferay.change.tracking.settings,\
 	com.liferay.change.tracking.util.comparator

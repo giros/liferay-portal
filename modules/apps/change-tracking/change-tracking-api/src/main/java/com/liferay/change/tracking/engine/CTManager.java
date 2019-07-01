@@ -276,17 +276,6 @@ public interface CTManager {
 	public int getRelatedOwnerCTEntriesCount(long ctEntryId);
 
 	/**
-	 * Returns <code>true</code> if the given version model is a change that has
-	 * not been published to production.
-	 *
-	 * @param  modelClassNameId the primary key of the model's class
-	 * @param  modelClassPK the primary key of the model
-	 * @return <code>true</code> if the given version model is a change that has
-	 *         not been published to production
-	 */
-	public boolean isDraftChange(long modelClassNameId, long modelClassPK);
-
-	/**
 	 * Returns <code>true</code> if a model addition or update is in progress.
 	 * This only returns <code>true</code> if the addition or update is being
 	 * executed with {@link #executeModelUpdate(UnsafeSupplier)} and the
@@ -327,6 +316,12 @@ public interface CTManager {
 	 */
 	public boolean isRetrievableVersion(
 		long companyId, long userId, long modelClassNameId, long modelClassPK);
+
+	public Optional<CTEntry> registerModelChange(
+			CTCollection ctCollection, long userId, long modelClassNameId,
+			long modelClassPK, long modelResourcePrimKey, int changeType,
+			boolean force)
+		throws CTEngineException;
 
 	/**
 	 * Registers the model change into the change tracking framework for the

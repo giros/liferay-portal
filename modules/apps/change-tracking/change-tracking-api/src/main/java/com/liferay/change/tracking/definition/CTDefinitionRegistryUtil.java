@@ -53,12 +53,21 @@ public class CTDefinitionRegistryUtil {
 
 		CTDefinition<?, ?> ctDefinition = _getCTDefinition(classNameId);
 
+		if (ctDefinition == null) {
+			return "model.resource.".concat(
+				PortalUtil.getClassName(classNameId));
+		}
+
 		return ctDefinition.getContentTypeLanguageKey();
 	}
 
 	@SuppressWarnings("unchecked")
 	public static long getVersionEntityGroupId(long classNameId, long classPK) {
 		CTDefinition<?, ?> ctDefinition = _getCTDefinition(classNameId);
+
+		if (ctDefinition == null) {
+			return 0;
+		}
 
 		Function versionEntityByVersionEntityIdFunction =
 			ctDefinition.getVersionEntityByVersionEntityIdFunction();
@@ -81,6 +90,10 @@ public class CTDefinitionRegistryUtil {
 
 		CTDefinition<?, ?> ctDefinition = _getCTDefinition(classNameId);
 
+		if (ctDefinition == null) {
+			return "versionEntitySiteName";
+		}
+
 		Function versionEntityByVersionEntityIdFunction =
 			ctDefinition.getVersionEntityByVersionEntityIdFunction();
 
@@ -97,6 +110,10 @@ public class CTDefinitionRegistryUtil {
 	@SuppressWarnings("unchecked")
 	public static String getVersionEntityTitle(long classNameId, long classPK) {
 		CTDefinition<?, ?> ctDefinition = _getCTDefinition(classNameId);
+
+		if (ctDefinition == null) {
+			return "versionEntityTitle";
+		}
 
 		Function versionEntityByVersionEntityIdFunction =
 			ctDefinition.getVersionEntityByVersionEntityIdFunction();
@@ -117,6 +134,10 @@ public class CTDefinitionRegistryUtil {
 
 		CTDefinition<?, ?> ctDefinition = _getCTDefinition(classNameId);
 
+		if (ctDefinition == null) {
+			return "versionEntityVersion";
+		}
+
 		Function versionEntityByVersionEntityIdFunction =
 			ctDefinition.getVersionEntityByVersionEntityIdFunction();
 
@@ -136,7 +157,7 @@ public class CTDefinitionRegistryUtil {
 				getCTDefinitionOptionalByVersionClassName(
 					PortalUtil.getClassName(classNameId));
 
-		return ctDefinitionOptional.get();
+		return ctDefinitionOptional.orElse(null);
 	}
 
 	private static CTDefinitionRegistry _getCTDefinitionRegistry() {

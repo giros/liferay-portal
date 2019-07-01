@@ -72,6 +72,7 @@ public class CTEntryModelImpl
 		{"ctEntryId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
 		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
+		{"ctCollectionId", Types.BIGINT},
 		{"originalCTCollectionId", Types.BIGINT},
 		{"modelClassNameId", Types.BIGINT}, {"modelClassPK", Types.BIGINT},
 		{"modelResourcePrimKey", Types.BIGINT}, {"changeType", Types.INTEGER},
@@ -88,6 +89,7 @@ public class CTEntryModelImpl
 		TABLE_COLUMNS_MAP.put("userName", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("createDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("modifiedDate", Types.TIMESTAMP);
+		TABLE_COLUMNS_MAP.put("ctCollectionId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("originalCTCollectionId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("modelClassNameId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("modelClassPK", Types.BIGINT);
@@ -98,7 +100,7 @@ public class CTEntryModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table CTEntry (ctEntryId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,originalCTCollectionId LONG,modelClassNameId LONG,modelClassPK LONG,modelResourcePrimKey LONG,changeType INTEGER,collision BOOLEAN,status INTEGER)";
+		"create table CTEntry (ctEntryId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,ctCollectionId LONG,originalCTCollectionId LONG,modelClassNameId LONG,modelClassPK LONG,modelResourcePrimKey LONG,changeType INTEGER,collision BOOLEAN,status INTEGER)";
 
 	public static final String TABLE_SQL_DROP = "drop table CTEntry";
 
@@ -113,11 +115,19 @@ public class CTEntryModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
-	public static final long MODELCLASSNAMEID_COLUMN_BITMASK = 1L;
+	public static final long COMPANYID_COLUMN_BITMASK = 1L;
 
-	public static final long MODELCLASSPK_COLUMN_BITMASK = 2L;
+	public static final long CTCOLLECTIONID_COLUMN_BITMASK = 2L;
 
-	public static final long CTENTRYID_COLUMN_BITMASK = 4L;
+	public static final long MODELCLASSNAMEID_COLUMN_BITMASK = 4L;
+
+	public static final long MODELCLASSPK_COLUMN_BITMASK = 8L;
+
+	public static final long MODELRESOURCEPRIMKEY_COLUMN_BITMASK = 16L;
+
+	public static final long STATUS_COLUMN_BITMASK = 32L;
+
+	public static final long CTENTRYID_COLUMN_BITMASK = 64L;
 
 	public static void setEntityCacheEnabled(boolean entityCacheEnabled) {
 		_entityCacheEnabled = entityCacheEnabled;
@@ -139,19 +149,6 @@ public class CTEntryModelImpl
 	public static final String
 		MAPPING_TABLE_CTENTRYAGGREGATES_CTENTRIES_SQL_CREATE =
 			"create table CTEntryAggregates_CTEntries (companyId LONG not null,ctEntryId LONG not null,ctEntryAggregateId LONG not null,primary key (ctEntryId, ctEntryAggregateId))";
-
-	public static final String MAPPING_TABLE_CTCOLLECTIONS_CTENTRIES_NAME =
-		"CTCollections_CTEntries";
-
-	public static final Object[][]
-		MAPPING_TABLE_CTCOLLECTIONS_CTENTRIES_COLUMNS = {
-			{"companyId", Types.BIGINT}, {"ctCollectionId", Types.BIGINT},
-			{"ctEntryId", Types.BIGINT}
-		};
-
-	public static final String
-		MAPPING_TABLE_CTCOLLECTIONS_CTENTRIES_SQL_CREATE =
-			"create table CTCollections_CTEntries (companyId LONG not null,ctCollectionId LONG not null,ctEntryId LONG not null,primary key (ctCollectionId, ctEntryId))";
 
 	public CTEntryModelImpl() {
 	}
@@ -296,6 +293,11 @@ public class CTEntryModelImpl
 			"modifiedDate",
 			(BiConsumer<CTEntry, Date>)CTEntry::setModifiedDate);
 		attributeGetterFunctions.put(
+			"ctCollectionId", CTEntry::getCtCollectionId);
+		attributeSetterBiConsumers.put(
+			"ctCollectionId",
+			(BiConsumer<CTEntry, Long>)CTEntry::setCtCollectionId);
+		attributeGetterFunctions.put(
 			"originalCTCollectionId", CTEntry::getOriginalCTCollectionId);
 		attributeSetterBiConsumers.put(
 			"originalCTCollectionId",
@@ -347,7 +349,19 @@ public class CTEntryModelImpl
 
 	@Override
 	public void setCompanyId(long companyId) {
+		_columnBitmask |= COMPANYID_COLUMN_BITMASK;
+
+		if (!_setOriginalCompanyId) {
+			_setOriginalCompanyId = true;
+
+			_originalCompanyId = _companyId;
+		}
+
 		_companyId = companyId;
+	}
+
+	public long getOriginalCompanyId() {
+		return _originalCompanyId;
 	}
 
 	@Override
@@ -418,6 +432,28 @@ public class CTEntryModelImpl
 	}
 
 	@Override
+	public long getCtCollectionId() {
+		return _ctCollectionId;
+	}
+
+	@Override
+	public void setCtCollectionId(long ctCollectionId) {
+		_columnBitmask |= CTCOLLECTIONID_COLUMN_BITMASK;
+
+		if (!_setOriginalCtCollectionId) {
+			_setOriginalCtCollectionId = true;
+
+			_originalCtCollectionId = _ctCollectionId;
+		}
+
+		_ctCollectionId = ctCollectionId;
+	}
+
+	public long getOriginalCtCollectionId() {
+		return _originalCtCollectionId;
+	}
+
+	@Override
 	public long getOriginalCTCollectionId() {
 		return _originalCTCollectionId;
 	}
@@ -478,7 +514,19 @@ public class CTEntryModelImpl
 
 	@Override
 	public void setModelResourcePrimKey(long modelResourcePrimKey) {
+		_columnBitmask |= MODELRESOURCEPRIMKEY_COLUMN_BITMASK;
+
+		if (!_setOriginalModelResourcePrimKey) {
+			_setOriginalModelResourcePrimKey = true;
+
+			_originalModelResourcePrimKey = _modelResourcePrimKey;
+		}
+
 		_modelResourcePrimKey = modelResourcePrimKey;
+	}
+
+	public long getOriginalModelResourcePrimKey() {
+		return _originalModelResourcePrimKey;
 	}
 
 	@Override
@@ -513,7 +561,19 @@ public class CTEntryModelImpl
 
 	@Override
 	public void setStatus(int status) {
+		_columnBitmask |= STATUS_COLUMN_BITMASK;
+
+		if (!_setOriginalStatus) {
+			_setOriginalStatus = true;
+
+			_originalStatus = _status;
+		}
+
 		_status = status;
+	}
+
+	public int getOriginalStatus() {
+		return _originalStatus;
 	}
 
 	public long getColumnBitmask() {
@@ -558,6 +618,7 @@ public class CTEntryModelImpl
 		ctEntryImpl.setUserName(getUserName());
 		ctEntryImpl.setCreateDate(getCreateDate());
 		ctEntryImpl.setModifiedDate(getModifiedDate());
+		ctEntryImpl.setCtCollectionId(getCtCollectionId());
 		ctEntryImpl.setOriginalCTCollectionId(getOriginalCTCollectionId());
 		ctEntryImpl.setModelClassNameId(getModelClassNameId());
 		ctEntryImpl.setModelClassPK(getModelClassPK());
@@ -627,7 +688,16 @@ public class CTEntryModelImpl
 	public void resetOriginalValues() {
 		CTEntryModelImpl ctEntryModelImpl = this;
 
+		ctEntryModelImpl._originalCompanyId = ctEntryModelImpl._companyId;
+
+		ctEntryModelImpl._setOriginalCompanyId = false;
+
 		ctEntryModelImpl._setModifiedDate = false;
+
+		ctEntryModelImpl._originalCtCollectionId =
+			ctEntryModelImpl._ctCollectionId;
+
+		ctEntryModelImpl._setOriginalCtCollectionId = false;
 
 		ctEntryModelImpl._originalModelClassNameId =
 			ctEntryModelImpl._modelClassNameId;
@@ -637,6 +707,15 @@ public class CTEntryModelImpl
 		ctEntryModelImpl._originalModelClassPK = ctEntryModelImpl._modelClassPK;
 
 		ctEntryModelImpl._setOriginalModelClassPK = false;
+
+		ctEntryModelImpl._originalModelResourcePrimKey =
+			ctEntryModelImpl._modelResourcePrimKey;
+
+		ctEntryModelImpl._setOriginalModelResourcePrimKey = false;
+
+		ctEntryModelImpl._originalStatus = ctEntryModelImpl._status;
+
+		ctEntryModelImpl._setOriginalStatus = false;
 
 		ctEntryModelImpl._columnBitmask = 0;
 	}
@@ -676,6 +755,8 @@ public class CTEntryModelImpl
 		else {
 			ctEntryCacheModel.modifiedDate = Long.MIN_VALUE;
 		}
+
+		ctEntryCacheModel.ctCollectionId = getCtCollectionId();
 
 		ctEntryCacheModel.originalCTCollectionId = getOriginalCTCollectionId();
 
@@ -769,11 +850,16 @@ public class CTEntryModelImpl
 
 	private long _ctEntryId;
 	private long _companyId;
+	private long _originalCompanyId;
+	private boolean _setOriginalCompanyId;
 	private long _userId;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
 	private boolean _setModifiedDate;
+	private long _ctCollectionId;
+	private long _originalCtCollectionId;
+	private boolean _setOriginalCtCollectionId;
 	private long _originalCTCollectionId;
 	private long _modelClassNameId;
 	private long _originalModelClassNameId;
@@ -782,9 +868,13 @@ public class CTEntryModelImpl
 	private long _originalModelClassPK;
 	private boolean _setOriginalModelClassPK;
 	private long _modelResourcePrimKey;
+	private long _originalModelResourcePrimKey;
+	private boolean _setOriginalModelResourcePrimKey;
 	private int _changeType;
 	private boolean _collision;
 	private int _status;
+	private int _originalStatus;
+	private boolean _setOriginalStatus;
 	private long _columnBitmask;
 	private CTEntry _escapedModel;
 
