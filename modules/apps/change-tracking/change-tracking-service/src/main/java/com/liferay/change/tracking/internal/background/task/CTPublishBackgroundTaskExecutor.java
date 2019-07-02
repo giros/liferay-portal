@@ -44,6 +44,7 @@ import com.liferay.portal.kernel.backgroundtask.BaseBackgroundTaskExecutor;
 import com.liferay.portal.kernel.backgroundtask.display.BackgroundTaskDisplay;
 import com.liferay.portal.kernel.change.tracking.model.CTModelAdapter;
 import com.liferay.portal.kernel.change.tracking.service.CTServiceAdapter;
+import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -117,6 +118,8 @@ public class CTPublishBackgroundTaskExecutor
 					_publishCTCollection(
 						backgroundTask, ctProcessId, ctCollectionId,
 						ignoreCollision);
+
+					FinderCacheUtil.clearCache();
 
 					return null;
 				});
