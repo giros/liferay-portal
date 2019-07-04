@@ -414,7 +414,7 @@ public class CTEngineManagerImpl implements CTEngineManager {
 			companyId, ctCollectionId);
 
 		return ctCollectionOptional.map(
-			CTCollection::getCtCollect
+			CTCollection::getCtCollectionId
 		).orElse(
 			0L
 		);
