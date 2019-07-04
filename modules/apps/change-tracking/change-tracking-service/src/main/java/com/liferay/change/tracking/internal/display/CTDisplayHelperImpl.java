@@ -17,6 +17,7 @@ package com.liferay.change.tracking.internal.display;
 import com.liferay.change.tracking.definition.CTDefinition;
 import com.liferay.change.tracking.definition.CTDefinitionRegistry;
 import com.liferay.change.tracking.display.CTDisplayHelper;
+import com.liferay.change.tracking.model.CTEntry;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 import com.liferay.portal.kernel.change.tracking.display.CTDisplayAdapter;
@@ -112,6 +113,24 @@ public class CTDisplayHelperImpl implements CTDisplayHelper {
 			}
 
 			return String.valueOf(model.getPrimaryKeyObj());
+		}
+
+		return ctDisplayAdapter.getModelDisplayName(model, locale);
+	}
+
+	@Override
+	public String getDisplayName(CTEntry ctEntry, Locale locale) {
+		CTDisplayAdapter<?> ctDisplayAdapter = _serviceTrackerMap.getService(
+			ctEntry.getModelClassNameId());
+
+		if (ctDisplayAdapter == null) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"No CTDisplayAdapter is registered for " +
+						ctEntry.getModelClassNameId());
+			}
+
+			return String.valueOf(ctEntry.getModelClassPK());
 		}
 
 		return ctDisplayAdapter.getModelDisplayName(model, locale);
