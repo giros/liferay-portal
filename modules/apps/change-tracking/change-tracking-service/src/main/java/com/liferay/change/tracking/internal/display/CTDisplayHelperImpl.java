@@ -16,19 +16,24 @@ package com.liferay.change.tracking.internal.display;
 
 import com.liferay.change.tracking.definition.CTDefinition;
 import com.liferay.change.tracking.definition.CTDefinitionRegistry;
+import com.liferay.change.tracking.definition.CTDefinitionRegistryUtil;
 import com.liferay.change.tracking.display.CTDisplayHelper;
-import com.liferay.change.tracking.model.CTEntry;
+import com.liferay.change.tracking.internal.adapter.CTAdapterBag;
+import com.liferay.change.tracking.internal.adapter.CTAdapterHelper;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.change.tracking.display.CTDisplayAdapter;
+import com.liferay.portal.kernel.change.tracking.service.CTServiceAdapter;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.model.ClassName;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.GroupedModel;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
+import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
 import java.util.Collection;
@@ -100,6 +105,40 @@ public class CTDisplayHelperImpl implements CTDisplayHelper {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
+	public String getDisplayName(
+		long classNameId, long classPK, Locale locale) {
+
+		CTDisplayAdapter ctDisplayAdapter = _serviceTrackerMap.getService(
+			classNameId);
+
+		if (ctDisplayAdapter == null) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"No CTDisplayAdapter is registered for " + classNameId);
+			}
+
+			return String.valueOf(classPK);
+		}
+
+		CTAdapterBag<?, ?> ctAdapterBag = _ctAdapterHelper.getCTAdapterBag(
+			classNameId);
+
+		if (ctAdapterBag == null) {
+			return CTDefinitionRegistryUtil.getVersionEntityTitle(
+				classNameId, classPK);
+		}
+
+		CTServiceAdapter<?, ?> ctServiceAdapter =
+			ctAdapterBag.getCTServiceAdapter();
+
+		BaseModel<?> baseModel = ctServiceAdapter.fetchByPrimaryKey(classPK);
+
+		return ctDisplayAdapter.getModelDisplayName(baseModel, locale);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	public <T extends BaseModel<T>> String getDisplayName(
 		T model, Locale locale) {
 
@@ -117,26 +156,6 @@ public class CTDisplayHelperImpl implements CTDisplayHelper {
 		}
 
 		return ctDisplayAdapter.getModelDisplayName(model, locale);
-	}
-
-	@Override
-	public String getDisplayName(CTEntry ctEntry, Locale locale) {
-		CTDisplayAdapter<?> ctDisplayAdapter = _serviceTrackerMap.getService(
-			ctEntry.getModelClassNameId());
-
-		if (ctDisplayAdapter == null) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					"No CTDisplayAdapter is registered for " +
-						ctEntry.getModelClassNameId());
-			}
-
-			return String.valueOf(ctEntry.getModelClassPK());
-		}
-
-		//return ctDisplayAdapter.getModelDisplayName(model, locale);
-
-		return StringPool.BLANK;
 	}
 
 	@Override
@@ -171,6 +190,51 @@ public class CTDisplayHelperImpl implements CTDisplayHelper {
 		return displayNames;
 	}
 
+	@Override
+	public String getSiteDisplayName(
+		long classNameId, long classPK, Locale locale) {
+
+		CTDisplayAdapter ctDisplayAdapter = _serviceTrackerMap.getService(
+			classNameId);
+
+		if (ctDisplayAdapter == null) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"No CTDisplayAdapter is registered for " + classNameId);
+			}
+
+			return String.valueOf(classPK);
+		}
+
+		CTAdapterBag<?, ?> ctAdapterBag = _ctAdapterHelper.getCTAdapterBag(
+			classNameId);
+
+		if (ctAdapterBag == null) {
+			return CTDefinitionRegistryUtil.getVersionEntitySiteName(
+				classNameId, classPK);
+		}
+
+		CTServiceAdapter<?, ?> ctServiceAdapter =
+			ctAdapterBag.getCTServiceAdapter();
+
+		BaseModel<?> baseModel = ctServiceAdapter.fetchByPrimaryKey(classPK);
+
+		if (baseModel instanceof GroupedModel) {
+			GroupedModel groupedModel = (GroupedModel)baseModel;
+
+			Group group = _groupLocalService.fetchGroup(
+				groupedModel.getGroupId());
+
+			if (group == null) {
+				return _language.get(locale, "not-available");
+			}
+
+			return group.getName(locale);
+		}
+
+		return _language.get(locale, "not-available");
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		CTDisplayHelperImpl.class);
 
@@ -178,7 +242,13 @@ public class CTDisplayHelperImpl implements CTDisplayHelper {
 	private ClassNameLocalService _classNameLocalService;
 
 	@Reference
+	private CTAdapterHelper _ctAdapterHelper;
+
+	@Reference
 	private CTDefinitionRegistry _ctDefinitionRegistry;
+
+	@Reference
+	private GroupLocalService _groupLocalService;
 
 	@Reference
 	private Language _language;
