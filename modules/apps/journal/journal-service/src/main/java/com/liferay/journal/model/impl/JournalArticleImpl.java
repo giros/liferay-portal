@@ -117,7 +117,8 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 			getGroupId(), JournalConstants.SERVICE_NAME, serviceContext);
 
 		Folder folder = PortletFileRepositoryUtil.addPortletFolder(
-			getUserId(), repository.getRepositoryId(),
+			PortalUtil.getValidUserId(getCompanyId(), getUserId()),
+			repository.getRepositoryId(),
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
 			String.valueOf(getResourcePrimKey()), serviceContext);
 
