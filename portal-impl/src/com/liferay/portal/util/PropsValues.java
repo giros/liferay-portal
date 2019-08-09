@@ -3041,6 +3041,10 @@ public class PropsValues {
 		GetterUtil.getBoolean(
 			PropsUtil.get(PropsKeys.STAGING_LIVE_GROUP_REMOTE_STAGING_ENABLED));
 
+	public static final long STAGING_OWNER_REMOTE_URL_LOCK_TIMEOUT =
+		GetterUtil.getLong(
+			PropsUtil.get(PropsKeys.STAGING_OWNER_REMOTE_URL_LOCK_TIMEOUT));
+
 	public static final int STAGING_REMOTE_TRANSFER_BUFFER_SIZE =
 		GetterUtil.getInteger(
 			PropsUtil.get(PropsKeys.STAGING_REMOTE_TRANSFER_BUFFER_SIZE));
