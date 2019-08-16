@@ -17,6 +17,10 @@ package com.liferay.exportimport.web.internal.display.context;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +30,10 @@ import java.util.List;
  */
 public class ProcessSummaryDisplayContext {
 
+	public ProcessSummaryDisplayContext(ThemeDisplay themeDisplay) {
+		_themeDisplay = themeDisplay;
+	}
+
 	public List<String> getPageNames(JSONArray layoutsJSONArray) {
 		List<String> pageNames = new ArrayList<>();
 
@@ -34,7 +42,13 @@ public class ProcessSummaryDisplayContext {
 
 			String pageName = layoutJSONObject.getString("name");
 
-			pageNames.add(pageName);
+			long layoutId = layoutJSONObject.getLong("layoutId");
+
+			if (_isPropagated(
+					layoutId, layoutJSONObject.getBoolean("privateLayout"))) {
+
+				pageNames.add(pageName);
+			}
 
 			if (layoutJSONObject.getBoolean("hasChildren")) {
 				List<String> childPageNames = _getChildPageNames(
@@ -63,7 +77,14 @@ public class ProcessSummaryDisplayContext {
 				basePageName + StringPool.FORWARD_SLASH +
 					childLayoutJSONObject.getString("name");
 
-			pageNames.add(childPageName);
+			long layoutId = childLayoutJSONObject.getLong("layoutId");
+
+			if (_isPropagated(
+					layoutId,
+					childLayoutJSONObject.getBoolean("privateLayout"))) {
+
+				pageNames.add(childPageName);
+			}
 
 			if (childLayoutJSONObject.getBoolean("hasChildren")) {
 				List<String> childPageNames = _getChildPageNames(
@@ -76,5 +97,22 @@ public class ProcessSummaryDisplayContext {
 
 		return pageNames;
 	}
+
+	private boolean _isPropagated(long layoutId, boolean privateLayout) {
+		Group scopeGroup = _themeDisplay.getScopeGroup();
+
+		Group liveGroup = scopeGroup.getLiveGroup();
+
+		Layout layout = LayoutLocalServiceUtil.fetchLayout(
+			liveGroup.getGroupId(), privateLayout, layoutId);
+
+		if (layout != null) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private final ThemeDisplay _themeDisplay;
 
 }
