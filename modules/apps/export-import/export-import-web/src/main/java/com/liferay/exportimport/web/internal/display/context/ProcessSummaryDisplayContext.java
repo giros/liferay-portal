@@ -22,7 +22,10 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.model.LayoutRevision;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
+import com.liferay.portal.kernel.service.LayoutRevisionLocalServiceUtil;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +54,11 @@ public class ProcessSummaryDisplayContext {
 
 			String pageName = layoutJSONObject.getString("name");
 
-			pageNames.add(pageName);
+			if (_hasApprovedLayoutRevision(
+					layoutJSONObject.getLong("layoutRevisionId"))) {
+
+				pageNames.add(pageName);
+			}
 
 			if (layoutJSONObject.getBoolean("hasChildren")) {
 				List<String> childPageNames = _getChildPageNames(
@@ -128,7 +135,11 @@ public class ProcessSummaryDisplayContext {
 				basePageName + StringPool.FORWARD_SLASH +
 					childLayoutJSONObject.getString("name");
 
-			pageNames.add(childPageName);
+			if (_hasApprovedLayoutRevision(
+					childLayoutJSONObject.getLong("layoutRevisionId"))) {
+
+				pageNames.add(childPageName);
+			}
 
 			if (childLayoutJSONObject.getBoolean("hasChildren")) {
 				List<String> childPageNames = _getChildPageNames(
@@ -140,6 +151,20 @@ public class ProcessSummaryDisplayContext {
 		}
 
 		return pageNames;
+	}
+
+	private boolean _hasApprovedLayoutRevision(long layoutRevisionId) {
+		LayoutRevision layoutRevision =
+			LayoutRevisionLocalServiceUtil.fetchLayoutRevision(
+				layoutRevisionId);
+
+		if ((layoutRevision != null) &&
+			(layoutRevision.getStatus() == WorkflowConstants.STATUS_APPROVED)) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
