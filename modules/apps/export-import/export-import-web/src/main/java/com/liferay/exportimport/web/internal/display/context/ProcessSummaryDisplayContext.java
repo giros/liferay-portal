@@ -17,6 +17,9 @@ package com.liferay.exportimport.web.internal.display.context;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.model.LayoutRevision;
+import com.liferay.portal.kernel.service.LayoutRevisionLocalServiceUtil;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +34,20 @@ public class ProcessSummaryDisplayContext {
 
 		for (int i = 0; i < layoutsJSONArray.length(); ++i) {
 			JSONObject layoutJSONObject = layoutsJSONArray.getJSONObject(i);
+
+			long layoutRevisionId = layoutJSONObject.getLong(
+				"layoutRevisionId");
+
+			LayoutRevision layoutRevision =
+				LayoutRevisionLocalServiceUtil.fetchLayoutRevision(
+					layoutRevisionId);
+
+			if ((layoutRevision != null) &&
+				(layoutRevision.getStatus() !=
+					WorkflowConstants.STATUS_APPROVED)) {
+
+				continue;
+			}
 
 			String pageName = layoutJSONObject.getString("name");
 
