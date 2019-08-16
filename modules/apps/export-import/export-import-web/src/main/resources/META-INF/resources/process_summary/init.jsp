@@ -22,8 +22,7 @@ page import="com.liferay.exportimport.web.internal.display.context.ProcessSummar
 page import="com.liferay.portal.kernel.model.LayoutSetBranch" %><%@
 page import="com.liferay.portal.kernel.service.LayoutSetBranchLocalServiceUtil" %><%@
 page import="com.liferay.portal.kernel.util.FastDateFormatConstants" %><%@
-page import="com.liferay.portal.kernel.util.LongWrapper" %><%@
-page import="com.liferay.portlet.layoutsadmin.util.LayoutsTreeUtil" %>
+page import="com.liferay.portal.kernel.util.LongWrapper" %>
 
 <liferay-staging:defineObjects />
 

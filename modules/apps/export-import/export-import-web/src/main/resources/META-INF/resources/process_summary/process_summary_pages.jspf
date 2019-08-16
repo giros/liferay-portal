@@ -25,22 +25,12 @@ long layoutSetBranchId = MapUtil.getLong(parameterMap, "layoutSetBranchId");
 
 LayoutSetBranch layoutSetBranch = null;
 
-long[] selectedLayoutIds = null;
+long[] selectedLayoutIds = GetterUtil.getLongValues(exportImportConfigurationSettingsMap.get("layoutIds"));
 
-List<String> pageNames = new ArrayList<>();
+List<String> pageNames = processSummaryDisplayContext.getPageNames(groupId, settingsMapPrivateLayout, selectedLayoutIds);
 
 if (Validator.isNotNull(MapUtil.getString(parameterMap, "layoutSetBranchId"))) {
 	layoutSetBranch = LayoutSetBranchLocalServiceUtil.getLayoutSetBranch(layoutSetBranchId);
-
-	selectedLayoutIds = GetterUtil.getLongValues(exportImportConfigurationSettingsMap.get("layoutIds"));
-
-	String layoutsJSONString = LayoutsTreeUtil.getLayoutsJSON(request, groupId, settingsMapPrivateLayout, LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, selectedLayoutIds, false, "asd");
-
-	JSONObject layoutsJSONObject = JSONFactoryUtil.createJSONObject(layoutsJSONString);
-
-	JSONArray layoutsJSONArray = layoutsJSONObject.getJSONArray("layouts");
-
-	pageNames = processSummaryDisplayContext.getPageNames(layoutsJSONArray);
 }
 
 boolean deleteMissingLayouts = MapUtil.getBoolean(parameterMap, PortletDataHandlerKeys.DELETE_MISSING_LAYOUTS);
