@@ -40,7 +40,7 @@ if (Validator.isNotNull(MapUtil.getString(parameterMap, "layoutSetBranchId"))) {
 
 	JSONArray layoutsJSONArray = layoutsJSONObject.getJSONArray("layouts");
 
-	pageNames = processSummaryDisplayContext.getPageNames(layoutsJSONArray);
+	pageNames = processSummaryDisplayContext.getPageNames(layoutsJSONArray, selectedLayoutIds);
 }
 
 boolean deleteMissingLayouts = MapUtil.getBoolean(parameterMap, PortletDataHandlerKeys.DELETE_MISSING_LAYOUTS);

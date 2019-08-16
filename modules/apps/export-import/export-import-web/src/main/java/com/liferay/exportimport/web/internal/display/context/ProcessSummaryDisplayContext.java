@@ -17,6 +17,7 @@ package com.liferay.exportimport.web.internal.display.context;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.util.ArrayUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +27,28 @@ import java.util.List;
  */
 public class ProcessSummaryDisplayContext {
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), as of 7.3
+	 */
+	@Deprecated
 	public List<String> getPageNames(JSONArray layoutsJSONArray) {
+		return getPageNames(layoutsJSONArray, null);
+	}
+
+	public List<String> getPageNames(
+		JSONArray layoutsJSONArray, long[] selectedLayoutIds) {
+
 		List<String> pageNames = new ArrayList<>();
 
 		for (int i = 0; i < layoutsJSONArray.length(); ++i) {
 			JSONObject layoutJSONObject = layoutsJSONArray.getJSONObject(i);
+
+			if ((selectedLayoutIds != null) &&
+				!ArrayUtil.contains(
+					selectedLayoutIds, layoutJSONObject.getLong("layoutId"))) {
+
+				continue;
+			}
 
 			String pageName = layoutJSONObject.getString("name");
 
