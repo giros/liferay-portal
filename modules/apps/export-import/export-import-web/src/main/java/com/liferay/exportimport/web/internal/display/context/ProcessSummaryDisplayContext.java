@@ -14,10 +14,13 @@
 
 package com.liferay.exportimport.web.internal.display.context;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 
@@ -70,27 +73,27 @@ public class ProcessSummaryDisplayContext {
 			return null;
 		}
 
-		List<String> layoutNames = new ArrayList<>();
+		StringBuilder sb = new StringBuilder(layout.getName());
 
-		layoutNames.add(0, layout.getName());
+		while (layout.getParentLayoutId() !=
+					LayoutConstants.DEFAULT_PARENT_LAYOUT_ID) {
 
-		while (!layout.isRootLayout()) {
-			layout = LayoutLocalServiceUtil.fetchLayout(
-				layout.getGroupId(), layout.isPrivateLayout(),
-				layout.getParentLayoutId());
-
-			if (layout != null) {
-				layoutNames.add(0, layout.getName() + StringPool.FORWARD_SLASH);
+			try {
+				layout = LayoutLocalServiceUtil.getParentLayout(layout);
 			}
-			else {
-				break;
+			catch (PortalException pe) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(pe, pe);
+				}
 			}
+
+			sb.insert(0, layout.getName() + StringPool.FORWARD_SLASH);
 		}
 
-		StringBundler pageNameSB = new StringBundler(
-			ArrayUtil.toStringArray(layoutNames));
-
-		return pageNameSB.toString();
+		return sb.toString();
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		ProcessSummaryDisplayContext.class);
 
 }
