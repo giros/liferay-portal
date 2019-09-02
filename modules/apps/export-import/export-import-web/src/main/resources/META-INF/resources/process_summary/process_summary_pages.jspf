@@ -21,17 +21,11 @@ boolean settingsMapPrivateLayout = MapUtil.getBoolean(exportImportConfigurationS
 
 String publicPagesDescription = (settingsMapPrivateLayout) ? LanguageUtil.get(request, "private-pages") : LanguageUtil.get(request, "public-pages");
 
-long layoutSetBranchId = MapUtil.getLong(parameterMap, "layoutSetBranchId");
-
-LayoutSetBranch layoutSetBranch = null;
+LayoutSetBranch layoutSetBranch = LayoutSetBranchLocalServiceUtil.fetchLayoutSetBranch(MapUtil.getLong(parameterMap, "layoutSetBranchId"));
 
 long[] selectedLayoutIds = GetterUtil.getLongValues(exportImportConfigurationSettingsMap.get("layoutIds"));
 
 List<String> pageNames = processSummaryDisplayContext.getPageNames(groupId, settingsMapPrivateLayout, selectedLayoutIds);
-
-if (Validator.isNotNull(MapUtil.getString(parameterMap, "layoutSetBranchId"))) {
-	layoutSetBranch = LayoutSetBranchLocalServiceUtil.getLayoutSetBranch(layoutSetBranchId);
-}
 
 boolean deleteMissingLayouts = MapUtil.getBoolean(parameterMap, PortletDataHandlerKeys.DELETE_MISSING_LAYOUTS);
 boolean layoutSetSettings = MapUtil.getBoolean(parameterMap, PortletDataHandlerKeys.LAYOUT_SET_SETTINGS);

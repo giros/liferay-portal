@@ -40,7 +40,7 @@ public class ProcessSummaryDisplayContext {
 	}
 
 	/**
-	 * @deprecated As of Mueller (7.2.x), as of 7.3, with no replacement
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
 	 */
 	@Deprecated
 	public List<String> getPageNames(JSONArray layoutsJSONArray) {
