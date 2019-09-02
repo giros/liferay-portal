@@ -17,6 +17,7 @@ package com.liferay.exportimport.web.internal.display.context;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
@@ -41,7 +42,24 @@ public class ProcessSummaryDisplayContext {
 	 */
 	@Deprecated
 	public List<String> getPageNames(JSONArray layoutsJSONArray) {
-		return null;
+		List<String> pageNames = new ArrayList<>();
+
+		for (int i = 0; i < layoutsJSONArray.length(); ++i) {
+			JSONObject layoutJSONObject = layoutsJSONArray.getJSONObject(i);
+
+			String pageName = layoutJSONObject.getString("name");
+
+			pageNames.add(pageName);
+
+			if (layoutJSONObject.getBoolean("hasChildren")) {
+				List<String> childPageNames = _getChildPageNames(
+					pageName, layoutJSONObject.getJSONObject("children"));
+
+				pageNames.addAll(childPageNames);
+			}
+		}
+
+		return pageNames;
 	}
 
 	public List<String> getPageNames(
@@ -57,6 +75,36 @@ public class ProcessSummaryDisplayContext {
 
 			if (pageName != null) {
 				pageNames.add(pageName);
+			}
+		}
+
+		return pageNames;
+	}
+
+	private List<String> _getChildPageNames(
+		String basePageName, JSONObject childLayoutsJSONObject) {
+
+		List<String> pageNames = new ArrayList<>();
+
+		JSONArray childLayoutsJSONArray = childLayoutsJSONObject.getJSONArray(
+			"layouts");
+
+		for (int i = 0; i < childLayoutsJSONArray.length(); ++i) {
+			JSONObject childLayoutJSONObject =
+				childLayoutsJSONArray.getJSONObject(i);
+
+			String childPageName =
+				basePageName + StringPool.FORWARD_SLASH +
+					childLayoutJSONObject.getString("name");
+
+			pageNames.add(childPageName);
+
+			if (childLayoutJSONObject.getBoolean("hasChildren")) {
+				List<String> childPageNames = _getChildPageNames(
+					childPageName,
+					childLayoutJSONObject.getJSONObject("children"));
+
+				pageNames.addAll(childPageNames);
 			}
 		}
 
