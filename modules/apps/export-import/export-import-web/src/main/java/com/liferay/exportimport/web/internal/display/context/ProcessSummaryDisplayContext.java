@@ -23,9 +23,9 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
-import com.liferay.portal.kernel.util.ArrayUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -67,9 +67,9 @@ public class ProcessSummaryDisplayContext {
 
 		List<String> pageNames = new ArrayList<>();
 
-		for (long selectedLayoutId :
-				ArrayUtil.sortedUnique(selectedLayoutIds)) {
+		Arrays.sort(selectedLayoutIds);
 
+		for (long selectedLayoutId : selectedLayoutIds) {
 			_addPageNames(groupId, privateLayout, selectedLayoutId, pageNames);
 		}
 
