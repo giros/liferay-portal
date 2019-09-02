@@ -26,7 +26,9 @@ import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Péter Alius
@@ -65,7 +67,7 @@ public class ProcessSummaryDisplayContext {
 	public List<String> getPageNames(
 		long groupId, boolean privateLayout, long[] selectedLayoutIds) {
 
-		List<String> pageNames = new ArrayList<>();
+		Set<String> pageNames = new LinkedHashSet<>();
 
 		Arrays.sort(selectedLayoutIds);
 
@@ -73,12 +75,12 @@ public class ProcessSummaryDisplayContext {
 			_addPageNames(groupId, privateLayout, selectedLayoutId, pageNames);
 		}
 
-		return pageNames;
+		return new ArrayList<>(pageNames);
 	}
 
 	private void _addPageNames(
 		long groupId, boolean privateLayout, long selectedLayoutId,
-		List<String> pageNames) {
+		Set<String> pageNames) {
 
 		Layout layout = LayoutLocalServiceUtil.fetchLayout(
 			groupId, privateLayout, selectedLayoutId);
@@ -107,11 +109,7 @@ public class ProcessSummaryDisplayContext {
 			}
 		}
 
-		String pageName = sb.toString();
-
-		if (!pageNames.contains(pageName)) {
-			pageNames.add(pageName);
-		}
+		pageNames.add(sb.toString());
 	}
 
 	private List<String> _getChildPageNames(
