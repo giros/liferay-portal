@@ -65,14 +65,17 @@ public class ProcessSummaryDisplayContext {
 	}
 
 	public List<String> getPageNames(
-		long groupId, boolean privateLayout, long[] selectedLayoutIds) {
+		long groupId, boolean privateLayout, long[] selectedLayoutIds,
+		String languageId) {
 
 		Set<String> pageNames = new LinkedHashSet<>();
 
 		Arrays.sort(selectedLayoutIds);
 
 		for (long selectedLayoutId : selectedLayoutIds) {
-			_addPageNames(groupId, privateLayout, selectedLayoutId, pageNames);
+			_addPageNames(
+				groupId, privateLayout, selectedLayoutId, pageNames,
+				languageId);
 		}
 
 		return new ArrayList<>(pageNames);
@@ -80,7 +83,7 @@ public class ProcessSummaryDisplayContext {
 
 	private void _addPageNames(
 		long groupId, boolean privateLayout, long selectedLayoutId,
-		Set<String> pageNames) {
+		Set<String> pageNames, String languageId) {
 
 		Layout layout = LayoutLocalServiceUtil.fetchLayout(
 			groupId, privateLayout, selectedLayoutId);
@@ -89,7 +92,7 @@ public class ProcessSummaryDisplayContext {
 			return;
 		}
 
-		StringBuilder sb = new StringBuilder(layout.getName());
+		StringBuilder sb = new StringBuilder(layout.getName(languageId));
 
 		while (layout.getParentLayoutId() !=
 					LayoutConstants.DEFAULT_PARENT_LAYOUT_ID) {
@@ -98,7 +101,8 @@ public class ProcessSummaryDisplayContext {
 				layout = LayoutLocalServiceUtil.getParentLayout(layout);
 
 				_addPageNames(
-					groupId, privateLayout, layout.getLayoutId(), pageNames);
+					groupId, privateLayout, layout.getLayoutId(), pageNames,
+					languageId);
 
 				sb.insert(0, layout.getName() + StringPool.FORWARD_SLASH);
 			}
