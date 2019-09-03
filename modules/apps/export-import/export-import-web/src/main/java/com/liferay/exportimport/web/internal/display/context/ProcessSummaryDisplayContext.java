@@ -58,11 +58,7 @@ public class ProcessSummaryDisplayContext {
 
 			String pageName = layoutJSONObject.getString("name");
 
-			if (_hasApprovedLayoutRevision(
-					layoutJSONObject.getLong("layoutRevisionId"))) {
-
-				pageNames.add(pageName);
-			}
+			pageNames.add(pageName);
 
 			if (layoutJSONObject.getBoolean("hasChildren")) {
 				List<String> childPageNames = _getChildPageNames(
@@ -145,11 +141,7 @@ public class ProcessSummaryDisplayContext {
 				basePageName + StringPool.FORWARD_SLASH +
 					childLayoutJSONObject.getString("name");
 
-			if (_hasApprovedLayoutRevision(
-					childLayoutJSONObject.getLong("layoutRevisionId"))) {
-
-				pageNames.add(childPageName);
-			}
+			pageNames.add(childPageName);
 
 			if (childLayoutJSONObject.getBoolean("hasChildren")) {
 				List<String> childPageNames = _getChildPageNames(
@@ -176,20 +168,6 @@ public class ProcessSummaryDisplayContext {
 				WorkflowConstants.STATUS_APPROVED);
 
 		return !approvedLayoutRevisions.isEmpty();
-	}
-
-	private boolean _hasApprovedLayoutRevision(long layoutRevisionId) {
-		LayoutRevision layoutRevision =
-			LayoutRevisionLocalServiceUtil.fetchLayoutRevision(
-				layoutRevisionId);
-
-		if ((layoutRevision != null) &&
-			(layoutRevision.getStatus() == WorkflowConstants.STATUS_APPROVED)) {
-
-			return true;
-		}
-
-		return false;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
