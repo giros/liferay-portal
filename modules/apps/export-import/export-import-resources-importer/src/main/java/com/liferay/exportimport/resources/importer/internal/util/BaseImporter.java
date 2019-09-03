@@ -66,11 +66,15 @@ public abstract class BaseImporter implements Importer {
 				existing = true;
 			}
 			else {
+				ServiceContext serviceContext = new ServiceContext();
+
+				serviceContext.setAttribute("addDefaultLayout", Boolean.FALSE);
+
 				layoutSetPrototype =
 					LayoutSetPrototypeLocalServiceUtil.addLayoutSetPrototype(
 						userId, companyId, getTargetValueMap(),
 						new HashMap<Locale, String>(), true, true,
-						new ServiceContext());
+						serviceContext);
 			}
 
 			group = layoutSetPrototype.getGroup();
