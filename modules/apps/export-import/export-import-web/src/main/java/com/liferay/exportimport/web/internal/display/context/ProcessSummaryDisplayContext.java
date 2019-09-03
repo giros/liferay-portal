@@ -14,6 +14,7 @@
 
 package com.liferay.exportimport.web.internal.display.context;
 
+import com.liferay.exportimport.kernel.staging.LayoutStagingUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -23,8 +24,11 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutRevision;
+import com.liferay.portal.kernel.model.LayoutSet;
+import com.liferay.portal.kernel.model.LayoutSetBranch;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutRevisionLocalServiceUtil;
+import com.liferay.portal.kernel.service.LayoutSetLocalServiceUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.ArrayList;
@@ -96,6 +100,12 @@ public class ProcessSummaryDisplayContext {
 			return;
 		}
 
+		if (LayoutStagingUtil.isBranchingLayout(layout) &&
+			!_hasApprovedLayoutRevision(layout)) {
+
+			return;
+		}
+
 		StringBuilder sb = new StringBuilder(layout.getName());
 
 		while (layout.getParentLayoutId() !=
@@ -151,6 +161,21 @@ public class ProcessSummaryDisplayContext {
 		}
 
 		return pageNames;
+	}
+
+	private boolean _hasApprovedLayoutRevision(Layout layout) {
+		LayoutSet layoutSet = LayoutSetLocalServiceUtil.fetchLayoutSet(
+			layout.getGroupId(), layout.getPrivateLayout());
+
+		LayoutSetBranch layoutSetBranch = LayoutStagingUtil.getLayoutSetBranch(
+			layoutSet);
+
+		List<LayoutRevision> approvedLayoutRevisions =
+			LayoutRevisionLocalServiceUtil.getLayoutRevisions(
+				layoutSetBranch.getLayoutSetBranchId(), layout.getPlid(),
+				WorkflowConstants.STATUS_APPROVED);
+
+		return !approvedLayoutRevisions.isEmpty();
 	}
 
 	private boolean _hasApprovedLayoutRevision(long layoutRevisionId) {
