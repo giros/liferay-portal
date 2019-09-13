@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service.impl;
 
+import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.RequiredLayoutSetPrototypeException;
 import com.liferay.portal.kernel.model.Group;
@@ -124,8 +126,16 @@ public class LayoutSetPrototypeLocalServiceImpl
 		// Group
 
 		if (!CompanyThreadLocal.isDeleteInProcess()) {
-			int count = layoutSetPersistence.countByLayoutSetPrototypeUuid(
-				layoutSetPrototype.getUuid());
+			DynamicQuery query = layoutSetLocalService.dynamicQuery();
+
+			query.add(
+				RestrictionsFactoryUtil.eq(
+					"layoutSetPrototypeUuid", layoutSetPrototype.getUuid()));
+			query.add(
+				RestrictionsFactoryUtil.eq(
+					"companyId", layoutSetPrototype.getCompanyId()));
+
+			long count = dynamicQueryCount(query);
 
 			if (count > 0) {
 				throw new RequiredLayoutSetPrototypeException();
