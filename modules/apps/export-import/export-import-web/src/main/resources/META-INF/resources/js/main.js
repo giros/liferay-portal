@@ -813,7 +813,6 @@ AUI.add(
 					var cmdNode = instance.byId('cmd');
 					var redirectNode = instance.byId('redirect');
 
-					var url;
 					if (cmdNode.val() === 'add' || cmdNode.val() === 'update') {
 						var params = {
 							cmd: cmdNode.val()
@@ -854,24 +853,24 @@ AUI.add(
 							params.rootNodeName = rootNodeNameNode.val();
 						}
 
-						url = Liferay.Util.PortletURL.createPortletURL(
+						var portletURL = Liferay.Util.PortletURL.createPortletURL(
 							redirectNode.val(),
 							params
 						);
 
-						redirectNode.val(url.toString());
+						redirectNode.val(portletURL.toString());
 					}
 
 					if (cmdNode) {
 						var form = instance.get('form');
 
-						url = Liferay.Util.PortletURL.createRenderURL(
+						var renderURL = Liferay.Util.PortletURL.createRenderURL(
 							form.get('action')
 						);
 
-						instance._setDisabledCheckboxParameters(url);
+						instance._setDisabledCheckboxParameters(renderURL);
 
-						form.set('action', url.toString());
+						form.set('action', renderURL.toString());
 
 						var currentURL = instance.byId('currentURL');
 
